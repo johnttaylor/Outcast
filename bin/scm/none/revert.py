@@ -1,0 +1,39 @@
+"""
+ 
+Script that reverts/cancels the checkouts for the speficied files
+===============================================================================
+usage: evie [common-opts] revert [options] <pkgname> FILES...
+
+Arguments:
+    <pkgname>           Name of the package to archive.  The pkgname must be
+                        a 'local package' in the current Workspace.
+    FILES               List of files of revert
+      
+Options:
+    -h, --help          Display help for this command
+
+    
+Notes:
+    o Returns zero if all files are successfully checked out; else non-zero is 
+      is returned.    
+    
+    
+"""
+import os
+import utils
+from docopt.docopt import docopt
+
+
+#---------------------------------------------------------------------------------------------------------
+def display_summary():
+    print "{:<13}{}".format( 'revert', 'Reverts/cancels the checkouts for the speficied files' )
+    
+
+#------------------------------------------------------------------------------
+def run( common_args, cmd_argv ):
+    args = docopt(__doc__, argv=cmd_argv)
+
+    print "REVERTED: {} {}".format( args['<pkgname>'], args['FILES'] )
+
+    # Return 'error' since this is just a stub
+    exit(1)
