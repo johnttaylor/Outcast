@@ -42,6 +42,8 @@ def run( common_args, cmd_argv ):
     # set vault file
     if ( not args['--vault'] ):
         args['--vault'] = os.path.join( common_args['--uverse'], "default.vault" )
+    else:
+        args['--vault'] = os.path.join( common_args['--uverse'], args['--vault'] )
         
     # push the archive file
     vault.push_archive( args['--vault'], args['<pkgarchive>'], args['--override'] )

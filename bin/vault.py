@@ -179,7 +179,7 @@ def _ftp_connect_and_cd( host, dir, cfg ):
         utils.print_verbose( ftp.getwelcome() )
     except:
         pass
-        
+ 
     # Goto vault dir
     if ( dir != "" ):
         try:
@@ -203,7 +203,15 @@ def _push_ftp( vaultfile, cfg, archive, overwrite=False ):
     # check if archive already exists
     try:
         _reset_found()
-        ftp.retrlines('LIST ' + f, _cbfound ) 
+
+        # Some FTP servers will generate an 'cannot find file' error here -->which 
+        # generates an exception -->which is okay to ignore since it means the file 
+        # is not present.
+        try:
+            ftp.retrlines('LIST ' + f, _cbfound ) 
+        except Exception as ex:
+            pass 
+                    
         if ( _found_count() > 0 ):
             if ( overwrite ):
                 utils.print_warning( "Overwriting file " + f )

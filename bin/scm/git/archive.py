@@ -85,7 +85,7 @@ def run( common_args, cmd_argv ):
                 os.remove( outname )
             else:
                 exit( "ERROR: Archive file - {} - already exists".format( outname ) )
-
+        
         tar = tarfile.open( outname, format )
         tar.add( base, filter=_filter_files ) 
         tar.close()
