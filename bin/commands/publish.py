@@ -51,6 +51,7 @@ Options:
     --nopending         Skips enforcing that no pending changes to the SCM 
                         repository before publishing
     --nodeps            Skips checking/verifying the package's dependencies
+    --nogetdeps         Skips pulling and mounting dependent packages.
     --noclean           Does not executes the package's top/tools/clean script
     --notests           Does not executes the package's top/tools/tests script
     --nobuild           Does not executes the package's top/tools/build script
@@ -184,6 +185,13 @@ def run( common_args, cmd_argv ):
         t   = utils.run_shell( cmd, common_args['-v'] )
         _check_results( t, "ERROR: Failed the dependency check." )
         
+    # get needed dependencies
+    if ( not args['--nogetdeps'] ):
+        print "= Getting dependencies..."
+        cmd = 'orc.py -v -w {} --user "{}" --passwd "{}" --norefresh --now {} getdeps {} --override'.format(root, common_args['--user'], common_args['--passwd'], now, args['<pkgname>'] ) 
+        t   = utils.run_shell( cmd, common_args['-v'] )
+        _check_results( t, "ERROR: Failed getting (and mounting) dependencies." )
+    
     # Clean everthing before building
     if ( not args['--noclean'] ):
         print "= Pre-cleaning..." 
