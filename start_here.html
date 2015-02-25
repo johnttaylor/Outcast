@@ -249,6 +249,8 @@ Error message and password prompt
 
 <li>$:/state/toc/Contents-References--242358753</li>
 
+<li>$:/state/toc/Contents-Tools--242358753</li>
+
 <li>$:/StoryList</li>
 
 <li>$:/temp/advancedsearch</li>
@@ -301,6 +303,8 @@ Error message and password prompt
 
 <li>Glossary</li>
 
+<li>Installing</li>
+
 <li>LeftMenu</li>
 
 <li>LeftTitle</li>
@@ -324,6 +328,8 @@ Error message and password prompt
 <li>Packages Directory</li>
 
 <li>References</li>
+
+<li>Tools</li>
 
 <li>Top Directory</li>
 
@@ -549,7 +555,7 @@ body .dirtree li:last-child {
 }
 </pre>
 </div>
-<div created="20140607071109226" creator="TonGerner" leftmenu-width="230px" modified="20150221162234393" modifier="TonGerner" story-left="230px" story-width="1100px" tags="leftmenu $:/tags/Stylesheet" title="$:/_stylesheet/leftmenu-show" top-leftmenu="50px" type="text/vnd.tiddlywiki">
+<div created="20140607071109226" creator="TonGerner" leftmenu-width="230px" modified="20150225034354966" modifier="TonGerner" story-left="230px" story-width="1100px" tags="leftmenu $:/tags/Stylesheet" title="$:/_stylesheet/leftmenu-show" top-leftmenu="50px" type="text/vnd.tiddlywiki">
 <pre>/* STORY-RIVER */
 .tc-story-river {
      left: {{!!story-left}};
@@ -5333,7 +5339,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20141012030920472" title="$:/state/ShowPaletteEditor">
 <pre>no</pre>
 </div>
-<div modified="20150221162234395" title="$:/state/sidebar">
+<div modified="20150225034354966" title="$:/state/sidebar">
 <pre>no</pre>
 </div>
 <div modified="20150221151605055" title="$:/state/tab--1498284803">
@@ -5372,7 +5378,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20150221161339782" title="$:/state/toc/Contents-Branching--242358753">
 <pre>close</pre>
 </div>
-<div modified="20150221160436286" title="$:/state/toc/Contents-Directories &amp; Files--242358753">
+<div modified="20150225034358560" title="$:/state/toc/Contents-Directories &amp; Files--242358753">
 <pre>close</pre>
 </div>
 <div modified="20150221155113947" title="$:/state/toc/Contents-Directories--1025088837">
@@ -5396,14 +5402,17 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20141011172627069" title="$:/state/toc/Contents-Intro--966365951">
 <pre>open</pre>
 </div>
-<div modified="20150221162250021" title="$:/state/toc/Contents-Overview--242358753">
+<div modified="20150225034401676" title="$:/state/toc/Contents-Overview--242358753">
 <pre>close</pre>
 </div>
 <div modified="20150221155116868" title="$:/state/toc/Contents-References--1025088837">
 <pre>close</pre>
 </div>
-<div modified="20150221161433456" title="$:/state/toc/Contents-References--242358753">
-<pre>open</pre>
+<div modified="20150225034403942" title="$:/state/toc/Contents-References--242358753">
+<pre>close</pre>
+</div>
+<div modified="20150225034403154" title="$:/state/toc/Contents-Tools--242358753">
+<pre>close</pre>
 </div>
 <div list="Overview" title="$:/StoryList">
 <pre></pre>
@@ -5425,7 +5434,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
     }
 }</pre>
 </div>
-<div created="20141011164514051" modified="20150221161659812" title="$:/temp/NewTagName">
+<div created="20141011164514051" modified="20150224223132231" title="$:/temp/NewTagName">
 <pre></pre>
 </div>
 <div created="20141011171545808" modified="20141011171550853" title="$:/temp/search">
@@ -5708,7 +5717,7 @@ MERGE yellow/1.0.20 (patch)  main/2.11.5 (major) TO main/2.11.6
 &lt;/ul&gt;
 &lt;/h2&gt;</pre>
 </div>
-<div created="20140803162036980" creator="JohnTaylor" modified="20141108053128065" modifier="JohnTaylor" tags="miscellaneous" title="Environment Variables">
+<div created="20140803162036980" creator="JohnTaylor" modified="20150224215931822" modifier="JohnTaylor" tags="miscellaneous Tools toolbar standards" title="Environment Variables">
 <pre>!!Below is list of operating system environment variables that are used by Outcast
 
 |Variable | Req |Description |h
@@ -5778,6 +5787,245 @@ src/Gold/money.h
 &lt;/$list&gt;
 &lt;/ul&gt;
 &lt;/h2&gt;</pre>
+</div>
+<div created="20150224220024771" modified="20150225034009771" tags="Tools Overview Contents" title="Installing">
+<pre>The following steps are how to install the ''//proof-of-concept// Outcast'' tools on a developer PC.  
+
+''Note: The examples snippets provided in these instructions are for a Windows box, however the same steps work/apply to a Linux/Unix install''.  If/when there are any difference between Windows/Linux - the difference will be noted in the instructions.
+
+!!!NOTE: The Outcast tools create/use symbolic links.  Windows 7 (and higher) support symbolic links, ''however'' //administrator// privilege is required to make symbolic links.  This means the you must always launch your DOS box with the __//Run as Administrator//__ option when you use Outcast tools.
+
+# Install Python 2.7.8 (if not already installed).
+
+# Install Git (if not already installed).  For the proof-of-concept [[Github|http://github.com]] is used for all of the SCM and Outcast repositories.
+# For these instructions all of the tools, packages, //live// source code, etc. is under the top level root directory: ''`\_devel`''.  This is not a requirements, just a simplification for these install instructions.
+#&gt; `C:\&gt;mkdir _devel
+
+`
+
+# Install the Outcast proof-of-concept tools.  This is done by cloning its associated git repository.  There only needs to be one //instance// of the Outcast tools per developer PC. 
+#&gt; `C:\&gt;cd _devel
+
+C:\_devel&gt;git clone https://github.com/johnttaylor/Outcast.git
+Cloning into 'Outcast'...
+remote: Counting objects: 143, done.
+remote: Compressing objects: 100% (104/104), done.
+Receiving objects: 100% (143/143), 1.90 MiB | 788.00 KiB/s, done.
+remote: Total 143 (delta 38), reused 135 (delta 32), pack-reused 0
+Resolving deltas: 100% (38/38), done.
+Checking connectivity... done.
+
+`
+# Create the Native Outcast Universe and Package directories.  See [[here|WUV Relationships]] for more details on relationship between Universes, Package directories, developers, etc. In this example both Universe and Package directory will be local to a developer's PC and located in the directory `\_devel`
+## Create the Package directory `'\_devel\Packages`
+## Create the Native Universe directory by cloning the [[Foreign Outcast Universe|http://github.com/johnttaylor/Outcast-Universe]]  from [[Github|http://github.com]]
+
+#&gt;`C:\_devel&gt;mkdir Packages
+
+C:\_devel&gt;git clone https://github.com/johnttaylor/Outcast-Universe.git
+Cloning into 'Outcast-Universe'...
+remote: Counting objects: 57, done.
+remote: Compressing objects: 100% (52/52), done.
+remote: Total 57 (delta 27), reused 27 (delta 2), pack-reused  Unpacking objects: 100% (57/57), done.
+Checking connectivity... done.
+
+C:\_devel&gt;dir
+ Directory of C:\_devel
+
+02/24/2015  04:30 PM    &lt;DIR&gt;          .
+02/24/2015  04:30 PM    &lt;DIR&gt;          ..
+02/24/2015  04:10 PM    &lt;DIR&gt;          Outcast
+02/24/2015  04:22 PM    &lt;DIR&gt;          Outcast-Universe
+02/24/2015  04:27 PM    &lt;DIR&gt;          Packages
+
+`
+
+# Create a workspace directory.  A [[workspace|Workspace Directory]] is where individual Packages are editted, built, unittested, and changes checked in/out of your SCM repository. For this these install instructions all workspaces will be located under `\_devel\workspaces`. The workspace `\_devel\workspace\fox` will be used/assumed for the remaining of these instructions.
+
+#&gt; `C:\_devel&gt;mkdir workspaces
+
+C:\_devel&gt;cd workspaces
+
+C:\_devel\workspaces&gt;mkdir fox
+
+C:\_devel\workspaces&gt;cd fox
+
+C:\_devel\workspaces\fox&gt;
+
+`
+# Setup the necessary Outcast and [[NQBP|http://integerfoxcom/nqbp]] environment variables. Also update the command path for Outcast `bin/` directory.   //Note: There are additional Outcast [[environment variables|Environment Variables]], but since Git repositories are being used for managing the source code of the packages as well as for the Outcast Universe - the default settings are acceptable.//
+
+#&gt; `C:\_devel\workspaces\fox&gt;set OUTCAST_PKGS_UVERSE=\_devel\Outcast-Universe
+
+C:\_devel\workspaces\fox&gt;set OUTCAST_PKGS_ROOT=\_devel\Packages
+
+C:\_devel\workspaces\fox&gt;set NQBP_BIN=C:\_devel\workspaces\fox\xpkgs\nqbp
+
+C:\_devel\workspaces\fox&gt;set PATH=%PATH%;c:\_devel\Outcast\bin
+
+`
+
+# Finish preparing the `fox` workspace.  Two special directories - `xpkgs/` and `xinc/` - for ''each'' workspace are required.  The Outcast tool - `orc` can be used to create these additional directories. This step only needs to be done once in the lifetime of an individual workspace.
+#&gt; `C:\_devel\workspaces\fox&gt;orc mkwrk
+
+C:\_devel\workspaces\fox&gt;dir
+ Directory of C:\_devel\workspaces\fox
+
+02/24/2015  04:38 PM    &lt;DIR&gt;          .
+02/24/2015  04:38 PM    &lt;DIR&gt;          ..
+02/24/2015  04:38 PM    &lt;DIR&gt;          xinc
+02/24/2015  04:38 PM    &lt;DIR&gt;          xpkgs
+
+`
+# Fetch source code package(s) into the `fox` workspace.  //Note: these instructions fetch both [[Colony.Core|http://integerfox.com/colony-core]] and [[Colony.Posix|http://integerfox.com/colony.posix]].  However, only one - Colony.core (for Windows) or Colony.Posix (for Linux) - needs to be fetched for a given workspace/PC.//
+
+#&gt;`C:\_devel\workspaces\fox&gt;git clone https://github.com/johnttaylor/colony.core.git
+Cloning into 'colony.core'...
+remote: Counting objects: 2490, done.
+remote: Compressing objects: 100% (999/999), done.
+remote: Total 2490 (delta 1114), reused 2469 (delta 1101), pack-reused 0
+Receiving objects: 100% (2490/2490), 3.21 MiB | 1.39 MiB/s, done.
+Resolving deltas: 100% (1114/1114), done.
+Checking connectivity... done.
+Checking out files: 100% (2680/2680), done.
+
+C:\_devel\workspaces\fox&gt;git clone https://github.com/johnttaylor/colony.posix.git
+Cloning into 'colony.posix'...
+remote: Counting objects: 3010, done.
+remote: Compressing objects: 100% (1240/1240), done.
+remote: Total 3010 (delta 1589), reused 2762 (delta 1351), pack-reused 0
+Receiving objects: 100% (3010/3010), 6.77 MiB | 1.91 MiB/s, done.
+Resolving deltas: 100% (1589/1589), done.
+Checking connectivity... done.
+Checking out files: 100% (2312/2312), done.
+
+C:\_devel\workspaces\fox&gt;dir
+ Directory of C:\_devel\workspaces\fox
+
+02/24/2015  04:38 PM    &lt;DIR&gt;          .
+02/24/2015  04:38 PM    &lt;DIR&gt;          ..
+02/24/2015  04:50 PM    &lt;DIR&gt;          colony.core
+02/24/2015  04:51 PM    &lt;DIR&gt;          colony.posix
+02/24/2015  04:38 PM    &lt;DIR&gt;          xinc
+02/24/2015  04:38 PM    &lt;DIR&gt;          xpkgs
+
+`
+
+
+# Fetch and mount any/all dependencies of an individual source code Package.
+## View the current packages mounted for the workspace; and what package archives and top files available. 
+##&gt;`C:\_devel\workspaces\fox\colony.core&gt;orc ls      // display mounted packages
+
+C:\_devel\workspaces\fox\colony.core&gt;orc ls -k   // display pulled package archives
+
+C:\_devel\workspaces\fox\colony.core&gt;orc ls -n   // display package top files
+catch-main-1.0.53
+colony.core-main-1.0.0
+colony.posix-main-1.0.0
+nqbp-main-1.0.1
+nqbp-main-1.0.2
+nqbp-main-1.0.3
+nqbp-main-1.0.4
+nqbp-main-1.0.5
+
+`
+## Fetch and mount dependencies
+##&gt;`C:\_devel\workspaces\fox\colony.core&gt;orc getdeps colony.core
+
+C:\_devel\workspaces\fox\colony.core&gt;orc ls      // display mounted packages
+catch\main\1.0.53
+nqbp\main\1.0.5
+
+C:\_devel\workspaces\fox\colony.core&gt;orc ls -k   // display pulled package archives
+catch\main\1.0.53
+nqbp\main\1.0.5
+
+C:\_devel\workspaces\fox\colony.core&gt;orc ls -n   // display package top files
+catch-main-1.0.53
+colony.core-main-1.0.0
+colony.posix-main-1.0.0
+nqbp-main-1.0.1
+nqbp-main-1.0.2
+nqbp-main-1.0.3
+nqbp-main-1.0.4
+nqbp-main-1.0.5
+
+`
+
+# ''Last step!'' Build a unittest project to verify everything is okay.  The unittest projects assume that the compiler toolchain is already setup and accessible from the command line, e.g. for the Microsoft Visual Studio compiler - first run the `vcvars32.bat` batch file.
+#&gt;`C:\_devel\workspaces\fox\colony.core&gt;cd tests\Cpl\Container\_0test\windows\vc12
+
+C:\_devel\workspaces\fox\colony.core\tests\Cpl\Container\_0test\windows\vc12&gt;vcvars32
+
+C:\_devel\workspaces\fox\colony.core\tests\Cpl\Container\_0test\windows\vc12&gt;nqbp.py
+
+================================================================================
+= START of build for:  a.exe
+= Toolchain:           VC++ 12, 32bit (Visual Studio 2013)
+= Build Configuration: win32
+= Begin (UTC):         Wed, 25 Feb 2015 03:15:36
+= Build Time:          1424834136 (54ED3E58)
+================================================================================
+= Cleaning Project and local Package derived objects...
+= Cleaning External Package derived objects...
+=====================
+= Building Directory: src\Cpl\Container
+AvlTree_.cpp
+HashTable_.cpp
+Item.cpp
+Key.cpp
+=
+= Archiving: library.lib
+=====================
+= Building Directory: src\Cpl\Container\_0test
+dictionary.cpp
+...
+...
+=====================
+= Building Directory: src\Cpl\System\Win32\_realtime
+Api.cpp
+ElaspedTime.cpp
+Semaphore.cpp
+=
+= Archiving: library.lib
+=====================
+= Building Project Directory:
+main.cpp
+=====================
+= Linking...
+================================================================================
+= END of build for:    a.exe
+= Toolchain:           VC++ 12, 32bit (Visual Studio 2013)
+= Build Configuration: win32
+= Elapsed Time (hh mm:ss): 00 01:03
+================================================================================
+
+C:\_devel\workspaces\fox\colony.core\tests\Cpl\Container\_0test\windows\vc12&gt;_win32\a.exe
+
+@@ Fatal Error: Container Error: Double Insert. item=00443DC8, prev container=00443DAC, new container=00443DB4
+
+@@ Fatal Error: Container Error: Double Insert. item=00441568, prev container=00441548, new container=00441540
+
+@@ Fatal Error: Container Error: Double Insert. item=0043D660, prev container=0043D5E4, new container=0043D620
+
+@@ Fatal Error: KeyPlainType::compare(): mismatch in key lengths. this=00988060, my len=2 != 6
+
+@@ Fatal Error: KeyPlainType::compare(): mismatch in key lengths. this=0098808C, my len=2 != 6
+Map (0043DE54)
+[apple]
+[cherry]
+[orange]
+[pear]
+[pear1]
+
+@@ Fatal Error: Container Error: Double Insert. item=00443C80, prev container=0098B170, new container=0098B128
+TableStats: items=5, buckets=5, emptyBuckets=4, averagePerBucket=5.000000, maxItemPerBucket=5
+TableStats: items=0, buckets=3, emptyBuckets=3, averagePerBucket=0.000000, maxItemPerBucket=0
+TableStats: items=5, buckets=3, emptyBuckets=0, averagePerBucket=1.666667, maxItemPerBucket=3
+===============================================================================
+All tests passed (546 assertions in 4 test cases)
+
+`</pre>
 </div>
 <div created="20141012031702770" modified="20141019034705283" title="LeftMenu">
 <pre>---
@@ -5964,6 +6212,19 @@ url:      &lt;owner_url&gt;
 *[[GraphViz|http://www.graphviz.org]]
 
 &lt;/h2&gt;</pre>
+</div>
+<div created="20150224215003080" modified="20150224215853751" tags="Contents" title="Tools">
+<pre>A set command line tools have been created to manage and publish packages as part of the Outcast proof-of-concept.  Below is an overview of these tools.  
+
+These tools use a small number of environment variables.  A description of the these variables can be found [[here|Environment Variables]]
+
+|Name |Description |h
+|^orc |^ |
+|^ceres |^ |
+|^evie |^ |
+|^bob |^ |
+|^chuck |^ |
+|^nqbp |^[[NQBP|http://integerfox.com/nqbp]] is the original build engine for Outcast. It supports Outcast's [[workspace|Workspace Directory]] organization |</pre>
 </div>
 <div created="20140824162849115" creator="JohnTaylor" modified="20150221160321393" modifier="JohnTaylor" tags="Directories [[Directories &amp; Files]]" title="Top Directory">
 <pre>The &lt;code&gt;top/&lt;/code&gt; directory contains all of the information that Outcast needs (on a per package basis) to manage packages.  Within the Outcast tools, the contents &lt;code&gt;top/&lt;/code&gt; directory is accessible/browse-able without having to retrieve the entire package contents.  Because of this partitioning, it is recommend that a certain amount of documentation, help, faq, etc. information is included as well.
