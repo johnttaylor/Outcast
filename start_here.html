@@ -5411,14 +5411,14 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20150225034403942" title="$:/state/toc/Contents-References--242358753">
 <pre>close</pre>
 </div>
-<div modified="20150225034403154" title="$:/state/toc/Contents-Tools--242358753">
+<div modified="20150225041159308" title="$:/state/toc/Contents-Tools--242358753">
 <pre>close</pre>
 </div>
-<div list="Overview" title="$:/StoryList">
+<div list="Installing [[Environment Variables]] Overview" title="$:/StoryList">
 <pre></pre>
 </div>
-<div created="20141011164829984" modified="20150221151450215" title="$:/temp/advancedsearch">
-<pre>dirtree</pre>
+<div created="20141011164829984" modified="20150225034540999" title="$:/temp/advancedsearch">
+<pre>green-ro</pre>
 </div>
 <div plugin-type="info" title="$:/temp/info-plugin" type="application/json">
 <pre>{
@@ -6213,18 +6213,77 @@ url:      &lt;owner_url&gt;
 
 &lt;/h2&gt;</pre>
 </div>
-<div created="20150224215003080" modified="20150224215853751" tags="Contents" title="Tools">
+<div created="20150224215003080" modified="20150225040908175" tags="Contents" title="Tools">
 <pre>A set command line tools have been created to manage and publish packages as part of the Outcast proof-of-concept.  Below is an overview of these tools.  
 
 These tools use a small number of environment variables.  A description of the these variables can be found [[here|Environment Variables]]
 
+|greenaltrows |k
 |Name |Description |h
-|^orc |^ |
-|^ceres |^ |
-|^evie |^ |
-|^bob |^ |
-|^chuck |^ |
-|^nqbp |^[[NQBP|http://integerfox.com/nqbp]] is the original build engine for Outcast. It supports Outcast's [[workspace|Workspace Directory]] organization |</pre>
+|orc |Is used to manage packaging and/or workspaces. `orc` contains numerous sub commands.  Set below for a sample list of sub commands.  To get the current list type: `orc help` |
+|ceres |Is used for managing Outcast Universes.  `ceres` contains numerous sub commands.  Set below for a sample list of sub commands.  To get the current list type: `ceres help`  |
+|evie |Is a wrapper for invoking the SCM tool being used.  This allows the core Outcast tools to be independent of actual SCM tool being used to store the source code and Outcast Universes. `evie` contains numerous sub commands.  Set below for a sample list of sub commands.  To get the current list type: `evie help` |
+|bob |Is a script for building many projects using [[NQBP|http://integerfox.com/nqbp]].  The `orc publish` command uses the `bob` script to build all of a package unittest projects as part of the publish sequence. |
+|chuck |Is a wrapper for invoking a package's automated unit tests. The `orc publish` command uses the `chuck` script to execute all of a package unittest projects as part of the publish sequence. |
+|nqbp |[[NQBP|http://integerfox.com/nqbp]] is the original build engine for Outcast. It supports Outcast's [[workspace|Workspace Directory]] organization |
+-----
+
+!!! `orc` sub command table
+
+|solidborders|k
+|command |description |h
+|archive     |Archive file operations. |
+|bhist        |Lists the branch history of a Package. |
+|cat          |Displays content of Package Top files. |
+|checkdeps    |Checks a pkg.specification file for valid dependencies. |
+|getdeps      |Pulls and Mounts dependent Packages. |
+|ls           |Lists the mounted packages and available packages. |
+|lsvault      |Lists packages in the specified Package Vault. |
+|mkspec       |Creates a template pkg.specification file. |
+|mktools      |Creates a template tools/ directory. |
+|mkvault      |Creates a template Package Vault file. |
+|mkwrk        |Creates a Workspace directory. |
+|moddeps      |Adds, updates, and deletes a Package's dependencies.  |
+|mount        |Mounts a Package into the current workspace's 'xpkgs/' directory.  |
+|namespaces   |Check for namespace collisions in the current workspace. |
+|newer        |Checks if there are newer dependent packages available. |
+|publish      |Publishes a Package to the Native Outcast Universe. |
+|pullv        |Pulls a Package Archive from a Package Vault. |
+|pushv        |Pushes a Package Archive to one or more Package Vaults. |
+|rmpkg        |Marks a published package as Do-Not-Use or deprecated. |
+|rmvault      |Removes a Package Archive from one or more Package Vaults. |
+|top          |Creates a package top file for a local package. |
+|umount       |Unmounts a Package from the current workspace's 'xpkgs/' directory. |
+|which        |Displays branch/version information of a mounted package. |
+
+
+!!! `ceres` sub command table
+
+|solidborders|k
+|command |description |h
+|commit       |Commit changes of the Package Universe metadata files. |
+|distribute   |Distributes the Package Top file to Package Universes. |
+|lock         |Locks one or more Native Package metadata files. |
+|refresh      |Updates the Native Package Universe from the Foreign UVerse. |
+
+
+!!! `evie` sub command table
+
+|solidborders|k
+|command |description |h
+|archive      |Archive a Package without SCM metadata. |
+|checkin      |Checks in one or more files to the SCM repository. |
+|checkout     |Checks out one or more files from the SCM repository. |
+|label        |performs various SCM label operations. |
+|pending      |Checks if there are any pending check ins and/or checked out files. |
+|revert       |Reverts/cancels the checkouts for the speficied files. |
+|sync         |Sync's the workspace with the SCM Repository. |
+
+
+!!! `evie` sub command table
+
+|solidborders|k
+|command |description |h</pre>
 </div>
 <div created="20140824162849115" creator="JohnTaylor" modified="20150221160321393" modifier="JohnTaylor" tags="Directories [[Directories &amp; Files]]" title="Top Directory">
 <pre>The &lt;code&gt;top/&lt;/code&gt; directory contains all of the information that Outcast needs (on a per package basis) to manage packages.  Within the Outcast tools, the contents &lt;code&gt;top/&lt;/code&gt; directory is accessible/browse-able without having to retrieve the entire package contents.  Because of this partitioning, it is recommend that a certain amount of documentation, help, faq, etc. information is included as well.
