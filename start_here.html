@@ -251,6 +251,8 @@ Error message and password prompt
 
 <li>$:/state/toc/Contents-Tools--242358753</li>
 
+<li>$:/state/toc/Overview-Proof-of-Concept--242358753</li>
+
 <li>$:/StoryList</li>
 
 <li>$:/temp/advancedsearch</li>
@@ -280,6 +282,8 @@ Error message and password prompt
 <li>$:/view</li>
 
 <li>Acknowledgements</li>
+
+<li>Basic Workflow</li>
 
 <li>Branch Log</li>
 
@@ -326,6 +330,10 @@ Error message and password prompt
 <li>Package Vault</li>
 
 <li>Packages Directory</li>
+
+<li>Proof-of-Concept</li>
+
+<li>Publish Workflow</li>
 
 <li>References</li>
 
@@ -5378,7 +5386,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20150221161339782" title="$:/state/toc/Contents-Branching--242358753">
 <pre>close</pre>
 </div>
-<div modified="20150225034358560" title="$:/state/toc/Contents-Directories &amp; Files--242358753">
+<div modified="20150226041349152" title="$:/state/toc/Contents-Directories &amp; Files--242358753">
 <pre>close</pre>
 </div>
 <div modified="20150221155113947" title="$:/state/toc/Contents-Directories--1025088837">
@@ -5393,7 +5401,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20141108053032256" title="$:/state/toc/Contents-Files--242358753">
 <pre>close</pre>
 </div>
-<div modified="20150221161342155" title="$:/state/toc/Contents-Glossary--242358753">
+<div modified="20150226041348052" title="$:/state/toc/Contents-Glossary--242358753">
 <pre>close</pre>
 </div>
 <div modified="20141016041226295" title="$:/state/toc/Contents-Intro--242358753">
@@ -5402,7 +5410,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20141011172627069" title="$:/state/toc/Contents-Intro--966365951">
 <pre>open</pre>
 </div>
-<div modified="20150225034401676" title="$:/state/toc/Contents-Overview--242358753">
+<div modified="20150226041346316" title="$:/state/toc/Contents-Overview--242358753">
 <pre>close</pre>
 </div>
 <div modified="20150221155116868" title="$:/state/toc/Contents-References--1025088837">
@@ -5412,6 +5420,9 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <pre>close</pre>
 </div>
 <div modified="20150225041159308" title="$:/state/toc/Contents-Tools--242358753">
+<pre>close</pre>
+</div>
+<div modified="20150226041345216" title="$:/state/toc/Overview-Proof-of-Concept--242358753">
 <pre>close</pre>
 </div>
 <div list="Overview" title="$:/StoryList">
@@ -5434,7 +5445,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
     }
 }</pre>
 </div>
-<div created="20141011164514051" modified="20150224223132231" title="$:/temp/NewTagName">
+<div created="20141011164514051" modified="20150226041027153" title="$:/temp/NewTagName">
 <pre></pre>
 </div>
 <div created="20141011171545808" modified="20141011171550853" title="$:/temp/search">
@@ -5536,6 +5547,32 @@ html .solidborders td {  border: 1px solid black; }</pre>
 |Who|Contact Info|Notes|h
 |John Taylor |john.t.taylor@gmail.com|principal author |
 </pre>
+</div>
+<div created="20150226031550108" modified="20150226041209196" tags="Proof-of-Concept workflow" title="Basic Workflow">
+<pre>!!The following workflow assumes the following:
+
+* The the Outcast tools have been [[installed|Installing]] on the developer's PC and the command path has been updated to include the Outcast `bin/` directory.
+* The [[Native Outcast Universe|Package Universe]] and [[Package Directory|Package Directory]] are setup and the required Outcast environment variables have been sent to reference said locations.
+* Source code within individual packages is organized per the requirements for a [[workspace directory|Workspace Directory]], i.e. root level directories include: `top/`, `src/`, `tests/`, etc. 
+ 
+!!Basic Workflow steps....
+
+# The developer creates a workspace directory.  A developer can have an unlimited number of workspaces.  It is recommended to have a workspace per //project// if a developer works on many different projects concurrently.  The developer can skip to step 3 if he is using an existing workspace.  
+
+# After creating a workspace directory, the developer needs to run the `orc mkwrk` command in the newly created directory to finish the //initialization// of the workspace.  This step only needs to be done once for the lifetime of the workspace.
+
+# In a workspace there is a concept of __local__ and __external__ Packages.  A local Package is Package that is pulled directly from the organization's SCM repository.  A external Package is a previously released/published Package that is pull from a [[Outcast Vault||Package Vault]]. Essentially local Packages contain the source code that is being edited and external Packages contains dependent source code this is only consumed - not modified.
+## Pull/Fetch/Sync one or more local packages from the organization's SCM repository.  This step is ''not'' done using the Outcast tools.
+##* At any given time there can be multiple local Packages in workspace - however only one is the //active// local Package.  The //active// local Package is the Package your are building/compiling project(s) for.
+
+# Use the `orc getdeps` command to load and mount (as external) all dependent Packages required for the __//active//__ local Package.
+## If additionally (to the //active// Package) local Packages are being using, run the `orc mount` command to configure the workspace to reference/link-to these additional local Packages (instead of external mappings). 
+##* The developer can use the following commands to view, and modify the workspace's Package mappings: `orc ls`, `orc mount`, and `orc umount`.  
+
+# Edit, compile, test, repeat in the //active// local Package.
+#* NOTE: when making changes in the //non-active// local Package(s) you may have to re-run the `orc mount` command to pick up changes.  The basic rule is: Any additions or changes to header files in these //non-active// local Packages will not be visible to the //active// local Package until the `orc mount` has been re-run on the updated //non-active// local Package(s).  Changes to non-header file(s) will be visible immediately to the //active// local Package.
+
+# Check-in sources code changes made to the local Package(s) into your organization's SCM repository.  This step is ''not'' done using the Outcast tools.</pre>
 </div>
 <div created="20140905013839247" creator="JohnTaylor" modified="20150221160344370" modifier="JohnTaylor" tags="Files Branching [[Directories &amp; Files]]" title="Branch Log">
 <pre>The &lt;code&gt;branch.log&lt;/code&gt; file is comma separated file that contains the branch history of the package.  See [[branching rules|Branching Rules]] for how branching works. 
@@ -6095,8 +6132,14 @@ Packages can be branched and/or forked.  All packages are assumed to on the //ma
 |[[Stable Dependencies Principle|file:./articles/stability.pdf]] |//THE DEPENDENCIES BETWEEN PACKAGES IN A DESIGN SHOULD BE IN THE DIRECTION OF THE STABILITY OF THE PACKAGES. A PACKAGE SHOULD ONLY DEPEND UPON PACKAGES THAT ARE MORE STABLE THAT IT IS.// |
 |[[Principles and Patterns|file:./articles/p_and_p.pdf]] |Summary of OO Principles and Patterns |</pre>
 </div>
-<div created="20140726152202471" creator="JohnTaylor" modified="20150221161418511" modifier="JohnTaylor" tags="Contents" title="Overview">
+<div created="20140726152202471" creator="JohnTaylor" modified="20150226023527895" modifier="JohnTaylor" tags="Contents" title="Overview">
 <pre>Outcast is a project that was started as part of [[Project Eden|http://www.integerfox.com/#Eden]].  Outcast is for the lack of better term - a software development paradigm- that encompasses SCM and build processes, requirements trace-ability, design methodologies, unit testing, programming languages, and documentation. All this was a result of trying to solve the problem of how to manage, in a team environment, a scalable reusable code base.
+
+''So all of the above means what...?''  The first step is/was to create a set of tools as part of a proof-of-concept to realize the day-to-day workflow for developers to create and consume reusable code; and for that workflow to be scalable into large team environment.  The second step is to validate (or invalidate) and refine the workflow by creating and reusing //real// code.  This is where the various [[Colony.*|https://github.com/johnttaylor]] Github projects come into the picture.  The last step of the proof-of-concept will be to explore ways to incorporate/facilitate requirements traceability into the workflow.  
+
+The [[Outcast repository|https://github.com/johnttaylor/Outcast]] on Github contains a collection of Python scripts for the proof-of-concept tools.  All of these tools/scripts are command line based and run on both Windows and Linux.
+
+!!! The overview of the Outcast proof-of-concept is is described [[here|Proof-of-Concept]].
 
 !!!More
 &lt;h3&gt;
@@ -6203,6 +6246,46 @@ url:      &lt;owner_url&gt;
 
 </pre>
 </div>
+<div created="20150226020724233" modified="20150226041000908" tags="Overview" title="Proof-of-Concept">
+<pre>!!Basic assumptions and/or requirements.
+# THE GRANULE OF REUSE IS THE GRANULE OF RELEASE. ONLY COMPONENTS THAT ARE RELEASED THROUGH A TRACKING SYSTEM CAN BE EFFECTIVELY REUSED. (aka the [[The Reuse/Release Equivalence Principle|OO Articles]]).
+# Reuse will be at the source code level
+# A //Package// will be the unit of reuse/release.
+# [[Semantic versioning|http://semver.org]] shall be used identify and manage the released versions of Packages.
+# An application can consume one or more Packages.
+# The developer and the organization shall have the ability to develop/build from released Packages ''and/or'' unreleased source code directly from the SCM repository (or any mix of Packages and unreleased source).
+# The mechanism for releasing, storing, searching Packages must be scalable to a large number of Packages as well a large number of releases per Package.
+# Automated Package dependency management.
+# Do not replicate or duplicate the functionality of a [[SCM Tool|https://en.wikipedia.org/wiki/Software_configuration_management]].  Outcast should be a complimentary tool, not an alterntive/replacement for SCM tools.
+# Must be [[SCM Tool|https://en.wikipedia.org/wiki/Software_configuration_management]] agnostic
+## Must support releasing source code from many/different SCM branches (can not assume code is only released on //main//.
+# Must be host platform agnostic, i.e. must run on Windows, Linux, etc.
+
+!!High level implementation...
+* Git is the default SCM repository for both managing published packages as well as individual source code packages.  The Outcast tools allow other SCM tools - but only Git is/has been implemented.
+* The [[NQBP|https://integerfox.com/nqbp]] build engine is used as the default build engine for releasing/publishing packages.  The Outcast scripts are designed to support any build engine - however the build engine is required to support the [[Workspace Directory|Workspace Directory]] organization, specifically the `xpkgs/` and `xinc/` concept/directories.
+* Automating the actual build/release process is not officially part of the Outcast proof-of-concept, however [[Jenkins|http://jenkins-ci.org/]] is used internally for publishing/releasing all Packages that have a Windows host platform. //Note: __publishing__ a Package __is__ automated as part of the proof-of-concept - just not the integration with a 'build machine'.//
+* A Released Package has two outputs - a [[top file|Types of Files]] and a [[archive file|Types of Files]].  The //top// file contains the essential information of Package and is what is published to [[Foreign Outcast Universe|Package Universe]]. //Top// files are searched when evaluating Package dependencies. The intent/goal here is to reduce the footprint to minimize the performance impact when the number of Packages/Releases gets large.  The //archive// file contains the entire Package contents and is only retrieved when consuming a Package.  The //archive// file is what is published/pushed the [[Package Vault|Package Vault]].
+* There is a collection of Python [[scripts|Tools]] that implement the proof-of-concept.  The `orc` script is primary tool that a developer would use.  The remaining tools - while stand alone - provide functionality in support of `orc` sub-commands.
+
+!!Workflows for the Outcast proof-of-concept
+&lt;h3&gt;
+&lt;ul&gt;
+&lt;$list filter=&quot;[tag[Proof-of-Concept]sort[title]]&quot;&gt;&lt;li&gt;&lt;$link&gt;&lt;$view field=&quot;title&quot;/&gt;&lt;/$link&gt;&lt;/li&gt;
+&lt;/$list&gt;
+&lt;/ul&gt;
+&lt;/h3&gt;</pre>
+</div>
+<div created="20150226041118499" modified="20150226041153413" tags="Proof-of-Concept workflow" title="Publish Workflow">
+<pre>!!The following workflow assumes the following:
+
+* The the Outcast tools have been [[installed|Installing]] on the developer's PC and the command path has been updated to include the Outcast `bin/` directory.
+* The [[Native Outcast Universe|Package Universe]] and [[Package Directory|Package Directory]] are setup and the required Outcast environment variables have been sent to reference said locations.
+* Source code within individual packages is organized per the requirements for a [[workspace directory|Workspace Directory]], i.e. root level directories include: `top/`, `src/`, `tests/`, etc. 
+ 
+!!Publish Workflow steps....
+</pre>
+</div>
 <div created="20141017030416459" modified="20141017031409346" tags="Contents" title="References">
 <pre>&lt;h2&gt;
 
@@ -6213,7 +6296,7 @@ url:      &lt;owner_url&gt;
 
 &lt;/h2&gt;</pre>
 </div>
-<div created="20150224215003080" modified="20150225041907485" tags="Contents" title="Tools">
+<div created="20150224215003080" modified="20150226030134115" tags="Contents" title="Tools">
 <pre>A set command line tools have been created to manage and publish packages as part of the Outcast proof-of-concept.  Below is an overview of these tools.  
 
 These tools use a small number of environment variables.  A description of the these variables can be found [[here|Environment Variables]]
@@ -6223,7 +6306,7 @@ These tools use a small number of environment variables.  A description of the t
 |orc |Is used to manage packaging and/or workspaces. `orc` contains numerous sub commands.  Set below for a sample list of sub commands.  To get the current list type: `orc help` |
 |ceres |Is used for managing Outcast Universes.  `ceres` contains numerous sub commands.  Set below for a sample list of sub commands.  To get the current list type: `ceres help`  |
 |evie |Is a wrapper for invoking the SCM tool being used.  This allows the core Outcast tools to be independent of actual SCM tool being used to store the source code and Outcast Universes. `evie` contains numerous sub commands.  Set below for a sample list of sub commands.  To get the current list type: `evie help` |
-|bob |Is a script for building many projects using [[NQBP|http://integerfox.com/nqbp]].  The `orc publish` command uses the `bob` script to build all of a package unittest projects as part of the publish sequence. |
+|bob |Is a wrapper for building one or more projects .  The `orc publish` command uses the `bob` script to build all of a package unittest projects as part of the publish sequence. |
 |chuck |Is a wrapper for invoking a package's automated unit tests. The `orc publish` command uses the `chuck` script to execute all of a package unittest projects as part of the publish sequence. |
 |nqbp |[[NQBP|http://integerfox.com/nqbp]] is the original build engine for Outcast. It supports Outcast's [[workspace|Workspace Directory]] organization |
 -----
@@ -6321,7 +6404,7 @@ These tools use a small number of environment variables.  A description of the t
 |default vault | ''default.vault'' |A vault file contained in a [[Native Package Universe|Package Universe]] that specifies the default vault(s) to use when publishing/installing package archives. |
 |[[Branch log|Branch Log]] | ''branch.log'' |Contains the branch history of package. |</pre>
 </div>
-<div created="20140803153042238" creator="JohnTaylor" modified="20150221160741196" modifier="JohnTaylor" tags="Directories [[Directories &amp; Files]] Glossary" title="Workspace Directory">
+<div created="20140803153042238" creator="JohnTaylor" modified="20150226032129377" modifier="JohnTaylor" tags="Directories [[Directories &amp; Files]] Glossary" title="Workspace Directory">
 <pre>!!An Outcast workspace has the following structure/organization
 
 @@.dirtree
@@ -6337,10 +6420,10 @@ These tools use a small number of environment variables.  A description of the t
 ****`...`
 **`xinc`; Root directory for public interfaces of the loaded/mounted external packages. Note: All files in directory tree are symbolic links to either external or local Packages.
 ***`&lt;namespace1&gt;` ; Include directory retains the namespace organization of the individual packages
-****`...` ;
-***`&lt;namespace2&gt;` ; 
+****`...` 
+***`&lt;namespace2&gt;`  
 ****`...`
-** `local_pkg #1` ; Local package, i.e. contents are pulled/pushed directly to your SCM
+** `&lt;local_pkg #1&gt;` ; Local package, i.e. contents are pulled/pushed directly to your SCM
 *** `top` ; Outcast pkg info 
 *** `projects` ; ~LocalPackage's build directories
 *** `src` ; ~LocalPackage's source directories
