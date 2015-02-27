@@ -245,6 +245,8 @@ Error message and password prompt
 
 <li>$:/state/toc/Contents-Overview--242358753</li>
 
+<li>$:/state/toc/Contents-Proof-of-Concept--242358753</li>
+
 <li>$:/state/toc/Contents-References--1025088837</li>
 
 <li>$:/state/toc/Contents-References--242358753</li>
@@ -299,6 +301,8 @@ Error message and password prompt
 
 <li>Coding Standards</li>
 
+<li>Creating a new Package</li>
+
 <li>Directories &amp; Files</li>
 
 <li>Environment Variables</li>
@@ -315,11 +319,15 @@ Error message and password prompt
 
 <li>Licensing</li>
 
+<li>Managing Dependencies</li>
+
 <li>Naming Conventions</li>
 
 <li>OO Articles</li>
 
 <li>Overview</li>
+
+<li>Package Dependencies</li>
 
 <li>Package Granularity</li>
 
@@ -5383,10 +5391,10 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20150221155112963" title="$:/state/toc/Contents-Branching--1025088837">
 <pre>close</pre>
 </div>
-<div modified="20150221161339782" title="$:/state/toc/Contents-Branching--242358753">
+<div modified="20150227041815214" title="$:/state/toc/Contents-Branching--242358753">
 <pre>close</pre>
 </div>
-<div modified="20150226041349152" title="$:/state/toc/Contents-Directories &amp; Files--242358753">
+<div modified="20150227030516886" title="$:/state/toc/Contents-Directories &amp; Files--242358753">
 <pre>close</pre>
 </div>
 <div modified="20150221155113947" title="$:/state/toc/Contents-Directories--1025088837">
@@ -5410,7 +5418,10 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20141011172627069" title="$:/state/toc/Contents-Intro--966365951">
 <pre>open</pre>
 </div>
-<div modified="20150226041346316" title="$:/state/toc/Contents-Overview--242358753">
+<div modified="20150227031817701" title="$:/state/toc/Contents-Overview--242358753">
+<pre>close</pre>
+</div>
+<div modified="20150227044002902" title="$:/state/toc/Contents-Proof-of-Concept--242358753">
 <pre>close</pre>
 </div>
 <div modified="20150221155116868" title="$:/state/toc/Contents-References--1025088837">
@@ -5419,17 +5430,17 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20150225034403942" title="$:/state/toc/Contents-References--242358753">
 <pre>close</pre>
 </div>
-<div modified="20150225041159308" title="$:/state/toc/Contents-Tools--242358753">
+<div modified="20150227030524954" title="$:/state/toc/Contents-Tools--242358753">
 <pre>close</pre>
 </div>
 <div modified="20150226041345216" title="$:/state/toc/Overview-Proof-of-Concept--242358753">
 <pre>close</pre>
 </div>
-<div list="Overview" title="$:/StoryList">
+<div list="Proof-of-Concept [[Basic Workflow]] [[Creating a new Package]] [[Managing Dependencies]] [[Publish Workflow]] Overview" title="$:/StoryList">
 <pre></pre>
 </div>
-<div created="20141011164829984" modified="20150225041543883" title="$:/temp/advancedsearch">
-<pre>nqbp</pre>
+<div created="20141011164829984" modified="20150227030615886" title="$:/temp/advancedsearch">
+<pre>transitive</pre>
 </div>
 <div plugin-type="info" title="$:/temp/info-plugin" type="application/json">
 <pre>{
@@ -5445,7 +5456,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
     }
 }</pre>
 </div>
-<div created="20141011164514051" modified="20150226041027153" title="$:/temp/NewTagName">
+<div created="20141011164514051" modified="20150227031819673" title="$:/temp/NewTagName">
 <pre></pre>
 </div>
 <div created="20141011171545808" modified="20141011171550853" title="$:/temp/search">
@@ -5735,6 +5746,41 @@ MERGE yellow/1.0.20 (patch)  main/2.11.5 (major) TO main/2.11.6
 
 |Standard |Language| Usage  |Comments |h
 |[[John's Coding Standard|http://integerfox.com/outcast/documentation/codingstandard.htm]]| C++ |Targeted for embedded development |Very basic and brief.  The recommended default for embedded C++ packages in Outcast |
+</pre>
+</div>
+<div created="20150227022248723" modified="20150227030354876" tags="Proof-of-Concept workflow" title="Creating a new Package">
+<pre>!!The following workflow assumes the following:
+
+* The the Outcast tools have been [[installed|Installing]] on the developer's PC and the command path has been updated to include the Outcast `bin/` directory.
+* The [[Native Outcast Universe|Package Universe]] and [[Package Directory|Package Directory]] are setup and the required Outcast environment variables have been sent to reference said locations.
+
+ 
+!!Create a new Package Workflow steps....
+
+# Create a workspace or use an already existing workspace.  The sub-steps below summarizes how to create a workspace.  Also, see the [[install|Installing]] instructions for a detailed example.
+## Create the workspace directory.  It is recommended to have a common parent/root directory for all of the workspaces.
+## Change your current directory to the newly created directory and run the `orc mkwrk` command
+## If using [[NQBP|http://integerfox/nqbp]] as your build engine, set the environment variable `NQBP_BIN` to `&lt;rootpath&gt;/&lt;workspace_dir_name&gt;/xpgks/nqbp`
+# Create the Package directory under/in your workspace directory.  The details of this step is dependent on your organziation's SCM tools.  For example if using git, set the //cwd// to workspace directory and do a `git init &lt;pkgdir&gt;` where `&lt;pkgdir&gt;` is the name of the Package.
+# Change your current directory to the newly created package directory and create the following directories:
+#* `top/`
+#* `src/`
+#* `tests/`
+#* `projects/`    ; Optional
+# Create the Package Specification file by setting the current directory to the `top/` directory and running the `orc mksepc` command.  
+## Edit the following items under the `[info]` section of the created `pkg.specification` file.  Do ''not'' edit/modify any of the other sections.  All of the other items/sections should only be updated using `orc` commands.
+
+##* `name`
+##* `desc`
+##* `owner`
+##* `email`
+##* `url`
+
+# Create the initial script stubs required for the publish sequence by running the `orc mktools` command in the `top/` directory.
+## Modify these scripts as need for your organization's develop tools/policies.  ''Note:'' A default implementation is provided as part of the scripts - but the developer still needs to enable/select the default implementation.  In addition, the default implementation is data driven through  //config// files (e.g. `publish_build.list`) located in the `top/` directory.  The developer must provide/generate these config files.
+
+# All done!  All source code should be added under the `src/` directory.  All unittest projects should be added under the `tests/` directory.  Any application projects should be added under the `projects/` directory.  ''Note:'' The term __project__ here is the directory where a developer builds an application and/or unittests - typically there is very little source code contained in the project directories.
+
 </pre>
 </div>
 <div created="20150221160040098" modified="20150221160130905" tags="Contents" title="Directories &amp; Files">
@@ -6083,6 +6129,23 @@ __''//Table-of-Contents//''__
 
 &lt;div align=&quot;center&quot;&gt;&lt;iframe src=&quot;./license.txt&quot; frameborder=&quot;0&quot; width=&quot;100%&quot; height=&quot;800&quot;&gt;&lt;/iframe&gt;&lt;/div&gt;</pre>
 </div>
+<div created="20150227030534971" modified="20150227043734397" tags="Proof-of-Concept workflow" title="Managing Dependencies">
+<pre>!!The following workflow assumes the following:
+
+* The the Outcast tools have been [[installed|Installing]] on the developer's PC and the command path has been updated to include the Outcast `bin/` directory.
+* The [[Native Outcast Universe|Package Universe]] and [[Package Directory|Package Directory]] are setup and the required Outcast environment variables have been sent to reference said locations.
+* Source code within individual packages is organized per the requirements for a [[workspace directory|Workspace Directory]], i.e. root level directories include: `top/`, `src/`, `tests/`, etc. 
+ 
+!!Please review the description/definition of Outcast [[dependencies|Package Dependencies]] before proceeding.
+
+!!Modify Dependencies Workflow steps....
+# A packages dependencies can be viewed by issuing the `orc checkdeps --print` command.  ''Note:'' The `orc checkdeps` can create directed-graph diagrams if [[GraphViz|http://www.graphviz.org]] is install on your PC.
+# Additions, updates, and removals of dependencies are done using the `orc moddeps` command.  This command updates the Package's `pkg.specification` file.  The command supports/understands //immediate//, //transitive//, and //weak// [[dependencies|Package Dependencies]].  ''Note:'' the `orc moddeps` checks - with respect to a valid dependency graph - the modifications before committing the changes to the Package's `pkg.specification` file.  If the resulting dependency graph is invalid - the command will fail and the `pkg.specification` is ''not'' updated.
+
+!!Checking for Upgrades Workflow steps
+# A packages dependencies can be viewed by issuing the `orc checkdeps --print` command.  ''Note:'' The `orc checkdeps` can create directed-graph diagrams if [[GraphViz|http://www.graphviz.org]] is install on your PC.
+# To check if there are updates/upgrades to a Package's dependencies - run the `orc newer` command.  This command will provide a list of possible //upgrades//.  The developer is responsible for then using the `orc moddeps` to manually update the Package's `pkg.specification` file for any desired updates.  At this time there is ''no'' &quot;auto-upgrade&quot; command/tool.</pre>
+</div>
 <div created="20140803034158233" creator="JohnTaylor" modified="20150221161702781" modifier="JohnTaylor" tags="standards miscellaneous Overview" title="Naming Conventions">
 <pre>!Requirements:
 !!Package names 
@@ -6150,6 +6213,15 @@ The [[Outcast repository|https://github.com/johnttaylor/Outcast]] on Github cont
 &lt;/h3&gt;
 
 {{LeftMenu}}</pre>
+</div>
+<div created="20150227030637064" modified="20150227041803691" tags="Glossary Overview" title="Package Dependencies">
+<pre>Packages can and do depend on other Packages.  When consuming/using a package - you become dependent not only that specific package - but all of it dependencies.  This creates dependency graphs which can be potentially quite complex and/or deep. Part of the Outcast concept to manage - in a user friendly manner - the dependency trees of Packages.
+
+Outcast has two __types__ of dependencies - //''immediate''// and //''transitive''//. An //immediate// dependency is where package B directly references package C, e.g. source code in package B has `#include` to a header file in package C.  In fact for C/C++ code all `#include` statements define the package's //immediate// dependencies.  A //transitive// dependency is a functonal dependency which holds by the virtue of transitivity.  For example: package B directly references package C, and package C directly references package Z -  therefore due to the transitive nature of dependencies - B is dependent on package C and Z where the dependency on Z is considered a //transitive// dependency.
+
+Outcast also  has two __classification__ of dependencies - //''strong''// and //''weak''//.  The difference between a //strong// and a //weak// dependency is that a Package's //weak// dependencies to do ''not'' transfer to consumer of the Package.  This means that if package A has a strong dependency on package B and a weak dependency on package C; then if package Z uses/depends on package A - package Z is dependent on packages A and B; and ''not'' C. The concept of weak dependencies allows a package to have dependencies that are only required for its unittests and not impose a transitive dependency on to its consumers.  This is helpful to prevent cyclic dependency trees and/or to allow a platform independent package to be unittested against specific platforms.
+
+</pre>
 </div>
 <div created="20140821013917558" creator="JohnTaylor" modified="20150221161151861" modifier="JohnTaylor" tags="Overview" title="Package Granularity">
 <pre>Determining the granularity of package (i.e. the amount of code in a package) can be difficult, especially when first starting out with packages.  Every team, organization, code base, package, etc. is different and there is no single right answer.  Unfortunately there are many wrong answers.  The list below contain formal theory, general suggestions, and/or concepts to think about when selecting granularity of packages.
@@ -6246,7 +6318,7 @@ url:      &lt;owner_url&gt;
 
 </pre>
 </div>
-<div created="20150226020724233" modified="20150226041000908" tags="Overview" title="Proof-of-Concept">
+<div created="20150226020724233" modified="20150227030449496" tags="Overview Contents" title="Proof-of-Concept">
 <pre>!!Basic assumptions and/or requirements.
 # THE GRANULE OF REUSE IS THE GRANULE OF RELEASE. ONLY COMPONENTS THAT ARE RELEASED THROUGH A TRACKING SYSTEM CAN BE EFFECTIVELY REUSED. (aka the [[The Reuse/Release Equivalence Principle|OO Articles]]).
 # Reuse will be at the source code level
