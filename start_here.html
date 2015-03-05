@@ -5394,7 +5394,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20150227041815214" title="$:/state/toc/Contents-Branching--242358753">
 <pre>close</pre>
 </div>
-<div modified="20150227030516886" title="$:/state/toc/Contents-Directories &amp; Files--242358753">
+<div modified="20150305043137449" title="$:/state/toc/Contents-Directories &amp; Files--242358753">
 <pre>close</pre>
 </div>
 <div modified="20150221155113947" title="$:/state/toc/Contents-Directories--1025088837">
@@ -5421,8 +5421,8 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20150227031817701" title="$:/state/toc/Contents-Overview--242358753">
 <pre>close</pre>
 </div>
-<div modified="20150227044002902" title="$:/state/toc/Contents-Proof-of-Concept--242358753">
-<pre>close</pre>
+<div modified="20150305043139238" title="$:/state/toc/Contents-Proof-of-Concept--242358753">
+<pre>open</pre>
 </div>
 <div modified="20150221155116868" title="$:/state/toc/Contents-References--1025088837">
 <pre>close</pre>
@@ -5436,7 +5436,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20150226041345216" title="$:/state/toc/Overview-Proof-of-Concept--242358753">
 <pre>close</pre>
 </div>
-<div list="Proof-of-Concept [[Basic Workflow]] [[Creating a new Package]] [[Managing Dependencies]] [[Publish Workflow]] Overview" title="$:/StoryList">
+<div list="[[Basic Workflow]] Acknowledgements $:/core/ui/MoreSideBar/All [[Coding Standards]] [[Naming Conventions]] [[Workspace Directory]] Overview" title="$:/StoryList">
 <pre></pre>
 </div>
 <div created="20141011164829984" modified="20150227030615886" title="$:/temp/advancedsearch">
@@ -5559,7 +5559,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
 |John Taylor |john.t.taylor@gmail.com|principal author |
 </pre>
 </div>
-<div created="20150226031550108" modified="20150226041209196" tags="Proof-of-Concept workflow" title="Basic Workflow">
+<div created="20150226031550108" modified="20150305043451865" tags="Proof-of-Concept workflow" title="Basic Workflow">
 <pre>!!The following workflow assumes the following:
 
 * The the Outcast tools have been [[installed|Installing]] on the developer's PC and the command path has been updated to include the Outcast `bin/` directory.
@@ -5581,7 +5581,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
 ##* The developer can use the following commands to view, and modify the workspace's Package mappings: `orc ls`, `orc mount`, and `orc umount`.  
 
 # Edit, compile, test, repeat in the //active// local Package.
-#* NOTE: when making changes in the //non-active// local Package(s) you may have to re-run the `orc mount` command to pick up changes.  The basic rule is: Any additions or changes to header files in these //non-active// local Packages will not be visible to the //active// local Package until the `orc mount` has been re-run on the updated //non-active// local Package(s).  Changes to non-header file(s) will be visible immediately to the //active// local Package.
+#* NOTE: when making changes in the //non-active// local Package(s) you may have to re-run the `orc mount` command to pick up changes.  The basic rule is: Any time __new__ header file(s) are added to these //non-active// local Packages the new header file(s) will not be visible to the //active// local Package until the `orc mount` has been re-run on the updated //non-active// local Package(s).  Adding new __non-header__ file(s) will be visible immediately to the //active// local Package.
 
 # Check-in sources code changes made to the local Package(s) into your organization's SCM repository.  This step is ''not'' done using the Outcast tools.</pre>
 </div>
