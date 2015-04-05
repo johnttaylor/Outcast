@@ -372,11 +372,11 @@ def walk_linksrc( linksrc, parentpath, common_args ):
             display = info
             if ( OUTCAST_LOCAL_PKG_SUFFIX() in info ):
                 parts   = info.split(os.sep)
-                info    = os.path.join( common_args['-w'], parts[0] )
-                display = os.path.join( parts[0], OUTCAST_LOCAL_PKG_SUFFIX(), *parts[1:-1] )
+                path    = os.path.join( *parts[1:-1] )
+                info    = os.path.join( common_args['-w'], path )
+                display = os.path.join( OUTCAST_LOCAL_PKG_SUFFIX(), path )
                 
             if ( info.startswith(linksrc) ):
-                
                 list.append( (os.path.join(root,f), display) ) 
             
     return list

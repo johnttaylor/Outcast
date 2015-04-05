@@ -345,6 +345,8 @@ Error message and password prompt
 
 <li>References</li>
 
+<li>SDLC and Methodology</li>
+
 <li>Tools</li>
 
 <li>Top Directory</li>
@@ -571,7 +573,7 @@ body .dirtree li:last-child {
 }
 </pre>
 </div>
-<div created="20140607071109226" creator="TonGerner" leftmenu-width="230px" modified="20150225034354966" modifier="TonGerner" story-left="230px" story-width="1100px" tags="leftmenu $:/tags/Stylesheet" title="$:/_stylesheet/leftmenu-show" top-leftmenu="50px" type="text/vnd.tiddlywiki">
+<div created="20140607071109226" creator="TonGerner" leftmenu-width="230px" modified="20150320044947490" modifier="TonGerner" story-left="230px" story-width="1100px" tags="leftmenu $:/tags/Stylesheet" title="$:/_stylesheet/leftmenu-show" top-leftmenu="50px" type="text/vnd.tiddlywiki">
 <pre>/* STORY-RIVER */
 .tc-story-river {
      left: {{!!story-left}};
@@ -5355,7 +5357,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20141012030920472" title="$:/state/ShowPaletteEditor">
 <pre>no</pre>
 </div>
-<div modified="20150225034354966" title="$:/state/sidebar">
+<div modified="20150320044947490" title="$:/state/sidebar">
 <pre>no</pre>
 </div>
 <div modified="20150225041545881" title="$:/state/tab--1498284803">
@@ -5421,8 +5423,8 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20150227031817701" title="$:/state/toc/Contents-Overview--242358753">
 <pre>close</pre>
 </div>
-<div modified="20150305043139238" title="$:/state/toc/Contents-Proof-of-Concept--242358753">
-<pre>open</pre>
+<div modified="20150320045003669" title="$:/state/toc/Contents-Proof-of-Concept--242358753">
+<pre>close</pre>
 </div>
 <div modified="20150221155116868" title="$:/state/toc/Contents-References--1025088837">
 <pre>close</pre>
@@ -5430,13 +5432,13 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20150225034403942" title="$:/state/toc/Contents-References--242358753">
 <pre>close</pre>
 </div>
-<div modified="20150227030524954" title="$:/state/toc/Contents-Tools--242358753">
+<div modified="20150320045000934" title="$:/state/toc/Contents-Tools--242358753">
 <pre>close</pre>
 </div>
 <div modified="20150226041345216" title="$:/state/toc/Overview-Proof-of-Concept--242358753">
 <pre>close</pre>
 </div>
-<div list="[[Basic Workflow]] Acknowledgements $:/core/ui/MoreSideBar/All [[Coding Standards]] [[Naming Conventions]] [[Workspace Directory]] Overview" title="$:/StoryList">
+<div list="Proof-of-Concept [[SDLC and Methodology]] Overview" title="$:/StoryList">
 <pre></pre>
 </div>
 <div created="20141011164829984" modified="20150227030615886" title="$:/temp/advancedsearch">
@@ -6367,6 +6369,39 @@ url:      &lt;owner_url&gt;
 *[[GraphViz|http://www.graphviz.org]]
 
 &lt;/h2&gt;</pre>
+</div>
+<div created="20150320045023238" modified="20150321141324537" title="SDLC and Methodology">
+<pre>While Outcast is pitched as a //development paradigm// - the initial [[proof of concept|Proof-of-Concept]] attempted to be [[SDLC|http://en.wikipedia.org/wiki/Systems_development_life_cycle]] (Software Development Life Cycle) process agnostic as much as possible.  The scope of the proof-of-concept is/was to determine what's the //cost// and/or burden to the developer/organization when publishing/releasing internal reusable software packages - not just final products.  In addition, in my experience it is very difficult and/or undesirable to have a one-process-to-rule-them-all SDLC approach that you apply everywhere and anywhere.   So the bottom line: with respect to SDLC process and/or methodologies - Outcast (at this point in time) is more talk than walk.
+
+Below is the few impacts/requirements the Outcast [[proof of concept|Proof-of-Concept]] imposes on your SDLC.
+
+#Source code organization
+#Builds
+#Naming conventions and/or namespaces
+#Partitioning source code into packages
+#Publishing packages
+## semantic versioning
+
+While I don't believe in //one SDLC process to rule them all// - I do have strong opinions and/or recommendations for best practices across the entire SDLC.  ''Caveat: YMMV''.  Also, some of these items can only realistically be applied at the start of green-field development, i.e. it would cause more pain than good if applied to existing code base.
+
+# Design reviews
+## Design concept review
+## Design review --&gt;includes public interface header files, namespaces, source code/package dependencies identified, directory locations defined, etc.
+# Automated unittests
+## Idea: have a second developer flush out gaps in unittest, i.e. a form of code review
+# Track units-of-work via the bug/job tracker
+# Build Machine
+# Have a software architecture for an application (this is not the system sw architecture)
+## Defined layers (driver, run-time-environment, application)
+## Pattern for ITC/IPC
+## Pattern for accessing config/db values, e.g. MVC
+# Use a SCM
+## Supports checking many files as an atomic operation
+# Archive Tools
+## Archive OS
+
+ 
+ </pre>
 </div>
 <div created="20150224215003080" modified="20150226030134115" tags="Contents" title="Tools">
 <pre>A set command line tools have been created to manage and publish packages as part of the Outcast proof-of-concept.  Below is an overview of these tools.  

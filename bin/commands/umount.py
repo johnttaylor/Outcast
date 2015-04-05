@@ -105,13 +105,13 @@ def _umount_pkg( linkpath, common_args, args, error_on_not_mounted=False, cleani
 
 
     # Remove any/all exported header files
-    xincpath   = os.path.join( common_args['-w'], OUTCAST_XINC_DIRNAME() )
-    linkinfo   = _get_pkg_source( linkpath, common_args, args )
+    xincpath = os.path.join( common_args['-w'], OUTCAST_XINC_DIRNAME() )
+    linkinfo = _get_pkg_source( linkpath, common_args, args )
     
     if ( OUTCAST_LOCAL_PKG_SUFFIX() in linkinfo ):
         if ( linkinfo.startswith(os.sep) ):
-            linkinfo = linkinfo[1]
-        linkinfo = common_args['-w'] + os.sep + os.path.dirname(linkinfo)
+            linkinfo = linkinfo[1:]
+        linkinfo = os.path.join( common_args['-w'], os.path.dirname(linkinfo) )
         
     removelist = utils.walk_linksrc( linkinfo, xincpath, common_args )
     for t in removelist:
@@ -121,7 +121,7 @@ def _umount_pkg( linkpath, common_args, args, error_on_not_mounted=False, cleani
     utils.walk_clean_empty_dirs(xincpath) 
 
     # Remove the Package link
-    linkinfo   = _get_pkg_source( linkpath, common_args, args )
+    linkinfo = _get_pkg_source( linkpath, common_args, args )
     try:
         symlinks.remove_link( linkpath )
         utils.print_verbose( "UNMOUNTED  " +  linkinfo )
