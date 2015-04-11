@@ -138,17 +138,16 @@ def run( common_args, cmd_argv ):
         else:
             exit( "ERROR: Invalid and/or non-transitive package specified for the 'transitive-update' action." )
                       
-    # apply Immediate and Weak Actions
-    _modify_direct_list( me_d, immediate )
-    _modify_direct_list( me_w, weak )
-
-        
     # apply DELETE actions
     for pkg_to_del in deldeps:
         if ( not _remove_from_list( pkg_to_del, me_d ) ):
             if ( not _remove_from_list( pkg_to_del, me_w ) ):
                 exit( "ERROR: Attempting to deleting a immediate/weak dependency that does not exist: {}".format( pkg_to_del ) )
 
+    # apply Immediate and Weak Actions
+    _modify_direct_list( me_d, immediate )
+    _modify_direct_list( me_w, weak )
+        
     # Ensure the Native Package universe is current
     if ( not common_args['--norefresh'] ):
         cmd = 'ceres.py -v -w {} --user "{}" --passwd "{}" refresh'.format(common_args['-w'], common_args['--user'], common_args['--passwd'] )
@@ -165,7 +164,7 @@ def run( common_args, cmd_argv ):
     all.extend( me_d )
     all.extend( me_w )
     trail.append( (pkg_spec, t[0], t[1], t[2]) )
-    deps.build_node( root, all, common_args['--uverse'], trail, cache, trans )
+    deps.build_node( root, all, common_args['--uverse'], trail, cache, me_w, True, trans )
 
     
     # Attemp to resolve dependency conflicts
@@ -178,7 +177,13 @@ def run( common_args, cmd_argv ):
     for direct_child in root.get_children():
         for transitive in direct_child.get_children():
             trans.extend( deps.tree_as_a_list(transitive) )
-    trans = utils.remove_duplicates(trans)          
+    temp_trans = utils.remove_duplicates(trans)          
+   
+    # Remove myself/(aka the root) from the transitive list (this will happen when there is a weak-cyclic scenario)
+    trans = []
+    for n in temp_trans:
+        if ( n[0] != t[0] ):
+            trans.append(n)
         
     # Remove transitive dependencies that are also direct dependencies (aka immedidate or weak deps)
     for direct in all:

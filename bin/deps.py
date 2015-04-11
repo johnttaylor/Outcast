@@ -22,7 +22,7 @@ def validate_dependencies( pkginfo, list_deps, list_weak, list_trans, common_arg
         
     # calculate all of the possible transitive dependencies
     trail.append( (file_name, t[0], t[1], t[2]) )
-    build_node( root, all, common_args['--uverse'], trail, cache )
+    build_node( root, all, common_args['--uverse'], trail, cache, list_weak )
 
     # Skip most of the test(s) when --nocheck
     root_actual = utils.Node( t )
@@ -35,7 +35,7 @@ def validate_dependencies( pkginfo, list_deps, list_weak, list_trans, common_arg
         check_against_blacklist( common_args['--uverse'], allall, common_args, warn_on_do_not_use="Initial check shows a dependency on a 'Do-Not-Use' Package: {}-{}-{}." )
 
         # Run algorithm
-        _build_actual( root_actual, all, allall, common_args['--uverse'], trail, cache )
+        _build_actual( root_actual, all, allall, common_args['--uverse'], trail, cache, list_weak )
 
         # Check for stale transitive dependencies
         stale = find_unused_dependencies( root_actual, list_trans )
@@ -52,9 +52,9 @@ def validate_dependencies( pkginfo, list_deps, list_weak, list_trans, common_arg
         # Find weak ONLY dependencies
         trail = [t]
         root_noweak = utils.Node(t)
-        build_node( root_noweak, list_deps, common_args['--uverse'], trail, cache )
+        build_node( root_noweak, list_deps, common_args['--uverse'], trail, cache, None )
         root_actual_noweak = utils.Node(t)
-        _build_actual( root_actual_noweak, list_deps, allall, common_args['--uverse'], trail, cache )
+        _build_actual( root_actual_noweak, list_deps, allall, common_args['--uverse'], trail, cache, list_weak )
             
         # update returned trees with weak-ONLY info
         _mark_weak_only_nodes( root, root_noweak )
@@ -216,15 +216,22 @@ def read_spec_from_tar_file( f ):
 
 
 #------------------------------------------------------------------------------
-def build_node( parent_node, children_data, path_to_uverse, trail, cache, trans=None ):
+def build_node( parent_node, children_data, path_to_uverse, trail, cache, weak_deps, no_warn_on_weakcycle=False, trans=None ):
     parent_node.add_children_data( children_data )
     for cnode in parent_node.get_children():
         p,b,v = _get_node_data_and_substitute( cnode, trans )
         fname = build_top_fname(p,b,v)
         cpath = os.path.join( path_to_uverse, fname )
 
-        # trap cyclic dependencies
+        # trap weak-cyclic dependencies
         n = (fname, p, b, v)
+        if ( _test_for_weak_cyclic(n,trail,weak_deps) ):
+            if ( not no_warn_on_weakcycle ):
+                utils.print_warning( "Weak Cyclic dependency." )
+                utils.print_warning( "   " + _convert_trail_to_string(trail,n) )
+            return
+            
+        # trap cyclic dependencies
         if ( _test_for_cyclic(n,trail) ):
             print "ERROR: Cyclic dependency."
             _display_trail(trail,n)
@@ -239,7 +246,7 @@ def build_node( parent_node, children_data, path_to_uverse, trail, cache, trans=
         # Process the child top file
         i,d,w,t,bhist = info
         if ( len(d) > 0 ):
-            build_node( cnode, d, path_to_uverse, trail, cache, trans )
+            build_node( cnode, d, path_to_uverse, trail, cache, weak_deps, no_warn_on_weakcycle, trans )
         trail.remove(n)
     
         
@@ -261,6 +268,7 @@ def _get_node_data_and_substitute( node, trans=None ):
         
 def build_top_fname( p, b, v ):
     return p + '-' + b + '-' + v + '.top'
+       
          
 def _test_for_cyclic( t, trail ):
     for x in trail:
@@ -269,14 +277,36 @@ def _test_for_cyclic( t, trail ):
     
     return False
 
+
+def _test_for_weak_cyclic( t, trail, weak_deps ):
+    if ( weak_deps != None and len(trail) > 1 ):
+        root           = trail[0]
+        imm_child      = trail[1]
+        weak_pkg_names = _extract_pkgnames( weak_deps )
+        
+        if ( imm_child[1] in weak_pkg_names ):
+            if ( t[1] == root[1] ):
+                return True
+
+    return False;
+
+
 def _display_trail(trail, n=None):
     print "ERROR:   ",
+    print _convert_trail_to_string(trail,n)
+
+        
+def _convert_trail_to_string( trail, n=None):
+    result = []
     for i in trail:
-        print encode_dep(i[1:],use_quotes=False) +" ->",
+        result.append( encode_dep(i[1:],use_quotes=False) )
+        result.append( " -> " )
     if ( n != None ):
-        print encode_dep(n[1:],use_quotes=False)                   
+        result.append( encode_dep(i[1:],use_quotes=False) )
         
-        
+    return "".join(result)
+    
+
 #------------------------------------------------------------------------------
 def _load_section( section, cfg, fname ):
     children = []
@@ -436,18 +466,21 @@ def read_info( cfg, filename, top_fname ):
     
         
 #------------------------------------------------------------------------------
-def _build_actual( node, children_data, all_entries, path_to_uverse, trail, cache ):
+def _build_actual( node, children_data, all_entries, path_to_uverse, trail, cache, weak_deps ):
     node.add_children_data( children_data )
     for cnode in node.get_children():
         p,b,v = cdata = cnode.get_data()
         entry = _find_pkg_in_list( p, all_entries )
         
-        # Trap missing transitive dependency
+        # Trap missing transitive dependency (and properly handle the weak-cyclic condition)
         if ( entry == None ):
-            print("ERROR: Missing a transitive dependency: {}".format(encode_dep(cdata,use_quotes=False)) )
-            _display_trail(trail)
-            exit(1)
-        
+            if ( not _test_for_weak_cyclic( ("",p,b,v), trail, weak_deps ) ):
+                print("ERROR: Missing a transitive dependency: {}".format(encode_dep(cdata,use_quotes=False)) )
+                _display_trail(trail)
+                exit(1)
+            else:
+                continue
+            
         # Housekeeping
         pa,ba,va      = entry
         fname         = build_top_fname(pa,ba,va)
@@ -469,7 +502,7 @@ def _build_actual( node, children_data, all_entries, path_to_uverse, trail, cach
         
         # process the child
         if ( len(d) > 0 ):
-            _build_actual( cnode, d, all_entries, path_to_uverse, trail, cache )
+            _build_actual( cnode, d, all_entries, path_to_uverse, trail, cache, weak_deps )
         trail.remove(a)
 
 

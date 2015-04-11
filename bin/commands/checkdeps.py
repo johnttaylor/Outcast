@@ -18,6 +18,11 @@ Options:
     --nocheck           Skips most error checking and produces just the '.dot'
                         files.  Note: Some error checking can not be bypassed,
                         e.g. cyclic dependency check.
+    --missing-weak      Will not generate an error if one of more the package's
+                        weak dependencies reference packages that do no exist.
+                        This option should only be used when publishing changes
+                        that span multiple packages that have 'weak cyclic'
+                        dependencies between them.
     -h, --help          Display help for this command
 
 Common Options:

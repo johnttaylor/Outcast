@@ -227,6 +227,8 @@ Error message and password prompt
 
 <li>$:/state/toc/Contents-Branching--242358753</li>
 
+<li>$:/state/toc/Contents-Directories &amp; Files--1025088837</li>
+
 <li>$:/state/toc/Contents-Directories &amp; Files--242358753</li>
 
 <li>$:/state/toc/Contents-Directories--1025088837</li>
@@ -5396,6 +5398,9 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20150227041815214" title="$:/state/toc/Contents-Branching--242358753">
 <pre>close</pre>
 </div>
+<div modified="20150409025816159" title="$:/state/toc/Contents-Directories &amp; Files--1025088837">
+<pre>open</pre>
+</div>
 <div modified="20150305043137449" title="$:/state/toc/Contents-Directories &amp; Files--242358753">
 <pre>close</pre>
 </div>
@@ -5438,11 +5443,11 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20150226041345216" title="$:/state/toc/Overview-Proof-of-Concept--242358753">
 <pre>close</pre>
 </div>
-<div list="Proof-of-Concept [[SDLC and Methodology]] Overview" title="$:/StoryList">
+<div list="$:/AdvancedSearch [[Package Dependencies]] [[Managing Dependencies]] Overview [[Packages Directory]] [[Workspace Directory]] [[Naming Conventions]]" title="$:/StoryList">
 <pre></pre>
 </div>
-<div created="20141011164829984" modified="20150227030615886" title="$:/temp/advancedsearch">
-<pre>transitive</pre>
+<div created="20141011164829984" modified="20150410021713124" title="$:/temp/advancedsearch">
+<pre>weak</pre>
 </div>
 <div plugin-type="info" title="$:/temp/info-plugin" type="application/json">
 <pre>{
@@ -6216,12 +6221,26 @@ The [[Outcast repository|https://github.com/johnttaylor/Outcast]] on Github cont
 
 {{LeftMenu}}</pre>
 </div>
-<div created="20150227030637064" modified="20150227041803691" tags="Glossary Overview" title="Package Dependencies">
+<div created="20150227030637064" modified="20150410023045597" tags="Glossary Overview" title="Package Dependencies">
 <pre>Packages can and do depend on other Packages.  When consuming/using a package - you become dependent not only that specific package - but all of it dependencies.  This creates dependency graphs which can be potentially quite complex and/or deep. Part of the Outcast concept to manage - in a user friendly manner - the dependency trees of Packages.
 
 Outcast has two __types__ of dependencies - //''immediate''// and //''transitive''//. An //immediate// dependency is where package B directly references package C, e.g. source code in package B has `#include` to a header file in package C.  In fact for C/C++ code all `#include` statements define the package's //immediate// dependencies.  A //transitive// dependency is a functonal dependency which holds by the virtue of transitivity.  For example: package B directly references package C, and package C directly references package Z -  therefore due to the transitive nature of dependencies - B is dependent on package C and Z where the dependency on Z is considered a //transitive// dependency.
 
-Outcast also  has two __classification__ of dependencies - //''strong''// and //''weak''//.  The difference between a //strong// and a //weak// dependency is that a Package's //weak// dependencies to do ''not'' transfer to consumer of the Package.  This means that if package A has a strong dependency on package B and a weak dependency on package C; then if package Z uses/depends on package A - package Z is dependent on packages A and B; and ''not'' C. The concept of weak dependencies allows a package to have dependencies that are only required for its unittests and not impose a transitive dependency on to its consumers.  This is helpful to prevent cyclic dependency trees and/or to allow a platform independent package to be unittested against specific platforms.
+Outcast also  has two __classification__ of dependencies - //''strong''// and //''weak''//.  The difference between a //strong// and a //weak// dependency is that a Package's //weak// dependencies to do ''not'' transfer to consumer(s) of the Package.  This means that if package A has a strong dependency on package B and a weak dependency on package C; then if package Z uses/depends on package A - package Z is dependent on packages A and B; and ''not'' C. The concept of weak dependencies allows a package to have dependencies that are only required for its unittests and not impose a transitive dependency on to its consumers.  This is helpful to prevent cyclic dependency trees and/or to allow a platform independent package to be unittested against specific platforms.
+
+''TO BE flushed out in detail''
+
+*weak dependency can conceptually and literally introduce cyclic dependencies.
+** The tools will need to be update to deal with this (currently they handle some of the cases - but not all of cases)
+** This okay - or at least rationalized as okay - because weak are for dependencies are for supporting unittests not for when being consumed by other packages.
+** However the cyclic dependencies cause a problem at publish time, i.e. a chicken-n-egg thing (duh!)
+*** This argues for the tools to support the concept of publishing even with incomplete/undefined dependency - ''but only'' for incomplete/undefined weak dependencies.
+* add the concept of a //Pending// published package state (using the same mechanism that deprecates/deletes packages)
+** add new command that will resolve the //incomplete dependencies// and move published packages out of the //Pending// states.
+** A package published with incomplete/invalid weak dependencies would be an example of a published package in the //pending// state.  
+*** Any package that is published and depends/references a package in the //pending// state --&gt;is put in the //pending// state
+
+
 
 </pre>
 </div>
@@ -6370,7 +6389,7 @@ url:      &lt;owner_url&gt;
 
 &lt;/h2&gt;</pre>
 </div>
-<div created="20150320045023238" modified="20150321141324537" title="SDLC and Methodology">
+<div created="20150320045023238" modified="20150406174650435" title="SDLC and Methodology">
 <pre>While Outcast is pitched as a //development paradigm// - the initial [[proof of concept|Proof-of-Concept]] attempted to be [[SDLC|http://en.wikipedia.org/wiki/Systems_development_life_cycle]] (Software Development Life Cycle) process agnostic as much as possible.  The scope of the proof-of-concept is/was to determine what's the //cost// and/or burden to the developer/organization when publishing/releasing internal reusable software packages - not just final products.  In addition, in my experience it is very difficult and/or undesirable to have a one-process-to-rule-them-all SDLC approach that you apply everywhere and anywhere.   So the bottom line: with respect to SDLC process and/or methodologies - Outcast (at this point in time) is more talk than walk.
 
 Below is the few impacts/requirements the Outcast [[proof of concept|Proof-of-Concept]] imposes on your SDLC.
@@ -6384,13 +6403,38 @@ Below is the few impacts/requirements the Outcast [[proof of concept|Proof-of-Co
 
 While I don't believe in //one SDLC process to rule them all// - I do have strong opinions and/or recommendations for best practices across the entire SDLC.  ''Caveat: YMMV''.  Also, some of these items can only realistically be applied at the start of green-field development, i.e. it would cause more pain than good if applied to existing code base.
 
-# Design reviews
-## Design concept review
-## Design review --&gt;includes public interface header files, namespaces, source code/package dependencies identified, directory locations defined, etc.
-# Automated unittests
-## Idea: have a second developer flush out gaps in unittest, i.e. a form of code review
+# Reviews in general
+## Keep the process as simple as possible (but no simpler)
+## If you can't (not willing to, etc.) enforce the review process at ''all'' times during the SDLC - then your effectively said you have no review process.
+## Try to keep the review focused on content, not syntax
+## Have clear deliverable for your reviews
+## The more automate the review process the better. 
+### Static code analysis/checker tools are your friend
+## Review earlier than later - even if it means reviewing partial work.  Whats the point of a review if you don't have time to make changes?
+# Automation in general
+## Do not deploy new tools/automation ''until'' you have full develop/defined process for using said automation.
+# Design reviews - 2 phases
+## 1st phase Design concept/outline review - done earlier (on unfinished work) in the design step.  
+### Enumerate what requirements are being satisfied
+### Outline/overview of design
+### Initial pass at dependencies
+### Initial draft of unit test plan
+## 2nd phase Design Exit gate review 
+### design document
+#### class diagrams, FSM diagrams, sequence diagrams, etc.  Note: All diagrams should have supporting text
+### final dependency list
+### final unit test plan
+### namespaces (where the new code lives)
+### Directory structure
+### includes public interface header files
+
+# Have Automated unittests.
+## Plan ahead, e.g. most embedded source code can be unittested on PC instead of the actual target if code was designed from the beginning to support this.  Yes I have been there done that - and it can be done.
+# Code Reviews
+## Idea: have a second developer(s) write/help/flush out gaps in unittest, 
+## Should not be a review of the coding style/syntax (not coding style is different from coding standards).  Recommend to a very strict (and immediate) process for failing code reviews for coding style violations.  If you set the bar low - then the developers which meet the bar
 # Track units-of-work via the bug/job tracker
-# Build Machine
+# Have a Build Machine for releases.
 # Have a software architecture for an application (this is not the system sw architecture)
 ## Defined layers (driver, run-time-environment, application)
 ## Pattern for ITC/IPC
@@ -6399,6 +6443,11 @@ While I don't believe in //one SDLC process to rule them all// - I do have stron
 ## Supports checking many files as an atomic operation
 # Archive Tools
 ## Archive OS
+# Design your code for change, i.e. assume that your requirement will change.
+## In reality only ~20% will be changing - the problem is you don't which 20%.  So design all code for change.
+### The Open/Close principle is friend
+
+
 
  
  </pre>
