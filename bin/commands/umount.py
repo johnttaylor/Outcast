@@ -32,6 +32,8 @@ Notes:
       unmount is an external or local package.  The '--clean' options 
       should only be needed for cleaning up if a previous umount command 
       paritally completed.
+    o If a '.' is used for <pkgname> then <pkgname> is derived from the
+      the current working directory where the command was invoked from.  
     
     
 """
@@ -53,6 +55,9 @@ def display_summary():
 #------------------------------------------------------------------------------
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
+
+    # Trap the '.' notation for <pkgname> argument
+    utils.check_use_current_package( args )
 
     # Use the package spec file to remove packages
     if ( args['-f'] ):

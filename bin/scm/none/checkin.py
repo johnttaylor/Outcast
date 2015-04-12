@@ -16,7 +16,8 @@ Options:
 Notes:
     o Returns zero if all of the files where successfully checked; else non-zero 
       is returned.    
-    
+    o If a '.' is used for <pkgname> then <pkgname> is derived from the
+      the current working directory where the command was invoked from.  
     
 """
 import os

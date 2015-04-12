@@ -81,6 +81,15 @@ def _test_for_markers( dir ):
 
     return result    
 
+
+def check_use_current_package( args ):
+    if ( args['<pkgname>'] == '.' ):
+        path   = os.getcwd();
+        wspace = detect_workspace_root( path )
+        pkg    = path[len(wspace):]
+        args['<pkgname>'] = os.path.basename(pkg)
+        
+
 #-----------------------------------------------------------------------------
 def set_uverse( args, skipenv=False ):
     if ( skipenv ):

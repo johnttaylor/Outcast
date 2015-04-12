@@ -6,13 +6,14 @@ usage: orc [common-opts] pushv [options] <pkgarchive>
 
 Arguments:
     <pkgarchive>        Name (and path) of the Package Archive to push
+                        
+
+Options:
     --vault FILE        Overrides the default setting of which Package Vault(s)
                         to push the package archive to.  The default vault info
                         is set by the Native Package Universe.
     -o,--override       Overwrites the Pacakge Archive if it already exists in
                         Package Vault.
-                        
-Options:
     -h, --help          Display help for this command
 
     

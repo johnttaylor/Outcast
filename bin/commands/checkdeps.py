@@ -5,11 +5,13 @@ Checks a pkg.specification file for valid dependencies
 usage: orc [common-opts] checkdeps [options] 
        orc [common-opts] checkdeps [options] <pkgname>
 
-Options:
+Arguments:
     <pkgname>           Package name in the current Workspace to check.  If no 
                         <pkgname> is specified, it is assumed that the CWD is
                         in the top/ directory of a locak package - and that
                         local package is the package run checkdeps on.
+
+Options:
     --dot               Generate two '.dot' that can be rendered by GraphViz.
     --graph FORMAT      Converts the GraphViz '.dot' files to the specified
                         document FORMAT.  Example 'formats': "pdf", "svg"
@@ -18,11 +20,6 @@ Options:
     --nocheck           Skips most error checking and produces just the '.dot'
                         files.  Note: Some error checking can not be bypassed,
                         e.g. cyclic dependency check.
-    --missing-weak      Will not generate an error if one of more the package's
-                        weak dependencies reference packages that do no exist.
-                        This option should only be used when publishing changes
-                        that span multiple packages that have 'weak cyclic'
-                        dependencies between them.
     -h, --help          Display help for this command
 
 Common Options:
@@ -41,6 +38,8 @@ Notes:
       vesion.  The 'actual' graph shows what version where installed when the
       package was pushed.
     o For more details about GraphViz, see http://www.graphviz.org/
+    o If a '.' is used for <pkgname> then <pkgname> is derived from the
+      the current working directory where the command was invoked from.  
     
         
 """
@@ -57,6 +56,9 @@ def display_summary():
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
     
+    # Trap the '.' notation for <pkgname> argument
+    utils.check_use_current_package( args )
+
     # Local to the package's top/ directory
     file = 'pkg.specification'
 

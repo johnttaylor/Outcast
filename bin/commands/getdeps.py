@@ -10,6 +10,8 @@ Arguments:
                         package specification file 'SPECFILE'.  
     <pkgname>           Pulls/Mounts all of the dependencies of/for the local
                         package '<pkgname>'.
+                        
+Options:
     --vault FILE        Overrides the default setting of which Package Vault(s)
                         to pull the package archive from.  The default vault 
                         info is set by the Native Package Universe.
@@ -18,8 +20,6 @@ Arguments:
     -o,--override       Overwrites the Pacakge Archive(s) if they already exist
                         in Packages Directory. Also overrides existing symoblic
                         links when mounting the pulled package(s)
-                        
-Options:
     -h, --help          Display help for this command
 
     
@@ -27,6 +27,8 @@ Notes:
     o A check of (ie. 'orc check') the dependencies is done prior to getting
       the dependent packages.  If the check fails, the get operation will be 
       aborted.
+    o If a '.' is used for <pkgname> then <pkgname> is derived from the
+      the current working directory where the command was invoked from.  
     
     
 """
@@ -44,6 +46,9 @@ def display_summary():
 #------------------------------------------------------------------------------
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
+
+    # Trap the '.' notation for <pkgname> argument
+    utils.check_use_current_package( args )
 
     # PACKAGE Spec file specified
     if ( args['-f'] ):

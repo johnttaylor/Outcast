@@ -15,8 +15,8 @@ Common Options:
     
     
 Notes:
-    
-    
+    o If a '.' is used for <pkgname> then <pkgname> is derived from the
+      the current working directory where the command was invoked from.  
     
 """
 import os
@@ -36,6 +36,9 @@ def display_summary():
 #------------------------------------------------------------------------------
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
+
+    # Trap the '.' notation for <pkgname> argument
+    utils.check_use_current_package( args )
 
     # Generate path to loaded package
     lpkg  = args['<pkgname>']

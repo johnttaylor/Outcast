@@ -36,6 +36,8 @@ Notes:
     o CAUTION: The command only compares the published time stamps.  When
       comparing publish times across branches, a newer published date does 
       NOT imply newer content and/or functionality.  
+    o If a '.' is used for <pkgname> then <pkgname> is derived from the
+      the current working directory where the command was invoked from.  
 
 
 Examples:
@@ -60,6 +62,9 @@ def display_summary():
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
     
+    # Trap the '.' notation for <pkgname> argument
+    utils.check_use_current_package( args )
+
     # PACKAGE Spec file specified
     if ( args['-f'] ):
         pkgspec = args['-f']

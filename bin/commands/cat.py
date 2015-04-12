@@ -33,7 +33,8 @@ Common Options:
 Notes:
     o The default operation if no file-selection option is specified is to
       display the pkg.specification file.
-    
+    o If a '.' is used for <pkgname> then <pkgname> is derived from the
+      the current working directory where the command was invoked from.  
         
 """
 from docopt.docopt import docopt
@@ -48,7 +49,10 @@ def display_summary():
 #------------------------------------------------------------------------------
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
-    
+
+    # Trap the '.' notation for <pkgname> argument
+    utils.check_use_current_package( args )
+
     # Select which file to display
     file = 'pkg.specification'
     if ( args['--jrnl'] ):

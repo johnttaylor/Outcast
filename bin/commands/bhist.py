@@ -16,14 +16,14 @@ Arguments:
                         '<pkgnbv>') in the Native Package Universe.  The format 
                         of 'pkgnbv' is: 'name-branch-version', e.g. 
                         'mypkg-main-1.1.4'
-    --dot               Generate a '.dot' that can be rendered by GraphViz.
-    --graph FORMAT      Converts the GraphViz '.dot' file to the specified
-                        document FORMAT.  Example 'formats': "pdf", "svg"
-                        Note: the '--graph' option does an implicit '--dot'
     <now>
     <old>
 
 Options:
+    --dot               Generate a '.dot' that can be rendered by GraphViz.
+    --graph FORMAT      Converts the GraphViz '.dot' file to the specified
+                        document FORMAT.  Example 'formats': "pdf", "svg"
+                        Note: the '--graph' option does an implicit '--dot'
     -h, --help          Display help for this command
 
 
@@ -32,6 +32,8 @@ Common Options:
 
 
 Notes:
+    o If a '.' is used for <pkgname> then <pkgname> is derived from the
+      the current working directory where the command was invoked from.  
       
 """
 import os, tarfile
@@ -50,6 +52,9 @@ def display_summary():
 #------------------------------------------------------------------------------
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
+
+    # Trap the '.' notation for <pkgname> argument
+    utils.check_use_current_package( args )
 
     # Load the specified file
     if ( args['-f'] ):

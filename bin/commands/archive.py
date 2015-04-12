@@ -12,18 +12,23 @@ Arguments:
     <tarname>           Name of the archive file.
     --ls                Lists the contents of the archive file
     --list              Returns a list of Archive formats supported
+    --long              Display file details when list an archive contents. 
 
 Options:
     -d PATH             Top level directory to begin the archive from.  PATH is
                         relative to the package's root directory.
     --format FMT        Archive format: tgz, zip, etc. [Default: gztar]
     -o, --override      Will overwrite the archive file it already exists
-    --long              Display file details when list an archive contents. 
     -h, --help          Display help for this command
 
 Common Options:
     See 'orc --help'
-    
+ 
+ 
+Notes:
+    o If a '.' is used for <pkgname> then <pkgname> is derived from the
+      the current working directory where the command was invoked from.  
+   
     
 """
 import os
@@ -40,6 +45,9 @@ def display_summary():
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
  
+    # Trap the '.' notation for <pkgname> argument
+    utils.check_use_current_package( args )
+
     # Display list of supported formats
     if ( args['--list'] ):
         l = shutil.get_archive_formats()

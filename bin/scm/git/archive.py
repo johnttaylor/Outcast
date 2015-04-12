@@ -23,6 +23,8 @@ Common Options:
     
 Notes:
     o The archive output file is place in the root of the current Workspace.
+    o If a '.' is used for <pkgname> then <pkgname> is derived from the
+      the current working directory where the command was invoked from.  
     
         
 """
@@ -40,6 +42,9 @@ def display_summary():
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
  
+    # Trap the '.' notation for <pkgname> argument
+    utils.check_use_current_package( args )
+
     # Display list of supported formats
     if ( args['--list'] ):
         print "{:<13}{}".format( "bztar", "bzip2'ed tar-file" )

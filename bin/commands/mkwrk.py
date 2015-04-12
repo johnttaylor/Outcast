@@ -5,8 +5,10 @@ Creates a Workspace directory
 usage: orc [common-opts] mkwrk [options] 
        orc [common-opts] mkwrk [options] DIR
 
-Options:
+Arguments:
     DIR                 Name (and path) of the Workspace directory to create. 
+
+Options:
     --clean             If the 'xpkgs/' and 'xinc/' directories already exist, 
                         they will be deleted.
     --clean-all         If the Workspace directory already exists, it will be

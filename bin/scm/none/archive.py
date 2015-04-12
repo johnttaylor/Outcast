@@ -25,7 +25,8 @@ Notes:
     o The script is responsible for filtering out and/or not including files 
       that are NOT being stored/tracked in the SCM repository, e.g. for git, the
       archive should NO include files specified by the .gitignore files. 
-     
+    o If a '.' is used for <pkgname> then <pkgname> is derived from the
+      the current working directory where the command was invoked from.  
     
     
 """

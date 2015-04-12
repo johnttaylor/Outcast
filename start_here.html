@@ -5443,7 +5443,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20150226041345216" title="$:/state/toc/Overview-Proof-of-Concept--242358753">
 <pre>close</pre>
 </div>
-<div list="$:/AdvancedSearch [[Package Dependencies]] [[Managing Dependencies]] Overview [[Packages Directory]] [[Workspace Directory]] [[Naming Conventions]]" title="$:/StoryList">
+<div list="[[Package Dependencies]] [[Managing Dependencies]] Overview [[Packages Directory]] [[Workspace Directory]] [[Naming Conventions]]" title="$:/StoryList">
 <pre></pre>
 </div>
 <div created="20141011164829984" modified="20150410021713124" title="$:/temp/advancedsearch">
@@ -6221,7 +6221,7 @@ The [[Outcast repository|https://github.com/johnttaylor/Outcast]] on Github cont
 
 {{LeftMenu}}</pre>
 </div>
-<div created="20150227030637064" modified="20150410023045597" tags="Glossary Overview" title="Package Dependencies">
+<div created="20150227030637064" modified="20150412040855400" tags="Glossary Overview" title="Package Dependencies">
 <pre>Packages can and do depend on other Packages.  When consuming/using a package - you become dependent not only that specific package - but all of it dependencies.  This creates dependency graphs which can be potentially quite complex and/or deep. Part of the Outcast concept to manage - in a user friendly manner - the dependency trees of Packages.
 
 Outcast has two __types__ of dependencies - //''immediate''// and //''transitive''//. An //immediate// dependency is where package B directly references package C, e.g. source code in package B has `#include` to a header file in package C.  In fact for C/C++ code all `#include` statements define the package's //immediate// dependencies.  A //transitive// dependency is a functonal dependency which holds by the virtue of transitivity.  For example: package B directly references package C, and package C directly references package Z -  therefore due to the transitive nature of dependencies - B is dependent on package C and Z where the dependency on Z is considered a //transitive// dependency.
@@ -6239,6 +6239,20 @@ Outcast also  has two __classification__ of dependencies - //''strong''// and //
 ** add new command that will resolve the //incomplete dependencies// and move published packages out of the //Pending// states.
 ** A package published with incomplete/invalid weak dependencies would be an example of a published package in the //pending// state.  
 *** Any package that is published and depends/references a package in the //pending// state --&gt;is put in the //pending// state
+* First pass at updating tools
+** Tools updated to not generate an error for all weak-cyclic use cases.
+*** Will generated a warning when pkg A has weak dependency on pkg B and pkg B has a strong dependency on pkg A.
+** Still working on how to publish when a change(s) are made to multiple packages and there is weak cyclic dependency condition between the packages involved.
+*** Work Around: two stage publish and then deprecate the intermediate/incorrect published package(s).  For example:
+***&gt;Given A-1.0.2 w:-&gt; B:1.0.0 and B:1.0.0 s:-&gt;A-1.0.0
+***&gt;Make changes to both A &amp; B
+***&gt;Publish A-1.0.3 ''without'' updating the weak dep on B and ''without'' building or testing (because the changes to B are missing)
+***&gt;Publish B-1.0.1 with strong dep s:-&gt;A-1.0.3
+***&gt;Publish A-1.0.4 with weak dep w:-&gt;B:1.0.1
+***&gt;Deprecate A-1.0.3
+
+
+
 
 
 

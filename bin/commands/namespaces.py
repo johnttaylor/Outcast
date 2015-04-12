@@ -39,6 +39,8 @@ Common Options:
     
     
 Notes:
+    o If a '.' is used for <pkgname> then <pkgname> is derived from the
+      the current working directory where the command was invoked from.  
     o The default Outcast algorithm for automatically detecting namespace is
       based on the assumption that any non-empty directory under the src/
       directory is a namespace with the following exceptions/rules:
@@ -92,6 +94,9 @@ def display_summary():
 #------------------------------------------------------------------------------
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
+
+    # Trap the '.' notation for <pkgname> argument
+    utils.check_use_current_package( args )
 
     # LIST sub-command
     if ( args['--list'] ): 

@@ -13,7 +13,8 @@ Options:
 Notes:
     o Returns non-zero if there is at least one pending/checked out files in 
       the package snapshot; else zero is returned.
-    
+    o If a '.' is used for <pkgname> then <pkgname> is derived from the
+      the current working directory where the command was invoked from.  
     
 """
 import os

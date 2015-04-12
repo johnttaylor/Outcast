@@ -229,7 +229,7 @@ def build_node( parent_node, children_data, path_to_uverse, trail, cache, weak_d
             if ( not no_warn_on_weakcycle ):
                 utils.print_warning( "Weak Cyclic dependency." )
                 utils.print_warning( "   " + _convert_trail_to_string(trail,n) )
-            return
+            continue
             
         # trap cyclic dependencies
         if ( _test_for_cyclic(n,trail) ):
@@ -246,10 +246,11 @@ def build_node( parent_node, children_data, path_to_uverse, trail, cache, weak_d
         # Process the child top file
         i,d,w,t,bhist = info
         if ( len(d) > 0 ):
-            build_node( cnode, d, path_to_uverse, trail, cache, weak_deps, no_warn_on_weakcycle, trans )
+            newresult = build_node( cnode, d, path_to_uverse, trail, cache, weak_deps, no_warn_on_weakcycle, trans )
+            result    = False if not result else newresult
         trail.remove(n)
     
-        
+            
 def _get_node_data_and_substitute( node, trans=None ):
     # default behavior
     if ( trans == None ):
@@ -487,7 +488,7 @@ def _build_actual( node, children_data, all_entries, path_to_uverse, trail, cach
         cpath         = os.path.join( path_to_uverse, fname )
         a             = (fname, pa,ba,va)
         trail.append(a)
-        
+
         # Access the child node's TOP file - including the branching history
         i,d,w,t,bhist = read_top_file( cpath, fname, trail, cache )
      

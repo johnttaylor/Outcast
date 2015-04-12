@@ -30,6 +30,11 @@ Common Options:
     See 'orc --help'
 
 
+Notes:
+    o If a '.' is used for <pkgname> then <pkgname> is derived from the
+      the current working directory where the command was invoked from.  
+
+
 Action-Package Pair:
     The 'action' portion of the Action-Package pair specifies what type of
     dependency is being modified and how that dependency should be modified.
@@ -75,7 +80,6 @@ Action-Package Pair:
         // Adds, updates, and delete multiple dependencies
         orc moddeps mypkg imm:b-main-1.3.0 transitive:b-main-2.0.5 del:nqbp
         
-        
 """
 from docopt.docopt import docopt
 import subprocess, os
@@ -90,6 +94,9 @@ def display_summary():
 #------------------------------------------------------------------------------
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
+    
+    # Trap the '.' notation for <pkgname> argument
+    utils.check_use_current_package( args )
     
     # Get pkg.specification file to operate on
     if ( args['-f'] ):

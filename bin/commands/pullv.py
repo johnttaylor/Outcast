@@ -7,13 +7,13 @@ usage: orc [common-opts] pullv [options] <pkgnbv>
 Arguments:
     <pkgnbv>            Package name, branch, and version to pull from the
                         vault, e.g "my_pkg-main-1.2.3"
+
+Options:
     --vault FILE        Overrides the default setting of which Package Vault(s)
                         to pull the package archive from.  The default vault 
                         info is set by the Native Package Universe.
     -o,--override       Overwrites the Pacakge Archive if it already exists in
                         Packages Directory.
-                        
-Options:
     -h, --help          Display help for this command
 
     
