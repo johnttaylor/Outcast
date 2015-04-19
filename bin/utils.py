@@ -87,7 +87,7 @@ def check_use_current_package( args ):
         path   = os.getcwd();
         wspace = detect_workspace_root( path )
         pkg    = path[len(wspace):]
-        args['<pkgname>'] = os.path.basename(pkg)
+        args['<pkgname>'] = pkg.split(os.sep)[1]
         
 
 #-----------------------------------------------------------------------------
