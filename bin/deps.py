@@ -21,7 +21,7 @@ def validate_dependencies( pkginfo, list_deps, list_weak, list_trans, common_arg
         cache = {}
         
     # calculate all of the possible transitive dependencies
-    trail.append( (file_name, t[0], t[1], t[2]) )
+    trail.append( (file_name, t[0], t[1], t[2]) )   
     build_node( root, all, common_args['--uverse'], trail, cache, list_weak )
 
     # Skip most of the test(s) when --nocheck
@@ -223,12 +223,14 @@ def build_node( parent_node, children_data, path_to_uverse, trail, cache, weak_d
         fname = build_top_fname(p,b,v)
         cpath = os.path.join( path_to_uverse, fname )
 
+        
         # trap weak-cyclic dependencies
         n = (fname, p, b, v)
         if ( _test_for_weak_cyclic(n,trail,weak_deps) ):
             if ( not no_warn_on_weakcycle ):
                 utils.print_warning( "Weak Cyclic dependency." )
                 utils.print_warning( "   " + _convert_trail_to_string(trail,n) )
+            parent_node.remove_child_node( cnode ) 
             continue
             
         # trap cyclic dependencies
@@ -246,8 +248,8 @@ def build_node( parent_node, children_data, path_to_uverse, trail, cache, weak_d
         # Process the child top file
         i,d,w,t,bhist = info
         if ( len(d) > 0 ):
-            newresult = build_node( cnode, d, path_to_uverse, trail, cache, weak_deps, no_warn_on_weakcycle, trans )
-            result    = False if not result else newresult
+            build_node( cnode, d, path_to_uverse, trail, cache, weak_deps, no_warn_on_weakcycle, trans )
+            
         trail.remove(n)
     
             
@@ -480,6 +482,7 @@ def _build_actual( node, children_data, all_entries, path_to_uverse, trail, cach
                 _display_trail(trail)
                 exit(1)
             else:
+                node.remove_child_node( cnode ) 
                 continue
             
         # Housekeeping

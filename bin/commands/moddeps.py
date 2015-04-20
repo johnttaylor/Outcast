@@ -172,14 +172,13 @@ def run( common_args, cmd_argv ):
     all.extend( me_w )
     trail.append( (pkg_spec, t[0], t[1], t[2]) )
     deps.build_node( root, all, common_args['--uverse'], trail, cache, me_w, True, trans )
-
     
     # Attemp to resolve dependency conflicts
     if ( not _reconcile_conflicts( root, common_args['--uverse'], cache ) ):
         print "ERROR: final derived dependency tree"
         print root
         exit( "ERROR: Unable to resolve the new dependency tree" )
-    
+
     # Create new transitive list
     for direct_child in root.get_children():
         for transitive in direct_child.get_children():
