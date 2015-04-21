@@ -57,7 +57,7 @@ def run( common_args, cmd_argv ):
     _check_results( t, "ERROR: Failed Refresh the Native Package Universe." )
 
     # Lock the journal file
-    cmd = 'ceres -v -w {} --user "{}" --passwd "{}" lock {}'.format(common_args['-w'], common_args['--user'], common_args['--passwd'], journal )
+    cmd = 'ceres.py -v -w {} --user "{}" --passwd "{}" lock {}'.format(common_args['-w'], common_args['--user'], common_args['--passwd'], journal )
     t   = utils.run_shell( cmd, common_args['-v'] )
     _check_results( t, "ERROR: Failed to Lock the package's journal file ({}) in the Native/Foreign Universes.".format(journal) )
     

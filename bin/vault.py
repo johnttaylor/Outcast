@@ -163,8 +163,10 @@ def _ftp_connect_and_cd( host, dir, cfg ):
     try:
         utils.print_verbose( "Logging in..." )
         if ( cfg.get('primary', 'type' ) == 'ftp-anon' ):
+            utils.print_verbose( "ftp-anon..." );
             ftp.login()
         else:
+            utils.print_verbose( "ftp-user.  user={}, passwd={} ...".format(cfg.get('primary', 'user'),cfg.get('primary', 'password')) );
             ftp.login(cfg.get('primary', 'user'),cfg.get('primary', 'password'))
             
     except Exception as ex:
