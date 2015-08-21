@@ -8,6 +8,7 @@ Arguments:
     <pkgname>           Package name in the current Workspace to operate on.
                         
 Options:
+    --host HOST         Host [Default: windows]
     -h, --help          Display help for this command
 
 Common Options:
@@ -38,7 +39,7 @@ def run( common_args, cmd_argv ):
     # Executes the packages build script  
     pkgroot = os.path.join( common_args['-w'], args['<pkgname>'] )
     script  = os.path.join( pkgroot, 'top', 'tools', 'test.py' )
-    cmd = "{} {}".format(script, pkgroot )
+    cmd = "{} {} {}".format(script, pkgroot, args['--host'] )
     t   = utils.run_shell( cmd, common_args['-v'] )
     _check_results( t, "ERROR: Failed Cleaning." )
     

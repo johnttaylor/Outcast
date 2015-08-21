@@ -31,7 +31,10 @@ Options:
     --dir DIR            When specified it restricts the directory search 
                          results during the '--match' operation to directory
                          trees that contain the pattern 'DIR' in the names.  
-                         [Default: *]                       
+                         [Default: *]   
+    --d2 DIR             A second directory condition that will be AND'd with 
+                         with the --dir option when restricting the directory
+                         search.                    
     --loop N             Repeat the test 'N' times.  [default: 1] 
     -v                   Be verbose 
     -h, --help           Displays this information
@@ -117,6 +120,8 @@ if ( args['--match'] ):
     for d in all:
         names    = d.split(os.sep)
         filtered = fnmatch.filter(names, args['--dir'] )
+        if ( args['--d2'] ):
+            filtered = fnmatch.filter(filtered, args['--d2'] )
         if ( len(filtered) > 0 ):
             tests.append(d)
 
