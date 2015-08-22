@@ -120,9 +120,10 @@ if ( args['--match'] ):
     for d in all:
         names    = d.split(os.sep)
         filtered = fnmatch.filter(names, args['--dir'] )
-        if ( args['--d2'] ):
-            filtered = fnmatch.filter(filtered, args['--d2'] )
-        if ( len(filtered) > 0 ):
+        d2       = True
+        if ( args['--d2'] and len(fnmatch.filter(names, args['--d2'] )) == 0 ):
+            d2 = False
+        if ( len(filtered) > 0 and d2 ):
             tests.append(d)
 
     # Build arg string
