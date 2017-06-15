@@ -305,6 +305,8 @@ Error message and password prompt
 
 <li>Creating a new Package</li>
 
+<li>Creating a Visual Studio Solution for a Package</li>
+
 <li>Directories &amp; Files</li>
 
 <li>Environment Variables</li>
@@ -326,6 +328,8 @@ Error message and password prompt
 <li>Naming Conventions</li>
 
 <li>OO Articles</li>
+
+<li>Other</li>
 
 <li>Overview</li>
 
@@ -5401,8 +5405,8 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20150409025816159" title="$:/state/toc/Contents-Directories &amp; Files--1025088837">
 <pre>open</pre>
 </div>
-<div modified="20150809034752207" title="$:/state/toc/Contents-Directories &amp; Files--242358753">
-<pre>open</pre>
+<div modified="20170615030207156" title="$:/state/toc/Contents-Directories &amp; Files--242358753">
+<pre>close</pre>
 </div>
 <div modified="20150221155113947" title="$:/state/toc/Contents-Directories--1025088837">
 <pre>close</pre>
@@ -5416,8 +5420,8 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20141108053032256" title="$:/state/toc/Contents-Files--242358753">
 <pre>close</pre>
 </div>
-<div modified="20150809034808501" title="$:/state/toc/Contents-Glossary--242358753">
-<pre>open</pre>
+<div modified="20170615030210130" title="$:/state/toc/Contents-Glossary--242358753">
+<pre>close</pre>
 </div>
 <div modified="20141016041226295" title="$:/state/toc/Contents-Intro--242358753">
 <pre>close</pre>
@@ -5425,11 +5429,11 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20141011172627069" title="$:/state/toc/Contents-Intro--966365951">
 <pre>open</pre>
 </div>
-<div modified="20150809034811642" title="$:/state/toc/Contents-Overview--242358753">
-<pre>open</pre>
+<div modified="20170615030545532" title="$:/state/toc/Contents-Overview--242358753">
+<pre>close</pre>
 </div>
-<div modified="20150809040854681" title="$:/state/toc/Contents-Proof-of-Concept--242358753">
-<pre>open</pre>
+<div modified="20170615030212404" title="$:/state/toc/Contents-Proof-of-Concept--242358753">
+<pre>close</pre>
 </div>
 <div modified="20150221155116868" title="$:/state/toc/Contents-References--1025088837">
 <pre>close</pre>
@@ -5437,13 +5441,13 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20150809034828663" title="$:/state/toc/Contents-References--242358753">
 <pre>open</pre>
 </div>
-<div modified="20150809034830032" title="$:/state/toc/Contents-Tools--242358753">
+<div modified="20170615030222724" title="$:/state/toc/Contents-Tools--242358753">
 <pre>open</pre>
 </div>
 <div modified="20150809034836876" title="$:/state/toc/Overview-Proof-of-Concept--242358753">
 <pre>open</pre>
 </div>
-<div list="Overview" title="$:/StoryList">
+<div list="$:/core/ui/MoreSideBar/All [[Creating a Visual Studio Solution for a Package]] Other Overview" title="$:/StoryList">
 <pre></pre>
 </div>
 <div created="20141011164829984" modified="20150410021713124" title="$:/temp/advancedsearch">
@@ -5463,7 +5467,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
     }
 }</pre>
 </div>
-<div created="20141011164514051" modified="20150227031819673" title="$:/temp/NewTagName">
+<div created="20141011164514051" modified="20170615034652808" title="$:/temp/NewTagName">
 <pre></pre>
 </div>
 <div created="20141011171545808" modified="20141011171550853" title="$:/temp/search">
@@ -5789,6 +5793,49 @@ MERGE yellow/1.0.20 (patch)  main/2.11.5 (major) TO main/2.11.6
 # All done!  All source code should be added under the `src/` directory.  All unittest projects should be added under the `tests/` directory.  Any application projects should be added under the `projects/` directory.  ''Note:'' The term __project__ here is the directory where a developer builds an application and/or unittests - typically there is very little source code contained in the project directories.
 
 </pre>
+</div>
+<div created="20170615030502280" modified="20170615034909278" tags="Other" title="Creating a Visual Studio Solution for a Package">
+<pre>!! How to integrate Visual Studio to work with Outcast Packages
+Visual Studio is a very handy-dandy code editor.  For years I resisted the Borg, but once I started writing C#/.NET code it is now my editor of choice.  This does not mean I think its a perfect editor (that accolade belong to the now end-of-life'd [[CodeWright|https://en.wikipedia.org/wiki/CodeWright]]).  How with some strong arming and some acceptance to the VS way, Visual Studio can be used effectively with Outcast packages.
+
+My goal was to create a single solution which could navigate (and have Intellisense work) across all of the packages in single workspace.   The integeration is not perfect it is missing the following:
+
+* Locating/define the project specific header files, e.g. colony_config.h, colony_map.h
+* Invoking nqbp from within VS.
+
+!! How to create a VS Solution for a workspace with a VS Project per package.
+The following direction will create VS project(s) that 'auto' add all of the source code files to each project.  The 'auto' add feature only works when the project is loaded, this means if you add file - you will to unload then reload the project (right click on the project name in the solution explorer) where the new file(s) were added (or close and reopen the solution).
+
+# Create an empty solution in the parent directory of the workspace
+## Use 'File-&gt;New-&gt;Project From Existing Code' and create a project/solution with the same name as the workspace
+## Don't add any files
+## Select 'external build'
+# Create a project for each package
+## Use 'File-&gt;New-&gt;Project From Existing Code' and create a project/solution with the same name as the package
+##* Note: This creates a new solution and project
+## Don't add any files
+## Select 'external build'
+## Select the project properities (right click onthe project name)
+## Change the Configuration_Properties-&gt;NMake-&gt;IntelliSense-&gt;Include Search Path to include:
+### References to the pkg/src directory for each external package dependency
+### Reference to the THIS pkg's src/ directory
+###* NOTE: Use the 'xpkgs/' path for ALL include references!  You will have to manual type the 'xpkgs/' directory since the dialog box resolve the link to the actual target
+## Save and close the project/solution
+## Manually edit the pkg.vcxproj file and add the following XML snippet
+##&gt;`&lt;ItemGroup&gt;`
+##&gt;`  &lt;ClCompile Include=&quot;zoe\xpkgs\&lt;mypkgname&gt;\src\**\*.c&quot; /&gt;`
+##&gt;`  &lt;ClCompile Include=&quot;zoe\xpkgs\&lt;mypkgname&gt;\src\**\*.cpp&quot; /&gt;`
+##&gt;`  &lt;ClCompile Include=&quot;zoe\xpkgs\&lt;mypkgname&gt;\src\**\*.S&quot; /&gt;`
+##&gt;`  &lt;ClCompile Include=&quot;zoe\xpkgs\&lt;mypkgname&gt;\src\**\*.asm&quot; /&gt;`
+##&gt;` &lt;ClInclude Include=&quot;zoe\xpkgs\&lt;mypkgname&gt;\src\**\*.h&quot; /&gt;`
+##&gt;`&lt;/ItemGroup&gt;`
+# Open the workspace solution created in step 1 
+## Add the PROJECT created in step 2
+## Delete the orignal dummy/placeholder project that was created in step 1a
+## Save the solutin
+## Repeat steps 2-3 for each package
+
+!!</pre>
 </div>
 <div created="20150221160040098" modified="20150221160130905" tags="Contents" title="Directories &amp; Files">
 <pre>!!Directory Topics
@@ -6201,6 +6248,15 @@ Packages can be branched and/or forked.  All packages are assumed to on the //ma
 |[[Acyclic Dependencies Principle|file:./articles/granularity.pdf]] |//THE DEPENDENCY STRUCTURE BETWEEN PACKAGES MUST BE A DIRECTED ACYCLIC GRAPH (DAG). THAT IS, THERE MUST BE NO CYCLES IN THE DEPENDENCY STRUCTURE.// |
 |[[Stable Dependencies Principle|file:./articles/stability.pdf]] |//THE DEPENDENCIES BETWEEN PACKAGES IN A DESIGN SHOULD BE IN THE DIRECTION OF THE STABILITY OF THE PACKAGES. A PACKAGE SHOULD ONLY DEPEND UPON PACKAGES THAT ARE MORE STABLE THAT IT IS.// |
 |[[Principles and Patterns|file:./articles/p_and_p.pdf]] |Summary of OO Principles and Patterns |</pre>
+</div>
+<div created="20170615030250034" modified="20170615034640160" tags="Contents" title="Other">
+<pre>&lt;h3&gt;
+&lt;ul&gt;
+&lt;$list filter=&quot;[tag[Other]sort[title]]&quot;&gt;&lt;li&gt;&lt;$link&gt;&lt;$view field=&quot;title&quot;/&gt;&lt;/$link&gt;&lt;/li&gt;
+&lt;/$list&gt;
+&lt;/ul&gt;
+&lt;/h3&gt;
+</pre>
 </div>
 <div created="20140726152202471" creator="JohnTaylor" modified="20150226023527895" modifier="JohnTaylor" tags="Contents" title="Overview">
 <pre>Outcast is a project that was started as part of [[Project Eden|http://www.integerfox.com/#Eden]].  Outcast is for the lack of better term - a software development paradigm- that encompasses SCM and build processes, requirements trace-ability, design methodologies, unit testing, programming languages, and documentation. All this was a result of trying to solve the problem of how to manage, in a team environment, a scalable reusable code base.
