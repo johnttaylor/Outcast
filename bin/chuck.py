@@ -39,7 +39,14 @@ Options:
     -v                   Be verbose 
     -h, --help           Displays this information
 
-Notes:
+Examples:
+    ; Runs all 'a.exe' executables found under the current working directory
+    ; 5 times in row
+    chuck --match a.exe --loop 5
+
+    ; Runs all a.exe built with the vc12 compiler
+    chuck --match a.exe --dir vc12
+
       
 """
 
@@ -60,85 +67,87 @@ from my_globals import CHUCK_VERSION
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
-# Parse command line
-args = docopt(__doc__, version=CHUCK_VERSION(), options_first=True )
+# BEGIN
+if __name__ == '__main__':
 
-
-# Set quite & verbose modes
-#utils.set_quite_mode( args['-q'] )
-utils.set_verbose_mode( args['-v'] )
-
-# Default the projects/ dir path to the current working directory
-ppath = os.getcwd()
-if ( args['--path'] ):
-    ppath = args['--path']
-
-# Set the current directory
-utils.push_dir( ppath )
-
-
-# Trap --file options
-if ( args['--file'] ):
-    # Get project list from a file
-    try:
-        inf = open( args['--file'], 'r' )
-
-        # process all entries in the file        
-        for line in inf:
+    # Parse command line
+    args = docopt(__doc__, version=CHUCK_VERSION, options_first=True )
+    
+    # Set quite & verbose modes
+    #utils.set_quite_mode( args['-q'] )
+    utils.set_verbose_mode( args['-v'] )
+    
+    # Default the projects/ dir path to the current working directory
+    ppath = os.getcwd()
+    if ( args['--path'] ):
+        ppath = args['--path']
+    
+    # Set the current directory
+    utils.push_dir( ppath )
+    
+    
+    # Trap --file options
+    if ( args['--file'] ):
+        # Get project list from a file
+        try:
+            inf = open( args['--file'], 'r' )
+    
+            # process all entries in the file        
+            for line in inf:
+               
+                # drop comments and blank lines
+                line = line.strip()
+                if ( line.startswith('#') ):
+                    continue
+                if ( line == '' ):
+                    continue
            
-            # drop comments and blank lines
-            line = line.strip()
-            if ( line.startswith('#') ):
-                continue
-            if ( line == '' ):
-                continue
-       
-            # 'normalize' the file entries
-            line = utils.standardize_dir_sep( line.strip() )
-    
-            # Process 'add' entries
-            cmd = "chuck.py " + line
-            utils.run_shell( cmd, args['-v'], "ERROR: Test Command from File failed." )
-
-        inf.close()
-        exit(0)
+                # 'normalize' the file entries
+                line = utils.standardize_dir_sep( line.strip() )
         
-    except Exception as ex:
-        exit( "ERROR: Unable to open Test Command list: {}".format(args['--file']) )
-
-
-
-
-# Get superset of projects to build
-if ( args['--match'] ):
-    all = utils.walk_file_list( args['--match'], ppath )
-    if ( args['--m2'] ):
-        all.extend( utils.walk_file_list( args['--m2'], ppath ) )
-         
-    # Apply directory filter
-    tests = []
-    for d in all:
-        names    = d.split(os.sep)
-        filtered = fnmatch.filter(names, args['--dir'] )
-        d2       = True
-        if ( args['--d2'] and len(fnmatch.filter(names, args['--d2'] )) == 0 ):
-            d2 = False
-        if ( len(filtered) > 0 and d2 ):
-            tests.append(d)
-
-    # Build arg string
-    arg_string = ' '.join( args['<testargs>'] )
+                # Process 'add' entries
+                cmd = "chuck.py " + line
+                utils.run_shell( cmd, args['-v'], "ERROR: Test Command from File failed." )
     
-    # Run the tests
-    for t in tests:
-        utils.push_dir( os.path.split(t)[0] )
-        reldir = t.replace(ppath,'')[1:]
-        exe    = os.path.basename(t)
-        cmd    = "{} {}".format( exe, arg_string )
-        for n in range( int(args['--loop']) ):
-            print "= EXECUTING (#{}): {} {}".format( n+1, reldir, arg_string )
-            result = utils.run_shell( cmd, args['-v'], "** ERROR: Test failed **" )
-        utils.pop_dir
+            inf.close()
+            exit(0)
+            
+        except Exception as ex:
+            exit( "ERROR: Unable to open Test Command list: {}".format(args['--file']) )
+    
+    
+    
+    
+    # Get superset of projects to build
+    if ( args['--match'] ):
+        all = utils.walk_file_list( args['--match'], ppath )
+        if ( args['--m2'] ):
+            all.extend( utils.walk_file_list( args['--m2'], ppath ) )
+             
+        # Apply directory filter
+        tests = []
+        for d in all:
+            names    = d.split(os.sep)
+            filtered = fnmatch.filter(names, args['--dir'] )
+            d2       = True
+            if ( args['--d2'] and len(fnmatch.filter(names, args['--d2'] )) == 0 ):
+                d2 = False
+            if ( len(filtered) > 0 and d2 ):
+                tests.append(d)
+    
+        # Build arg string
+        arg_string = ' '.join( args['<testargs>'] )
         
-    print "= ALL Test(s) passed."
+        # Run the tests
+        for t in tests:
+            utils.push_dir( os.path.split(t)[0] )
+            reldir = t.replace(ppath,'')[1:]
+            exe    = os.path.basename(t)
+            cmd    = "{} {}".format( exe, arg_string )
+            for n in range( int(args['--loop']) ):
+                print "= EXECUTING (#{}): {} {}".format( n+1, reldir, arg_string )
+                result = utils.run_shell( cmd, args['-v'], "** ERROR: Test failed **" )
+            utils.pop_dir
+            
+        print "= ALL Test(s) passed."
  
