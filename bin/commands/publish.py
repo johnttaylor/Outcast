@@ -322,10 +322,10 @@ def run( common_args, cmd_argv ):
     
 #------------------------------------------------------------------------------
 def _clean_up(all=True, args=None):
-    keeptars = True
+    keeptars = False
     if ( args != None ):
         if ( args['--keeptars'] ):
-            keeptars = False
+            keeptars = True
 
     global pkgtar
     if ( os.path.isfile(pkgtar) and keeptars == False ):
