@@ -60,6 +60,10 @@ Options:
     --nonewer           Does not enforce the requirement that the publish 
                         version be newer than the last publish of the package
                         on the branch.
+    --keeptars          When this option is set AND the --dry-run option is 
+                        set, then the generated tar files are NOT deleted when
+                        the script ends.  The typical use of this option is for
+                        use with build machines.
     -h, --help          Display help for this command
 
 Common Options:
@@ -289,7 +293,7 @@ def run( common_args, cmd_argv ):
         print "Completed DRY-RUN of publish of: ", pkgname
         cmd = 'evie.py -v -w {} revert {} {} {}'.format( root, args['<pkgname>'], pkg_spec, chg_log )
         utils.run_shell( cmd, common_args['-v'] )
-        _clean_up(all=True)
+        _clean_up(True, args)
         
     else:
         # push archive to the vault
@@ -317,13 +321,18 @@ def run( common_args, cmd_argv ):
     
     
 #------------------------------------------------------------------------------
-def _clean_up(all=True):
+def _clean_up(all=True, args=None):
+    keeptars = True
+    if ( args != None ):
+        if ( args['--keeptars'] ):
+            keeptars = False
+
     global pkgtar
-    if ( os.path.isfile(pkgtar) ):
+    if ( os.path.isfile(pkgtar) and keeptars == False ):
         os.remove( pkgtar )
             
     global toptar
-    if ( os.path.isfile(toptar) ):
+    if ( os.path.isfile(toptar) and keeptars == False ):
         os.remove( toptar )
 
     if ( all ):
