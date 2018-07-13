@@ -2,12 +2,12 @@
 :: Windows batch file wrapper to execute an orc.py command and then
 :: to conditionally execute the output of speficied orc command.
 ::
-:: If the last output line of the orc.py script starts with: '.run:' - then 
+:: If the last output line of the orc.py script starts with: '.run: ' - then 
 :: this batch file will attempt to execute the last output line - after the 
-:: '.run:' has been stripped off
+:: '.run: ' has been stripped off
 
 set _cmd=orc.py %*
-set _tempfile=__orcw_temp.bat
+set _tempfile=%TEMP%\__orcw_temp_%RANDOM%.bat
 
 call :runorc
 IF ERRORLEVEL 1 goto :cleanup
@@ -29,13 +29,13 @@ set _LF=^
 :: The two empty lines above are required!
 set _W=
 FOR /F "usebackq delims==" %%I IN (`%_cmd%`) DO set _W=!_W!%%I!_LF!
-set _C=!_W:~0,5!
-IF "%_C%" == ".run:" goto :execute 
+set _C=!_W:~0,6!
+IF "%_C%" == ".run: " goto :execute 
 echo:!_W! 
 ENDLOCAL
 exit /b 1
 
 :execute
-echo:!_W:~5! > %_tempfile%
+echo:!_W:~6! > %_tempfile%
 ENDLOCAL
 exit /b 0
