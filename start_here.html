@@ -223,6 +223,10 @@ Error message and password prompt
 
 <li>$:/state/tab-1749438307</li>
 
+<li>$:/state/toc/Contents-Directories &amp; Files--242358753</li>
+
+<li>$:/state/toc/Contents-Glossary--1025088837</li>
+
 <li>$:/StoryList</li>
 
 <li>$:/temp/info-plugin</li>
@@ -263,13 +267,13 @@ Error message and password prompt
 
 <li>Coding Standards</li>
 
+<li>Compiler Scripts</li>
+
 <li>Creating a new Package</li>
 
 <li>Creating a Visual Studio Solution for a Package</li>
 
 <li>Directories &amp; Files</li>
-
-<li>Draft of 'LeftMenu'</li>
 
 <li>Environment Variables</li>
 
@@ -9427,7 +9431,13 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div created="20180707151857053" modified="20180707152024556" title="$:/state/tab-1749438307">
 <pre>$:/core/ui/ControlPanel/Info</pre>
 </div>
-<div list="$:/core/ui/MoreSideBar/All TopButtons Overview" title="$:/StoryList">
+<div created="20180714153847444" modified="20180714153847444" title="$:/state/toc/Contents-Directories &amp; Files--242358753">
+<pre>open</pre>
+</div>
+<div created="20180713005402899" modified="20180713005402899" title="$:/state/toc/Contents-Glossary--1025088837">
+<pre>open</pre>
+</div>
+<div list="Overview" title="$:/StoryList">
 <pre></pre>
 </div>
 <div plugin-type="info" title="$:/temp/info-plugin" type="application/json">
@@ -9810,6 +9820,60 @@ MERGE yellow/1.0.20 (patch)  main/2.11.5 (major) TO main/2.11.6
 |[[John's Coding Standard|http://integerfox.com/outcast/documentation/codingstandard.htm]]| C++ |Targeted for embedded development |Very basic and brief.  The recommended default for embedded C++ packages in Outcast |
 </pre>
 </div>
+<div created="20180714154300241" modified="20180715164725118" tags="[[Directories &amp; Files]] Directories" title="Compiler Scripts">
+<pre>When building the source code there is always the issue on where the compiler(s) are installed and how to have //common// compiler environment across all developers machines as well as the organization's Continuous Integration (CI) and/or Build servers.  
+
+
+Outcast addresses this issue by having a collection of scripts (one per compiler toolchain) in the package's `top/compilers/` directory.  The only requirements for these scripts is that properly configure/set-the-environment for a specific compiler and that the configuration/setup //works// for all development/build use cases, i.e. for developers and for the CI/build server.
+
+The //compiler scripts// are defined and maintained by the packages' owners.  A package owner in this context is defined as:
+
+* Packages that your organization develops or is the principle maintainer.
+* Packages that your organization’s CI/Build server(s) will be building.
+
+
+For the proof-of-concept this requirements is met the following:
+
+# A single well defined per-machine location is identified.  And said location must be //valid// for all build machines (i.e. developers, CI build machine, etc.)
+## On Windows host machines, this is `c:\compilers`
+
+# In this location there is:
+## A collection of symbolic links are defined that point to actual installed compilers.  See example below
+## A collection of batch files that setup the environment for each compiler.
+
+# The scripts in the packages' `\top\compilers` directory simply invoke the script(s) in the `c:\compilers` directory
+
+Example `c:\compilers` directory:
+
+&lt;&lt;&lt;
+```
+ c:\compilers&gt;dir
+ Volume in drive C has no label.
+ Volume Serial Number is 3AAA-F210
+
+ Directory of c:\compilers
+
+07/15/2018  10:44 AM    &lt;DIR&gt;          .
+07/15/2018  10:44 AM    &lt;DIR&gt;          ..
+07/14/2018  10:11 AM    &lt;SYMLINKD&gt;     kpit-rx-elf-v15.01 [C:\PROGRA~2\KPIT\GNURXV~1.01-]
+07/15/2018  10:42 AM               393 kpit-rx-elf-v15.01.bat
+07/14/2018  10:12 AM    &lt;SYMLINKD&gt;     mingw64-v5.1.0 [c:\TDM-GCC-64]
+07/15/2018  10:44 AM               110 mingw64-v5.1.0.bat
+07/14/2018  10:33 AM    &lt;SYMLINKD&gt;     mingw64-v8.1.0 [c:\mingw-w64\mingw64]
+07/15/2018  10:44 AM               110 mingw64-v8.1.0.bat
+07/15/2018  10:42 AM             6,120 vcvars32-vc14.bat
+               4 File(s)          6,733 bytes
+               5 Dir(s)  142,584,111,104 bytes free
+
+c:\compilers&gt;cat mingw64-v5.1.0.bat
+@echo off
+set PATH=C:\compilers\mingw64-v5.1.0\bin;%PATH%
+echo:MinGW-x64 Compiler Environment set (v5.1.0)
+
+c:\compilers&gt;
+```
+&lt;&lt;&lt;</pre>
+</div>
 <div created="20150227022248723" modified="20150227030354876" tags="Proof-of-Concept workflow" title="Creating a new Package">
 <pre>!!The following workflow assumes the following:
 
@@ -9904,15 +9968,6 @@ The following direction will create VS project(s) that 'auto' add all of the sou
 &lt;/$list&gt;
 &lt;/ul&gt;
 &lt;/h2&gt;</pre>
-</div>
-<div created="20141012031702770" draft.of="LeftMenu" draft.title="LeftMenu" modified="20180707152132280" title="Draft of 'LeftMenu'">
-<pre>---
-__''//Table-of-Contents//''__
-&lt;$scrollable class='tc-scrollable-leftmenu'&gt;
-&lt;div class=&quot;tc-table-of-contents&quot;&gt;
-&lt;&lt;toc-selective-expandable 'Contents'&gt;&gt;
-&lt;/div&gt;
-&lt;/$scrollable&gt;</pre>
 </div>
 <div created="20140803162036980" creator="JohnTaylor" modified="20150224215931822" modifier="JohnTaylor" tags="miscellaneous Tools toolbar standards" title="Environment Variables">
 <pre>!!Below is list of operating system environment variables that are used by Outcast
@@ -10425,12 +10480,13 @@ url:      &lt;owner_url&gt;
 ...
 ```</pre>
 </div>
-<div created="20140830150542417" creator="JohnTaylor" modified="20150221160703713" modifier="JohnTaylor" tags="Glossary" title="Package Universe">
+<div created="20140830150542417" creator="JohnTaylor" modified="20180713005728909" modifier="JohnTaylor" tags="Glossary" title="Package Universe">
 <pre>A Package universe is repository of  [[package top|Types Of Files]] files.  Within the Outcast paradigm, any package that is intended to be reused/shared, must be published to a package universe.
 
 !!There are two categories of Package Universes:
 * ''Native Universe''.  
-** Functions a filesystem accessible cache for searching published packages.*** Site/group/machine specific staging area for publishing packages
+** Functions as a filesystem accessible cache for searching published packages.
+*** Site/group/machine specific staging area for publishing packages
 * ''Foreign Universe''. 
 ** Can be located anywhere.  Foreign universes can be private to an organization, business unit, etc. or they can be public, e.g. public accessible via the internet.
 !!Contents of Package Universe
@@ -10664,7 +10720,7 @@ These tools use a small number of environment variables.  A description of the t
 
 </pre>
 </div>
-<div created="20140824162849115" creator="JohnTaylor" modified="20150221160321393" modifier="JohnTaylor" tags="Directories [[Directories &amp; Files]]" title="Top Directory">
+<div created="20140824162849115" creator="JohnTaylor" modified="20180714154247185" modifier="JohnTaylor" tags="Directories [[Directories &amp; Files]]" title="Top Directory">
 <pre>The &lt;code&gt;top/&lt;/code&gt; directory contains all of the information that Outcast needs (on a per package basis) to manage packages.  Within the Outcast tools, the contents &lt;code&gt;top/&lt;/code&gt; directory is accessible/browse-able without having to retrieve the entire package contents.  Because of this partitioning, it is recommend that a certain amount of documentation, help, faq, etc. information is included as well.
 
 !!Required files
@@ -10676,7 +10732,8 @@ These tools use a small number of environment variables.  A description of the t
 |^[[branch.log|Branch Log]] |Optional. Log of branches. Append only.  Not sorted, i.e records out-of-time-sequence. |
 |^tools/build |A Python script that //builds// the content of the package.  This script is called as part of the //publish// process to verify that package content //compiles//.  If build fails, the publish process is aborted. |
 |^tools/clean |A Python script that removes all derived objects from the package.  This script is called as part of the //publish// process to ensure that no derived objects get included in the published package content. |
-|^tools/test |A Python script that executes zero or more tests against the package contents.  This script is called as part of the //publish// process to verify the validity of the package contents. If any of the test(s) fail, the publish process is aborted. |</pre>
+|^tools/test |A Python script that executes zero or more tests against the package contents.  This script is called as part of the //publish// process to verify the validity of the package contents. If any of the test(s) fail, the publish process is aborted. |
+|^compilers/|Contains a set of script files used to configure and/or set the environment for the various compiler toolchains used by the package //owner// for building the package's projects and unittest applications. |</pre>
 </div>
 <div created="20141019034755923" modified="20180707181825746" tags="$:/tags/TopLeftBar" title="TopButtons">
 <pre>&lt;div class=&quot;tc-page-controls tc-toolbar&quot;&gt;

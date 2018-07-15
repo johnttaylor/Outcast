@@ -64,6 +64,13 @@ Options:
                         set, then the generated tar files are NOT deleted when
                         the script ends.  The typical use of this option is for
                         use with build machines.
+    --ci script         This is used when performing Continious Integration 
+                        builds to provide additional actions just after the
+                        get dependencies step and just prior to executings the
+                        packagees 'clean' script.  In addition, this option 
+                        enables the '--dry-run' switch.
+
+                  
     -h, --help          Display help for this command
 
 Common Options:
@@ -107,6 +114,10 @@ def run( common_args, cmd_argv ):
     
     # Trap the '.' notation for <pkgname> argument
     utils.check_use_current_package( args )
+
+    # Force the dry-run option when the --ci option is set
+    if ( args['--ci'] != None ):
+        args['--dry-run'] = True
 
     # Capture publish time
     now, local = utils.mark_time(common_args['--now'])
@@ -200,7 +211,14 @@ def run( common_args, cmd_argv ):
         cmd = 'orc.py -v -w {} --user "{}" --passwd "{}" --norefresh --now {} getdeps {} --override'.format(root, common_args['--user'], common_args['--passwd'], now, args['<pkgname>'] ) 
         t   = utils.run_shell( cmd, common_args['-v'] )
         _check_results( t, "ERROR: Failed getting (and mounting) dependencies." )
-    
+
+    # Run CI script (when provided)
+    if ( args['--ci'] != None ):
+        print "= Continiouse Integration (CI) script ..." 
+        cmd = args['--ci']
+        t   = utils.run_shell( cmd, common_args['-v'] )
+        _check_results( t, "ERROR: Failed CI script." )
+            
     # Clean everthing before building
     if ( not args['--noclean'] ):
         print "= Pre-cleaning..." 
