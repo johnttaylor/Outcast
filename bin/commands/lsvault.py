@@ -34,7 +34,7 @@ from my_globals import OUTCAST_LOCAL_PKG_SUFFIX
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'lsvault', 'Lists packages in the specified Package Vault.' ) 
+    print("{:<13}{}".format( 'lsvault', 'Lists packages in the specified Package Vault.' )) 
     
 
 #------------------------------------------------------------------------------

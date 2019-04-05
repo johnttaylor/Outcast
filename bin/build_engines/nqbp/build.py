@@ -38,6 +38,8 @@ Examples:
     
 """
 
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 import subprocess
@@ -124,7 +126,6 @@ def _filter_prj_list( all_prj, pattern, pkgroot ):
         dirs    = relpath.split(os.sep)
         if ( len(fnmatch.filter(dirs,pattern))> 0 ):
             list.append( p )
-            
 
     return list
     
@@ -138,7 +139,7 @@ def _build_project( prjdir, verbose, bldopts, config, xconfig, pkgroot ):
     
     # Build the project
     utils.push_dir( os.path.dirname(prjdir) )
-    print "BUILDING: "+ prjdir
+    print("BUILDING: "+ prjdir)
     cmd = 'nqbp.py ' + " ".join(bldopts)
     if ( config ):
         cmd = utils.concatenate_commands( cfg, cmd )
@@ -159,7 +160,7 @@ def _find_pkgroot( from_fname ):
             pass
             
         else:
-            print( "ERROR: Cannot find the 'Package Root' from: " + from_fname )
+            print(( "ERROR: Cannot find the 'Package Root' from: " + from_fname ))
             exit(1)
                 
     return root

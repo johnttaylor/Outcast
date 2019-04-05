@@ -29,7 +29,7 @@ from docopt.docopt import docopt
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'distribute', 'Distributes the Package Top file to Package Universes.' )
+    print("{:<13}{}".format( 'distribute', 'Distributes the Package Top file to Package Universes.' ))
     
 
 #------------------------------------------------------------------------------
@@ -102,6 +102,6 @@ def _clean_up(revert=False):
 def _check_results( t, err_msg, revert=False ):
     if ( t[0] != 0 ):
         if ( t[1] != None and t[1] != 'None None' ):
-            print t[1]
+            print(t[1])
         _clean_up(revert)
         exit( err_msg )

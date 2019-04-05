@@ -1,7 +1,6 @@
 """Collection of helper functions"""
 
 
-from __future__ import print_function
 import os, errno, fnmatch, subprocess, time, copy
 import symlinks, platform, tarfile
 from collections import deque
@@ -32,10 +31,12 @@ def render_dot_file_as_pic( pictype, oname ):
             except Exception as ex:
                 exit( "ERROR: {}".format(ex) )
         
-        p = subprocess.Popen( cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
-        r = p.communicate()
+        p  = subprocess.Popen( cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
+        r  = p.communicate()
+        r0 = '' if r[0] == None else r[0].decode()
+        r1 = '' if r[1] == None else r[1].decode()
         if ( p.returncode ):
-            print( r )
+            print( r0 + ' ' + r1 )
             exit( "ERROR: Failed rendering the .DOT file (ensure that the GraphVis 'bin/' directory is in your path)" )
         
 
@@ -232,6 +233,9 @@ def cat_file( fobj, strip_comments=True, strip_blank_lines=True ):
             continue
         if ( strip_blank_lines and line == '' ):
             continue
+
+        if ( type(line) is bytes ):
+            line = line.decode()
 
         print( line )
         
@@ -503,11 +507,13 @@ def run_shell( cmd, verbose_flag=False, on_err_msg=None ):
     else:
         p = subprocess.Popen( cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
 
-    r = p.communicate()
+    r  = p.communicate()
+    r0 = '' if r[0] == None else r[0].decode()
+    r1 = '' if r[1] == None else r[1].decode()
     if ( p.returncode != 0 and on_err_msg != None ):
         exit(on_err_msg)
     
-    return (p.returncode, "{} {}".format(r[0],r[1]) )
+    return (p.returncode, "{} {}".format(r0,r1) )
 
 
 #-----------------------------------------------------------------------------
@@ -849,7 +855,7 @@ def _derive_child_links( nodes, branches ):
     lists = []
     for b in branches:
         l = []
-        for n in nodes.itervalues():
+        for n in nodes.values():
             if ( n.name == b ):
                 l.append( n )
         
@@ -877,7 +883,7 @@ def _derive_child_links( nodes, branches ):
                             
 def _get_node( nodes, name_ver, create_if_not_found=True ):
     key = standardize_dir_sep(name_ver)
-    if ( nodes.has_key(key) ):
+    if ( key in nodes ):
         return nodes[key]
     elif ( create_if_not_found ):
         n = BranchNode( key )

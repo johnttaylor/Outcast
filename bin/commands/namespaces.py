@@ -88,7 +88,7 @@ from my_globals import OUTCAST_XPKGS_DIRNAME
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'namespaces', 'Check for namespace collisions in the current workspace' ) 
+    print("{:<13}{}".format( 'namespaces', 'Check for namespace collisions in the current workspace' )) 
     
 
 #------------------------------------------------------------------------------
@@ -107,7 +107,7 @@ def run( common_args, cmd_argv ):
             all, pkgsall = utils.workspace_namespaces_as_list( common_args['-w'] ) 
             for pkg,ns in pkgsall:
                 for n in ns:
-                    print "{}  {}".format(pkg,n) 
+                    print("{}  {}".format(pkg,n)) 
         
         # local package
         elif ( args['<pkgname>'].find('-') == -1 ):
@@ -186,14 +186,14 @@ def run( common_args, cmd_argv ):
             for n in always:
                 fd.write( n + "\n" )
                 if ( args['--print'] ):
-                    print n
+                    print(n)
 
             # Add my derived list
             for n in namespaces:
                 n = n.replace(os.sep,'::')
                 fd.write( n + "\n" )
                 if ( args['--print'] ):
-                    print n
+                    print(n)
 
             fd.close()
 
@@ -211,14 +211,14 @@ def run( common_args, cmd_argv ):
             # Find duplicates
             dups = utils.find_duplicates_in_list( all )
             if ( len(dups) == 0 ):
-                print "No namespace collisions."
+                print("No namespace collisions.")
                 exit(0)
             
             # Display offending packages
             for p,ns in pkgsall:
                 for n in ns:
                     if ( n in dups ):
-                        print "{}  {}".format(p,n) 
+                        print("{}  {}".format(p,n)) 
             exit(1)
               
         # Compare two packages
@@ -232,12 +232,12 @@ def run( common_args, cmd_argv ):
             all.extend( uverse )
             dups = utils.find_duplicates_in_list( all )
             if ( len(dups) == 0 ):
-                print "No namespace collisions."
+                print("No namespace collisions.")
                 exit(0)
             
             # display duplicate namespaces    
             for d in dups:
-                print d
+                print(d)
             exit(1)    
     
                 

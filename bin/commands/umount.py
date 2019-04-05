@@ -38,7 +38,7 @@ Notes:
     
 """
 
-import os, errno, ConfigParser
+import os, errno, configparser
 import symlinks
 import utils
 from docopt.docopt import docopt
@@ -49,7 +49,7 @@ from my_globals import OUTCAST_LOCAL_PKG_SUFFIX
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'umount', "Unmounts a Package from the current workspace's 'xpkgs/' directory" )
+    print("{:<13}{}".format( 'umount', "Unmounts a Package from the current workspace's 'xpkgs/' directory" ))
     
 
 #------------------------------------------------------------------------------
@@ -78,7 +78,7 @@ def run( common_args, cmd_argv ):
 
 #------------------------------------------------------------------------------
 def _parse_spec_file( common_args, args ):
-    cfg = ConfigParser.RawConfigParser(allow_no_value=True)
+    cfg = configparser.RawConfigParser(allow_no_value=True)
     cfg.optionxform = str
     cfg.read( args['-f'] )
             

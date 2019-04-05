@@ -47,7 +47,7 @@ from my_globals import OUTCAST_XINC_DIRNAME
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'bhist', 'Lists the branch history of a Package.' )
+    print("{:<13}{}".format( 'bhist', 'Lists the branch history of a Package.' ))
     
 #------------------------------------------------------------------------------
 def run( common_args, cmd_argv ):
@@ -111,7 +111,7 @@ def run( common_args, cmd_argv ):
         old_bname, old_ver = utils.standardize_dir_sep(args['<old>']).split(os.sep) 
         if ( now_bname != n[2].name ):
             exit("ERROR: 'now' must match the current branch, aka the last entry in the pkg.branching" )
-        print utils._inspect_parents( now_bname, now_ver, old_bname, old_ver, n[2] )
+        print(utils._inspect_parents( now_bname, now_ver, old_bname, old_ver, n[2] ))
         
 #------------------------------------------------------------------------------
 def _parse_and_print( fd, f ):

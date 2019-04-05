@@ -23,14 +23,14 @@ Notes:
     
     
 """
-import os, ConfigParser
+import os
 import utils, vault
 from docopt.docopt import docopt
 
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'mkvault', 'Creates a template Package Vault file.' )
+    print("{:<13}{}".format( 'mkvault', 'Creates a template Package Vault file.' ))
     
 
 #------------------------------------------------------------------------------

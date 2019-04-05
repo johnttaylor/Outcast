@@ -38,7 +38,7 @@ import utils, deps
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'archive', 'Archive file operations.' )
+    print("{:<13}{}".format( 'archive', 'Archive file operations.' ))
     
 
 #------------------------------------------------------------------------------
@@ -52,7 +52,7 @@ def run( common_args, cmd_argv ):
     if ( args['--list'] ):
         l = shutil.get_archive_formats()
         for i in l:
-            print "{:<13}{}".format( i[0], i[1] )
+            print("{:<13}{}".format( i[0], i[1] ))
         exit(0)
         
     # Display archive contents

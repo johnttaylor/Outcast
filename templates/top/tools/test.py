@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Package specific script that 'tests' the package content as part of the 
 publish process.  
@@ -33,7 +33,7 @@ def _use_outcast():
     cmd       = "chuck.py -v --path {} --file {}".format(path, testlist)
 
     # Invoke the build
-    print "EXECUTING: " + cmd
+    print("EXECUTING: " + cmd)
     p = subprocess.Popen( cmd, shell=True )
     r = p.communicate()
     if ( p.returncode != 0 ):
@@ -45,4 +45,4 @@ def _use_outcast():
 #_use_outcast()
 
 # Delete this line if using the Outcast default namespace algorihtm
-print "Testing...."
+print("Testing....")

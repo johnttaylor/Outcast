@@ -25,12 +25,12 @@ from docopt.docopt import docopt
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'distribute', 'Updates the Foreign Package Universe from the Native UVerse.' )
+    print("{:<13}{}".format( 'distribute', 'Updates the Foreign Package Universe from the Native UVerse.' ))
     
 
 #------------------------------------------------------------------------------
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
 
-    print "distribute..."
+    print("distribute...")
     exit(1)

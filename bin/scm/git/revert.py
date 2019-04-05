@@ -29,7 +29,7 @@ from docopt.docopt import docopt
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'revert', 'Reverts/cancels the checkouts for the speficied files' )
+    print("{:<13}{}".format( 'revert', 'Reverts/cancels the checkouts for the speficied files' ))
     
 
 #------------------------------------------------------------------------------
@@ -57,4 +57,4 @@ def _issue_cmd( common_args, cmd ):
         utils.print_warning( "git command failed. Cmd={}, {}.".format( cmd, t[1] ) )
     elif ( common_args['-v'] ):
         if ( t[1] != None and t[1] != 'None None' and t[1].strip() != '' ):
-            print t[1]
+            print(t[1])

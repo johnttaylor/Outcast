@@ -21,13 +21,13 @@ Notes:
 """
 import os
 import utils
-import ConfigParser
+import configparser
 from docopt.docopt import docopt
 
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'mkspec', 'Creates a template pkg.specification file.' )
+    print("{:<13}{}".format( 'mkspec', 'Creates a template pkg.specification file.' ))
     
 #------------------------------------------------------------------------------
 def run( common_args, cmd_argv ):
@@ -52,7 +52,7 @@ def run( common_args, cmd_argv ):
             
     
     # Create content
-    cfg = ConfigParser.RawConfigParser(allow_no_value=True)
+    cfg = configparser.RawConfigParser(allow_no_value=True)
     cfg.optionxform = str
     cfg.add_section( 'info' )
     cfg.set( 'info', 'name',        'my_package' )

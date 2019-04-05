@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 """
  
 Evie is an Outcast wrapper for invoking your SCM tool
@@ -44,12 +44,12 @@ from my_globals import OUTCAST_SCM_TOOL
 
 #------------------------------------------------------------------------------
 def load_command( scm, name ):
-        try:
-            command_module = __import__("scm.{}.{}".format(scm, name), fromlist=[scm])
-        except ImportError:
-            exit("%r is not a Evie command. Use 'evie help' for list of commands." % name)
-
-        return command_module
+    try:
+        command_module = __import__("scm.{}.{}".format(scm, name), fromlist=[scm])
+    except ImportError:
+        exit("%r is not a Evie command. Use 'evie help' for list of commands." % name)
+    
+    return command_module
         
         
 #------------------------------------------------------------------------------
@@ -77,7 +77,7 @@ def display_scm_types_list():
         files = os.listdir(bpath)
         for f in files:
             if ( os.path.isdir(os.path.join(bpath,f)) ):
-                print f
+                print(f)
       
     print( ' ' )
 

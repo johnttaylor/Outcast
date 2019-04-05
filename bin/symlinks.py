@@ -105,14 +105,17 @@ def win32_get_link_info( name, raiseExceptionOnNotExist=True ):
         raise OSError( "ERROR: The DIR command failed: " + cmd )
       
     # Not found -->not a symbolick link
-    r = p.communicate()
-    if ( r[0] == '' ):
+    r  = p.communicate()
+    r0 = '' if r[0] == None else r[0].decode()
+    r1 = '' if r[1] == None else r[1].decode()
+
+    if ( r0 == '' ):
         if ( raiseExceptionOnNotExist ): 
             raise OSError( "ERROR: '{}' is not a symbolic link.".format(name) )
         return ''
         
     # extract link info and strip off leading/traling '[' ']'
-    info = r[0].split()
+    info = r0.split()
     return os.path.realpath( info[5][1:-1] )
     
     

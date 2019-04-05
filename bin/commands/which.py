@@ -30,7 +30,7 @@ from my_globals import OUTCAST_LOCAL_PKG_SUFFIX
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'which', 'Displays branch/version information of a mounted package' )
+    print("{:<13}{}".format( 'which', 'Displays branch/version information of a mounted package' ))
     
 
 #------------------------------------------------------------------------------
@@ -51,6 +51,6 @@ def run( common_args, cmd_argv ):
     except OSError as ex:
         exit( "ERROR: Package: '{}' is not mounted or is an invalid name.".format(lpkg) )
             
-    print( linksrc[1:] ) 
+    print(( linksrc[1:] )) 
         
 

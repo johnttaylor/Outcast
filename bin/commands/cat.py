@@ -43,7 +43,7 @@ import utils, deps
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'cat', 'Displays content of Package Top files.' )
+    print("{:<13}{}".format( 'cat', 'Displays content of Package Top files.' ))
     
 
 #------------------------------------------------------------------------------

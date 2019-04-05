@@ -40,7 +40,7 @@ from my_globals import OUTCAST_XINC_DIRNAME
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'mkwrk', 'Creates a Workspace directory.' )
+    print("{:<13}{}".format( 'mkwrk', 'Creates a Workspace directory.' ))
     
 #------------------------------------------------------------------------------
 def run( common_args, cmd_argv ):

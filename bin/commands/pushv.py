@@ -29,7 +29,7 @@ from docopt.docopt import docopt
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'pushv', 'Pushes a Package Archive to one or more Package Vaults.' )
+    print("{:<13}{}".format( 'pushv', 'Pushes a Package Archive to one or more Package Vaults.' ))
     
 
 #------------------------------------------------------------------------------

@@ -27,7 +27,7 @@ from docopt.docopt import docopt
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'rmvault', 'Removes a Package Archive from one or more Package Vaults.' )
+    print("{:<13}{}".format( 'rmvault', 'Removes a Package Archive from one or more Package Vaults.' ))
     
 
 #------------------------------------------------------------------------------

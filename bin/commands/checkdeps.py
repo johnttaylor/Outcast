@@ -49,7 +49,7 @@ import utils, deps
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'checkdeps', 'Checks a pkg.specification file for valid dependencies.' )
+    print("{:<13}{}".format( 'checkdeps', 'Checks a pkg.specification file for valid dependencies.' ))
     
 
 #------------------------------------------------------------------------------
@@ -79,9 +79,9 @@ def run( common_args, cmd_argv ):
     p, d,w,t, cfg = deps.read_package_spec( file )
     dep_tree, act_tree = deps.validate_dependencies( p, d,w,t, common_args, args['--nocheck'], file )
     if ( not args['--nocheck'] ):
-        print "All dependency checks PASSED."
+        print("All dependency checks PASSED.")
     else:
-        print "SKIPPED one or more dependency checks."
+        print("SKIPPED one or more dependency checks.")
          
     # generate .DOT file
     if ( args['--dot'] or args['--graph'] ):
@@ -90,11 +90,11 @@ def run( common_args, cmd_argv ):
 
 
     if ( args['--print'] ):
-        print "Derived Transitive tree."
-        print dep_tree
+        print("Derived Transitive tree.")
+        print(dep_tree)
         if ( not args['--nocheck'] ):
-            print "Actual Package tree."
-            print act_tree
+            print("Actual Package tree.")
+            print(act_tree)
 
     
     
@@ -114,5 +114,5 @@ def _create_dot_file( file, qualifier, tree, graph_opt ):
 def _check_results( t, err_msg ):
     if ( t[0] != 0 ):
         if ( t[1] != None and t[1] != 'None None' ):
-            print t[1]
+            print(t[1])
         exit( err_msg )

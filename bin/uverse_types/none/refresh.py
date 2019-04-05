@@ -27,12 +27,12 @@ from docopt.docopt import docopt
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'refresh', 'Updates the Native Package Universe from the Foreign UVerse.' )
+    print("{:<13}{}".format( 'refresh', 'Updates the Native Package Universe from the Foreign UVerse.' ))
     
 
 #------------------------------------------------------------------------------
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
 
-    print "refreshing..."
+    print("refreshing...")
     exit(1)

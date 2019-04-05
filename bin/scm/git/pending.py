@@ -24,7 +24,7 @@ from docopt.docopt import docopt
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'pending', 'Checks if there are any pending check ins and/or checked out files.' )
+    print("{:<13}{}".format( 'pending', 'Checks if there are any pending check ins and/or checked out files.' ))
     
 
 #------------------------------------------------------------------------------
@@ -41,7 +41,7 @@ def run( common_args, cmd_argv ):
     # Re-run the command if verbose is enable (more reliable than making assumptions when the --quiet option is not used) 
     if ( common_args['-v'] ):
         if ( t[0] == 0 ):
-            print "No pending changes." 
+            print("No pending changes.") 
         else:
             utils.run_shell( "git diff-index HEAD", True )
     
@@ -59,6 +59,6 @@ def run( common_args, cmd_argv ):
     if ( t[0] != 0 ):
         exit( "ERROR: Unable to run '{}' to check for pending pushes.".format( cmd ) )
     if ( common_args['-v'] ):
-        print t[1]
+        print(t[1])
     if ( t[1].strip() != "" ):
         exit( "ERROR: At least one commit has not been pushed." )

@@ -40,7 +40,7 @@ from my_globals import OUTCAST_TOP_DIR
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'top', 'Creates a package top file for a local package.' )
+    print("{:<13}{}".format( 'top', 'Creates a package top file for a local package.' ))
     
 
 #------------------------------------------------------------------------------
@@ -85,6 +85,5 @@ def run( common_args, cmd_argv ):
 def _check_results( t, err_msg ):
     if ( t[0] != 0 ):
         if ( t[1] != None and t[1] != 'None None' ):
-            print t[1]
+            print(t[1])
         exit( err_msg )
-    

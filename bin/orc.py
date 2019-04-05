@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 """
  
 Orc is a Outcast tool for managing packaging and/or workspaces
@@ -46,20 +46,20 @@ import os
 from subprocess import call
 
 from docopt.docopt import docopt
+from my_globals import ORC_VERSION
 import utils
 
-from my_globals import ORC_VERSION
 
 
 
 #------------------------------------------------------------------------------
 def load_command( name ):
-        try:
-            command_module = __import__("commands.{}".format(name), fromlist=["commands"])
-        except ImportError:
-            exit("%r is not a Orc command. Use 'orc help' for list of commands." % name)
+    try:
+        command_module = __import__("commands.{}".format(name), fromlist=["commands"])
+    except ImportError:
+        exit("%r is not a Orc command. Use 'orc help' for list of commands." % name)
 
-        return command_module
+    return command_module
         
         
 #------------------------------------------------------------------------------
@@ -81,70 +81,72 @@ def display_command_list():
     print( ' ' )
 
 #------------------------------------------------------------------------------
-# Parse command line
-args = docopt(__doc__, version=ORC_VERSION(), options_first=True )
+# MAIN
+if __name__ == '__main__':
+    # Parse command line
+    args = docopt(__doc__, version=ORC_VERSION(), options_first=True )
 
-# Trap the special where option
-if ( args['--where'] ):
-    print __file__
-    exit(0)
+    # Trap the special where option
+    if ( args['--where'] ):
+        print(__file__)
+        exit(0)
  
-# Trap help on a specific command
-if ( args['<command>'] == 'help' ):
+    # Trap help on a specific command
+    if ( args['<command>'] == 'help' ):
 
-    # Display list of commands if none specified
-    if ( args['<args>'] == [] ):
-        display_command_list()
+        # Display list of commands if none specified
+        if ( args['<args>'] == [] ):
+            display_command_list()
         
-    # Display command specific help
+        # Display command specific help
+        else:
+            load_command( args['<args>'][0] ).run( args, ['--help'] )
+
+
+    # Trap no command specified        
+    elif ( args['<command>'] == None and not args['--qry-wpath'] and not args['--qry-pkg'] ):
+            docopt(__doc__,argv=['--help'])
+    
+
+    # Run the command (if it exists)
     else:
-        load_command( args['<args>'][0] ).run( args, ['--help'] )
-
-
-# Trap no command specified        
-elif ( args['<command>'] == None and not args['--qry-wpath'] and not args['--qry-pkg'] ):
-        docopt(__doc__,argv=['--help'])
+        # Set quite & verbose modes
+        utils.set_quite_mode( args['-q'] )
+        utils.set_verbose_mode( args['-v'] )
+        skip = False
     
+        # Handle the expection case(s) for needing the environment variables being set
+        skipenv = False
+        if ( args['<command>'] == 'set' ):
+            skipenv = True
 
-# Run the command (if it exists)
-else:
-    # Set quite & verbose modes
-    utils.set_quite_mode( args['-q'] )
-    utils.set_verbose_mode( args['-v'] )
-    skip = False
-    
-    # Handle the expection case(s) for needing the environment variables being set
-    skipenv = False
-    if ( args['<command>'] == 'set' ):
-        skipenv = True
+        # Handle the expection case(s) for needing to know the workspace/ root
+        skipwrk = False
+        if ( args['<command>'] == 'mkwrk' ):
+            skipwrk = True
 
-    # Handle the expection case(s) for needing to know the workspace/ root
-    skipwrk = False
-    if ( args['<command>'] == 'mkwrk' ):
-        skipwrk = True
+        # Housekeeping
+        utils.set_user_name( args, skipenv )
+        utils.set_password( args )
+        utils.set_workspace( args, skipwrk )
+        utils.set_uverse( args, skipenv )
+        utils.set_packages_dir( args, skipenv )
 
-    # Housekeeping
-    utils.set_user_name( args, skipenv )
-    utils.set_password( args )
-    utils.set_workspace( args, skipwrk )
-    utils.set_uverse( args, skipenv )
-    utils.set_packages_dir( args, skipenv )
-
-    # Trap the special --qry-wpath option
-    if ( args['--qry-wpath'] ):
-        print args['-w']
-        exit(0)
+        # Trap the special --qry-wpath option
+        if ( args['--qry-wpath'] ):
+            print(args['-w'])
+            exit(0)
         
-    # Trap the specia --qry-pkg option
-    if ( args['--qry-pkg'] ):
-        here = os.getcwd().replace(args['-w']+os.sep,'')
-        pkg  = here.split(os.sep)[0]
-        print args['-w'] + os.sep + pkg
-        exit(0)
+        # Trap the specia --qry-pkg option
+        if ( args['--qry-pkg'] ):
+            here = os.getcwd().replace(args['-w']+os.sep,'')
+            pkg  = here.split(os.sep)[0]
+            print(args['-w'] + os.sep + pkg)
+            exit(0)
         
         
-    # run the command
-    load_command( args['<command>'] ).run( args, [args['<command>']] + args['<args>'] )
+        # run the command
+        load_command( args['<command>'] ).run( args, [args['<command>']] + args['<args>'] )
 
 
     

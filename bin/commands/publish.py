@@ -88,7 +88,7 @@ Notes:
 import os
 import shutil
 import time
-import ConfigParser
+import configparser
 import symlinks
 import utils
 import deps
@@ -105,7 +105,7 @@ scmlabel = ''
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'publish', 'Publishes a Package to the Native Outcast Universe.' )
+    print("{:<13}{}".format( 'publish', 'Publishes a Package to the Native Outcast Universe.' ))
     
 
 #------------------------------------------------------------------------------
@@ -143,7 +143,7 @@ def run( common_args, cmd_argv ):
 
     # REVERT
     if ( args['--revert'] or args['--retry'] ):
-        print "= Reverting SCM checkouts..."
+        print("= Reverting SCM checkouts...")
         cmd = 'evie.py -v -w {} revert {} {} {}'.format( root, args['<pkgname>'], pkg_spec, chg_log )
         t   = utils.run_shell( cmd, common_args['-v'] )
         _check_results( t, "ERROR: Failed revert of SCM checkouts.", cleanall_flag=False )
@@ -180,7 +180,7 @@ def run( common_args, cmd_argv ):
 
     # Ensure the Native Package universe is current
     if ( not common_args['--norefresh'] ):
-        print "= Refreshing the Native Package Universes..."
+        print("= Refreshing the Native Package Universes...")
         cmd = 'ceres.py -v -w {} --user "{}" --passwd "{}" --now {} refresh'.format(root, common_args['--user'], common_args['--passwd'], now )
         t   = utils.run_shell( cmd, common_args['-v'] )
         _check_results( t, "ERROR: Failed Refresh the Native Package Universe." )
@@ -193,35 +193,35 @@ def run( common_args, cmd_argv ):
 
     # Check for pending checkings
     if ( not args['--nopending'] ):
-        print "= Checking for pending changes..."
+        print("= Checking for pending changes...")
         cmd = 'evie.py -v -w {} --user "{}" --passwd "{}" --now {} pending {}'.format( root, common_args['--user'], common_args['--passwd'], now, args['<pkgname>'] )
         t   = utils.run_shell( cmd, common_args['-v'] )
         _check_results( t, "ERROR: Failed pending check." )
         
     # Check dependencies
     if ( not args['--nodeps'] ):
-        print "= Checking dependencies..."
+        print("= Checking dependencies...")
         cmd = 'orc.py -v -w {} --user "{}" --passwd "{}" --norefresh --now {} checkdeps'.format(root, common_args['--user'], common_args['--passwd'], now ) 
         t   = utils.run_shell( cmd, common_args['-v'] )
         _check_results( t, "ERROR: Failed the dependency check." )
         
     # get needed dependencies
     if ( not args['--nogetdeps'] ):
-        print "= Getting dependencies..."
+        print("= Getting dependencies...")
         cmd = 'orc.py -v -w {} --user "{}" --passwd "{}" --norefresh --now {} getdeps {} --override'.format(root, common_args['--user'], common_args['--passwd'], now, args['<pkgname>'] ) 
         t   = utils.run_shell( cmd, common_args['-v'] )
         _check_results( t, "ERROR: Failed getting (and mounting) dependencies." )
 
     # Run CI script (when provided)
     if ( args['--ci'] != None ):
-        print "= Continiouse Integration (CI) script ..." 
+        print("= Continiouse Integration (CI) script ...") 
         cmd = args['--ci']
         t   = utils.run_shell( cmd, common_args['-v'] )
         _check_results( t, "ERROR: Failed CI script." )
             
     # Clean everthing before building
     if ( not args['--noclean'] ):
-        print "= Pre-cleaning..." 
+        print("= Pre-cleaning...") 
         p   = os.path.join( pathtools, "clean.py" )
         cmd = "{} {}".format(p, pkgroot )
         t   = utils.run_shell( cmd, common_args['-v'] )
@@ -229,7 +229,7 @@ def run( common_args, cmd_argv ):
                    
     # Build...
     if ( not args['--nobuild'] ):
-        print "= Building..."
+        print("= Building...")
         p   = os.path.join( pathtools, "build.py" )
         cmd = "{} {}".format(p, pkgroot )
         t   = utils.run_shell( cmd, common_args['-v'] )
@@ -237,7 +237,7 @@ def run( common_args, cmd_argv ):
                    
     # Update namespaces (I do this after the build to handle the case of autogen'd source code)
     if ( not args['--nons'] ):
-        print "= Updating pkg.namespaces..."
+        print("= Updating pkg.namespaces...")
         checkin_ns = namespaces
         cmd = 'evie.py -v -w {} --user "{}" --passwd "{}" --now {} checkout {} {}'.format(root, common_args['--user'], common_args['--passwd'], now, args['<pkgname>'], namespaces )
         t   = utils.run_shell( cmd, common_args['-v'] )
@@ -248,14 +248,14 @@ def run( common_args, cmd_argv ):
         _check_results( t, "ERROR: Failed to update pkg.namespaces (error with tools/namespaces.py)." )
 
         # Check for namespace collisions
-        print "= Check for namespace collisions..."
+        print("= Check for namespace collisions...")
         cmd = 'orc.py -v -w {} --user "{}" --passwd "{}" --norefresh --now {} namespaces --check'.format(root, common_args['--user'], common_args['--passwd'], now ) 
         t   = utils.run_shell( cmd, common_args['-v'] )
         _check_results( t, "ERROR: Failed the namespace collision check." )
           
     # Test...
     if ( not args['--notests'] ):
-        print "= Run tests..."
+        print("= Run tests...")
         p   = os.path.join( pathtools, "test.py" )
         cmd = "{} {}".format(p, pkgroot )
         t   = utils.run_shell( cmd, common_args['-v'] )
@@ -263,7 +263,7 @@ def run( common_args, cmd_argv ):
 
     # Clean everthing before archiving/publishing
     if ( not args['--noclean'] ):
-        print "= Post-cleaning..." 
+        print("= Post-cleaning...") 
         p   = os.path.join( pathtools, "clean.py" )
         cmd = "{} {}".format(p, pkgroot )
         t   = utils.run_shell( cmd, common_args['-v'] )
@@ -271,7 +271,7 @@ def run( common_args, cmd_argv ):
                    
 
     # edit pkg.specification 
-    print "= Updating pkg.specification..."
+    print("= Updating pkg.specification...")
     cmd = 'evie.py -v -w {} --user "{}" --passwd "{}" --now {} checkout {} {}'.format(root, common_args['--user'], common_args['--passwd'], now, args['<pkgname>'], pkg_spec )
     t   = utils.run_shell( cmd, common_args['-v'] )
     _check_results( t, "ERROR: Failed SCM checkout of {}.".format(pkg_spec) )
@@ -279,16 +279,16 @@ def run( common_args, cmd_argv ):
     
     # update changelog
     if ( args['--dry-run'] ):
-        print "= Updating pkg.journal... SKIPPING (dry-run)"
+        print("= Updating pkg.journal... SKIPPING (dry-run)")
     else:
-        print "= Updating pkg.journal..."
+        print("= Updating pkg.journal...")
         cmd = 'evie.py -v -w {} --user "{}" --passwd "{}" --now {} checkout {} {}'.format(root, common_args['--user'], common_args['--passwd'], now, args['<pkgname>'], chg_log )
         t   = utils.run_shell( cmd, common_args['-v'] )
         _check_results( t, "ERROR: Failed SCM checkout of {}.".format(chg_log) )
         utils.update_journal_publish( chg_log, common_args['--user'], args['<summary>'], args['--comments'], ver, bname, scmlabel )
     
     # Archive the package
-    print "= Archiving the package..."
+    print("= Archiving the package...")
     global pkgtar
     pkgtar = os.path.join( cwd, pkgname + "." + args['--format'] )
     cmd = 'evie.py -v -w {} --user "{}" --passwd "{}" --now {} archive {} --format {} {} {}'.format(root, common_args['--user'], common_args['--passwd'], now, override, args['--format'], args['<pkgname>'], pkgtar )
@@ -296,7 +296,7 @@ def run( common_args, cmd_argv ):
     _check_results( t, "ERROR: Failed Archiving package." )
 
     # Archive the top directory
-    print "= Archiving the package's top/ directory..."
+    print("= Archiving the package's top/ directory...")
     global toptar
     toptar = os.path.join( cwd, pkgname + "." + OUTCAST_TOP_DIR() )
     cmd = 'evie.py -v -w {} --user "{}" --passwd "{}" --now {} archive {} --format {} -d {} {} {} '.format(root, common_args['--user'], common_args['--passwd'], now, override, args['--format'], OUTCAST_TOP_DIR(), args['<pkgname>'], toptar )
@@ -305,36 +305,36 @@ def run( common_args, cmd_argv ):
     
     # Trap 'dry-run'
     if ( args['--dry-run'] ):
-        print "= Pushing package archive to the Package Vault... SKIPPING (dry-run)" 
-        print "= Distributing the Package Top file to the Native and Foreigh Package Universes... SKIPPING (dry-run)" 
-        print "= Checkin files and labeling the package in the SCM repository... SKIPPING (dry-run)"
-        print "Completed DRY-RUN of publish of: ", pkgname
+        print("= Pushing package archive to the Package Vault... SKIPPING (dry-run)") 
+        print("= Distributing the Package Top file to the Native and Foreigh Package Universes... SKIPPING (dry-run)") 
+        print("= Checkin files and labeling the package in the SCM repository... SKIPPING (dry-run)")
+        print("Completed DRY-RUN of publish of: ", pkgname)
         cmd = 'evie.py -v -w {} revert {} {} {}'.format( root, args['<pkgname>'], pkg_spec, chg_log )
         utils.run_shell( cmd, common_args['-v'] )
         _clean_up(True, args)
         
     else:
         # push archive to the vault
-        print "= Pushing package archive to the Package Vault..."
+        print("= Pushing package archive to the Package Vault...")
         cmd = 'orc.py -v -w {} --user "{}" --passwd "{}" --now {} pushv --vault {} {} {}'.format(root, common_args['--user'], common_args['--passwd'], now, args['--vault'], override, pkgtar )
         t   = utils.run_shell( cmd, common_args['-v'] )
         _check_results( t, "ERROR: Failed pushing package archive to the Package Vault." )
 
         # copy the top file to the native package universe
-        print "= Distributing the Package Top file to the Native and Foreigh Package Universes..."
+        print("= Distributing the Package Top file to the Native and Foreigh Package Universes...")
         cmd = 'ceres.py -v -w {} --user "{}" --passwd "{}" --now {} distribute {} {} "{}"'.format(root, common_args['--user'], common_args['--passwd'], now, override, toptar, args['<summary>'] )
         t   = utils.run_shell( cmd, common_args['-v'] )
         _check_results( t, "ERROR: Failed Updating the Native Package Universe." )
    
         
         # Checkin files
-        print "= Checkin files and labeling the package in the SCM repository..."
+        print("= Checkin files and labeling the package in the SCM repository...")
         cmd = 'evie.py -v -w {} --user "{}" --passwd "{}" --now {} checkin {} {} {} "{}" {} {} {}'.format(root, common_args['--user'], common_args['--passwd'], now, override, args['<pkgname>'], scmlabel, args['<summary>'], pkg_spec, chg_log, checkin_ns )
         t   = utils.run_shell( cmd, common_args['-v'] )
         _check_results( t, "ERROR: Failed Checking and Labeling in the SCM repository." )
     
         # All Done!
-        print "Completed publish of:", pkgname
+        print("Completed publish of:", pkgname)
         _clean_up(all=False)
     
     
@@ -362,12 +362,12 @@ def _clean_up(all=True, args=None):
 def _check_results( t, err_msg, cleanall_flag=True ):
     if ( t[0] != 0 ):
         if ( t[1] != None and t[1] != 'None None' ):
-            print t[1]
+            print(t[1])
         _clean_up(cleanall_flag)
         exit( err_msg )
 
 def _read_package_spec( args, pkg_spec, bname, minver ):
-    cfg = ConfigParser.RawConfigParser(allow_no_value=True)
+    cfg = configparser.RawConfigParser(allow_no_value=True)
     cfg.optionxform = str
     cfg.read( pkg_spec )
     

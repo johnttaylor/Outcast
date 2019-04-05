@@ -30,7 +30,7 @@ from docopt.docopt import docopt
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'lock', 'Locks one or more Native Package metadata files' )
+    print("{:<13}{}".format( 'lock', 'Locks one or more Native Package metadata files' ))
     
 
 #------------------------------------------------------------------------------
@@ -52,11 +52,11 @@ def run( common_args, cmd_argv ):
     if ( args['--unlock'] ):
         cmd = 'evie.py -v -w {} --scm git revert --use-cwd notused {}'.format( common_args['-w'], ' '.join(args['FILES']) )
         utils.run_shell( cmd, common_args['-v'] )
-        print "Lock removed and changes reverted for files: {}".format( ' '.join(args['FILES']) )
+        print("Lock removed and changes reverted for files: {}".format( ' '.join(args['FILES']) ))
         
     # Lock, aka do nothing
     else:
-        print "Files locked: {}".format( ' '.join(args['FILES']) )
+        print("Files locked: {}".format( ' '.join(args['FILES']) ))
         
     # Clean-up
     utils.pop_dir()

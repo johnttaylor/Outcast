@@ -26,12 +26,12 @@ Notes:
 
 """
 from docopt.docopt import docopt
-import subprocess, os, tarfile, sys
+import subprocess, os, sys
 import utils, deps
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'cc', 'Lists the supported compilers.' )
+    print("{:<13}{}".format( 'cc', 'Lists the supported compilers.' ))
     
 
 #------------------------------------------------------------------------------
@@ -53,17 +53,17 @@ def run( common_args, cmd_argv ):
     else:
         cc =_find_in_list( args['<compiler>'], file_list )
         if ( cc == None ):
-            print "Error: The specified compiler ({}) is not supported".format( cc )
+            print("Error: The specified compiler ({}) is not supported".format( cc ))
             _list_compilers( file_list )
         else:
-            print ".run: " + cc
+            print(".run: " + cc)
     
     
 #------------------------------------------------------------------------------
 def _list_compilers(file_list):
     for f in file_list:
         temp = os.path.splitext(f)[0]
-        print os.path.basename(temp)
+        print(os.path.basename(temp))
 
 def _find_in_list( compiler, file_list ):
     for f in file_list:

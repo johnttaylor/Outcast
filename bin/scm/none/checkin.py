@@ -27,14 +27,14 @@ from docopt.docopt import docopt
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'checkin', 'Checks in one or more files to the SCM repository.' )
+    print("{:<13}{}".format( 'checkin', 'Checks in one or more files to the SCM repository.' ))
     
 
 #------------------------------------------------------------------------------
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
 
-    print "CHECKIN: {} {}".format( args['<pkgname>'], args['FILES'] )
+    print("CHECKIN: {} {}".format( args['<pkgname>'], args['FILES'] ))
 
     # Return 'error' since this is just a stub
     exit(1)

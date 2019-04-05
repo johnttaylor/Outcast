@@ -29,7 +29,7 @@ from docopt.docopt import docopt
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'pullv', 'Pulls a Package Archive from a Package Vault.' )
+    print("{:<13}{}".format( 'pullv', 'Pulls a Package Archive from a Package Vault.' ))
     
 
 #------------------------------------------------------------------------------
@@ -76,7 +76,7 @@ def run( common_args, cmd_argv ):
     try:
         utils.print_verbose( "Uncompressing archive..." )
         tar = tarfile.open(fileobj=fd)
-        first = tar.next()
+        first = next(tar)
         if ( first.name != p ):
             exit( "ERROR: Contents of the archive file - {} - is not an Outcast Package archive.".format( archive ) )
         tar.extractall(tmp)

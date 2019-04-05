@@ -27,7 +27,7 @@ from docopt.docopt import docopt
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'refresh', 'Updates the Native Package Universe from the Foreign UVerse.' )
+    print("{:<13}{}".format( 'refresh', 'Updates the Native Package Universe from the Foreign UVerse.' ))
     
 
 #------------------------------------------------------------------------------
@@ -46,5 +46,5 @@ def run( common_args, cmd_argv ):
 def _check_results( t, err_msg, revert=False ):
     if ( t[0] != 0 ):
         if ( t[1] != None and t[1] != 'None None' ):
-            print t[1]
+            print(t[1])
         exit( err_msg )

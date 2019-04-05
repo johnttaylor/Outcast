@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 """
  
 Ceres is a Outcast tool for managing Outcast Universes
@@ -79,7 +79,7 @@ def display_uverse_types_list():
         files = os.listdir(bpath)
         for f in files:
             if ( os.path.isdir(os.path.join(bpath,f)) ):
-                print f
+                print(f)
       
     print( ' ' )
 

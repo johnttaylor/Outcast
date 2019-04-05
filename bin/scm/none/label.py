@@ -31,14 +31,14 @@ from docopt.docopt import docopt
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'label', 'Applies a SCM label to the current contents of the package' )
+    print("{:<13}{}".format( 'label', 'Applies a SCM label to the current contents of the package' ))
     
 
 #------------------------------------------------------------------------------
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
 
-    print "LABEL: {} {}".format( args['<pkgname>'], args['<label>'] )
+    print("LABEL: {} {}".format( args['<pkgname>'], args['<label>'] ))
 
     # Return 'error' since this is just a stub
     exit(1)

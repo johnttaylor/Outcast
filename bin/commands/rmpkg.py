@@ -36,7 +36,7 @@ from docopt.docopt import docopt
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'rmpkg', 'Marks a published package as Do-Not-Use or deprecated.' )
+    print("{:<13}{}".format( 'rmpkg', 'Marks a published package as Do-Not-Use or deprecated.' ))
     
 
 #------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ def _clean_up( root, journal ):
 def _check_results( t, err_msg, root=None, journal=None ):
     if ( t[0] != 0 ):
         if ( t[1] != None and t[1] != 'None None' ):
-            print t[1]
+            print(t[1])
         if ( root != None ):
             _clean_up( root, journal )
         exit( err_msg )

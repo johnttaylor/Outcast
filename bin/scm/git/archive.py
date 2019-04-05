@@ -35,7 +35,7 @@ import utils, deps
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'archive', 'Archive a Package without SCM metadata' )
+    print("{:<13}{}".format( 'archive', 'Archive a Package without SCM metadata' ))
     
 
 #------------------------------------------------------------------------------
@@ -47,10 +47,10 @@ def run( common_args, cmd_argv ):
 
     # Display list of supported formats
     if ( args['--list'] ):
-        print "{:<13}{}".format( "bztar", "bzip2'ed tar-file" )
-        print "{:<13}{}".format( "gztar", "gzip'ed tar-file" )
-        print "{:<13}{}".format( "tar",   "uncompressed tar file" )
-        print "{:<13}{}".format( "zip",   "ZIP file" )
+        print("{:<13}{}".format( "bztar", "bzip2'ed tar-file" ))
+        print("{:<13}{}".format( "gztar", "gzip'ed tar-file" ))
+        print("{:<13}{}".format( "tar",   "uncompressed tar file" ))
+        print("{:<13}{}".format( "zip",   "ZIP file" ))
         exit(0)
         
     # Parse the format
@@ -108,7 +108,7 @@ def _filter_files( tarinfo ):
     
     global verbose
     if ( verbose ):
-        print tarinfo.name
+        print(tarinfo.name)
     
     return tarinfo
         

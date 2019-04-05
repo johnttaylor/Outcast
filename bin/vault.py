@@ -1,7 +1,7 @@
 """Collection of helper functions"""
 
 from ftplib import FTP
-import os, ConfigParser, tempfile
+import os, configparser, tempfile
 import utils
 
 # globals
@@ -13,16 +13,16 @@ _shortflag = False
 
 #------------------------------------------------------------------------------
 def display_supported_types():
-    print "Supported Vault Types:"
-    print "----------------------"
-    print "ftp-anon    ; Anonymous FTP"
-    print "ftp-user    ; User account FTP"
+    print("Supported Vault Types:")
+    print("----------------------")
+    print("ftp-anon    ; Anonymous FTP")
+    print("ftp-user    ; User account FTP")
 
 
 #------------------------------------------------------------------------------
 def create_template_vault_config( vault_type ):
     # Create content
-    cfg = ConfigParser.RawConfigParser(allow_no_value=True)
+    cfg = configparser.RawConfigParser(allow_no_value=True)
     cfg.optionxform = str
     cfg.add_section( 'primary' )
     cfg.add_section( 'mirror1' )
@@ -94,7 +94,7 @@ def remove_archive( vaultfile, archive ):
 def _read_primary( vaultfile ):
     
     # Read vault file
-    cfg = ConfigParser.RawConfigParser(allow_no_value=True)
+    cfg = six.moves.configparser.RawConfigParser(allow_no_value=True)
     cfg.optionxform = str
     if ( not os.path.isfile(vaultfile) ):
         exit( "ERROR: Vault file - {} - does not exist".format( vaultfile ) )
@@ -228,7 +228,7 @@ def _push_ftp( vaultfile, cfg, archive, overwrite=False ):
         utils.print_verbose(" Complete",False,True)
         
     except Exception as ex:
-        print ex
+        print(ex)
         exit ( "ERROR: Unable to transfer file {}.".format( archive ) )
             
     ftp.close()
@@ -280,7 +280,7 @@ def _list_ftp( vaultfile, cfg, filter, shortflag=False ):
         ftp.retrlines( 'LIST ' + filter, _cblist )
         
     except Exception as ex:
-        print ex
+        print(ex)
         exit ( "ERROR: Unable to list vault directory." )
             
     ftp.close()
@@ -296,9 +296,9 @@ def _cblist( line ):
     
     t = line.split()
     if ( _shortflag ):
-        print t[len(t)-1]
+        print(t[len(t)-1])
     else:
-        print line
+        print(line)
 
 
 #------------------------------------------------------------------------------
@@ -328,7 +328,7 @@ def _pull_ftp( vaultfile, cfg, archive ):
         asize = int(t[len(t)-2])
         
     except Exception as ex:
-        print ex
+        print(ex)
         exit ( "ERROR: Unable to find archive file {}.".format( f ) )
 
 
@@ -351,7 +351,7 @@ def _pull_ftp( vaultfile, cfg, archive ):
         
     except Exception as ex:
         _fd.close()
-        print ex
+        print(ex)
         exit ( "ERROR: Unable to transfer file {} (err={}).".format( f, ex ) )
                 
  
@@ -401,7 +401,7 @@ def _remove_ftp( vaultfile, cfg, archive ):
         ftp.delete(f)
         
     except Exception as ex:
-        print ex
+        print(ex)
         exit ( "ERROR: Unable to delete file {}.".format( archive ) )
             
     ftp.close()

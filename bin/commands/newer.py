@@ -55,7 +55,7 @@ from my_globals import OUTCAST_TOP_DIR
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'newer', 'Checks if there are newer dependent packages available.' )
+    print("{:<13}{}".format( 'newer', 'Checks if there are newer dependent packages available.' ))
     
 
 #------------------------------------------------------------------------------
@@ -150,38 +150,38 @@ def _print_pretty( l ):
 
     # Display dependencies that are at the latest
     flag = False
-    print "Dependencies at the LATEST published package:"
+    print("Dependencies at the LATEST published package:")
     for pname,dtime,newer in l:
         if ( len(newer) == 0 ):
             flag = True
-            print "{}".format(pname,dtime)
+            print("{}".format(pname,dtime))
  
     # Add whitepsce between the two lists
     if ( not flag ):
-        print "-->none" 
+        print("-->none") 
     else:
-        print
+        print()
 
     # Display deoendencies that have newer packages
-    print "Dependencies with NEWER published package(s) available:"
+    print("Dependencies with NEWER published package(s) available:")
     flag = False
     for pname,dtime,newer in l:
         if ( len(newer) > 0 ):
             flag = True
             s = sorted(newer,key=_getKey)         
-            print "{}  {}".format(pname,dtime)
+            print("{}  {}".format(pname,dtime))
             for x in s:
-                print "--> {}  {}".format(x[0], x[1])
+                print("--> {}  {}".format(x[0], x[1]))
 
     if ( not flag ):
-        print "-->none"
+        print("-->none")
 
 def _print_simple( l ):
    for pname, dtime,newer in l:
         if ( len(newer) > 0 ):
             s = sorted(newer,key=_getKey)         
             for x in s:
-                print "{} {}   {} {}".format(pname,dtime, x[0], x[1])
+                print("{} {}   {} {}".format(pname,dtime, x[0], x[1]))
             
 
 def _read_top_file( common_args, pkg ):        

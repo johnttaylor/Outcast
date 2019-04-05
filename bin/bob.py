@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 """
  
 Bob is an Outcast wrapper for invoking a package's build engine
@@ -52,7 +52,7 @@ def display_build_engine_list():
         files = os.listdir(bpath)
         for f in files:
             if ( os.path.isdir(os.path.join(bpath,f)) ):
-                print f
+                print(f)
       
     print( ' ' )
 

@@ -27,7 +27,7 @@ from docopt.docopt import docopt
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'checkout', 'Checks out one or more files from the SCM repository.' )
+    print("{:<13}{}".format( 'checkout', 'Checks out one or more files from the SCM repository.' ))
     
 
 #------------------------------------------------------------------------------

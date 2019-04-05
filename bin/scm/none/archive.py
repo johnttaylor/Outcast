@@ -37,14 +37,14 @@ from docopt.docopt import docopt
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'archive', 'Creates an archive file from the current SCM snapshot' )
+    print("{:<13}{}".format( 'archive', 'Creates an archive file from the current SCM snapshot' ))
     
 
 #------------------------------------------------------------------------------
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
 
-    print "ARCHIVE: {}/{}".format(args['<pkgname>'], args['-d'] )
+    print("ARCHIVE: {}/{}".format(args['<pkgname>'], args['-d'] ))
 
     # Return 'error' since this is just a stub
     exit(1)

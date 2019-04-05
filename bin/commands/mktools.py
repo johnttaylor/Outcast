@@ -32,7 +32,7 @@ from docopt.docopt import docopt
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'mktools', 'Creates a template tools/ directory.' )
+    print("{:<13}{}".format( 'mktools', 'Creates a template tools/ directory.' ))
     
 #------------------------------------------------------------------------------
 def run( common_args, cmd_argv ):

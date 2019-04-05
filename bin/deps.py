@@ -1,8 +1,9 @@
 """Collection of helper functions related to package dependencies"""
 
-import ConfigParser, os, tarfile
+import configparser, os, tarfile
 import utils
-
+import tempfile
+import shutil
 #------------------------------------------------------------------------------
 def validate_dependencies( pkginfo, list_deps, list_weak, list_trans, common_args, nocheck_flag, file_name, cache=None ):
 
@@ -42,7 +43,7 @@ def validate_dependencies( pkginfo, list_deps, list_weak, list_trans, common_arg
         if ( len(stale) > 0 ):
             print( "ERROR: Stale dependencies in the [transitive_deps] section:" )
             for d in stale:
-                print( "ERROR:   " + d )
+                print(( "ERROR:   " + d ))
             exit(1)
                 
         # Clean-up tree for print/display purposes
@@ -121,7 +122,7 @@ def _mark_tree( node, noweak_list ):
 def _check_results( t, err_msg ):
     if ( t[0] != 0 ):
         if ( t[1] != None and t[1] != 'None None' ):
-            print t[1]
+            print(t[1])
         exit( err_msg )
 
 #------------------------------------------------------------------------------
@@ -162,7 +163,7 @@ def remove_duplicate_children( node, seen ):
 #------------------------------------------------------------------------------
 def read_package_spec( filename, top_fname='', fh=None ):
 
-    cfg = ConfigParser.RawConfigParser(allow_no_value=True)
+    cfg = configparser.RawConfigParser(allow_no_value=True)
     cfg.optionxform = str
     fname           = filename
     
@@ -176,7 +177,7 @@ def read_package_spec( filename, top_fname='', fh=None ):
     else:
         utils.print_verbose( "Reading file: "  + top_fname  )
         fname = top_fname
-        cfg.readfp( fh )
+        cfg.read_file( fh )
         fh.close()
     
     list_deps  = []
@@ -203,14 +204,19 @@ def read_package_spec( filename, top_fname='', fh=None ):
 def read_spec_from_tar_file( f ):
     # Open the child top file
     try:
-        tar = tarfile.open( f )
+        tar = tarfile.open( f , mode="r:*")
         fh  = tar.extractfile( 'top/pkg.specification' )
-    
+
+        # Make a temporary file that 'supports Unicode reads' (the tar file reads are 'str' not bytes/byte tuples)
+        fp  = tempfile.TemporaryFile(mode="w");
+        shutil.copy(fh,fp)
+
     except Exception as ex:
         exit("ERROR: Trying to locate/read Package Top File: {}".format(f) )
     
     # Get pkg.specification info from the top file
-    pkginfo  = read_package_spec( 'pkg.specification', f, fh )
+    pkginfo  = read_package_spec( 'pkg.specification', f, fp )
+    fp.close();
     tar.close()
     return pkginfo
 
@@ -235,7 +241,7 @@ def build_node( parent_node, children_data, path_to_uverse, trail, cache, weak_d
             
         # trap cyclic dependencies
         if ( _test_for_cyclic(n,trail) ):
-            print "ERROR: Cyclic dependency."
+            print("ERROR: Cyclic dependency.")
             _display_trail(trail,n)
             exit(1)
 
@@ -295,8 +301,8 @@ def _test_for_weak_cyclic( t, trail, weak_deps ):
 
 
 def _display_trail(trail, n=None):
-    print "ERROR:   ",
-    print _convert_trail_to_string(trail,n)
+    print("ERROR:   ", end=' ')
+    print(_convert_trail_to_string(trail,n))
 
         
 def _convert_trail_to_string( trail, n=None):
@@ -349,9 +355,9 @@ def _valid_no_duplicate_pkgs_in_section( list_deps, fname, msg ):
     pnames     = _extract_pkgnames( list_deps )
     duplicates = utils.find_duplicates_in_list( pnames )
     if ( len(duplicates) > 0 ):
-        print "ERROR: In file - " + fname + ' - ' + msg 
+        print("ERROR: In file - " + fname + ' - ' + msg) 
         for n in duplicates:
-            print "ERROR:   " + n
+            print("ERROR:   " + n)
         exit(1)        
     
 def _extract_pkgnames( list_of_deps ):
@@ -478,7 +484,7 @@ def _build_actual( node, children_data, all_entries, path_to_uverse, trail, cach
         # Trap missing transitive dependency (and properly handle the weak-cyclic condition)
         if ( entry == None ):
             if ( not _test_for_weak_cyclic( ("",p,b,v), trail, weak_deps ) ):
-                print("ERROR: Missing a transitive dependency: {}".format(encode_dep(cdata,use_quotes=False)) )
+                print(("ERROR: Missing a transitive dependency: {}".format(encode_dep(cdata,use_quotes=False)) ))
                 _display_trail(trail)
                 exit(1)
             else:
@@ -497,7 +503,7 @@ def _build_actual( node, children_data, all_entries, path_to_uverse, trail, cach
      
         # Check if actual transitive dependency is valid
         if ( not utils.is_ver1_backwards_compatible_with_ver2(entry,cdata,bhist) ):
-            print("ERROR: Actual transitive dependency is NOT compatible. Required min ver={}".format(encode_dep(cdata,use_quotes=False)) )
+            print(("ERROR: Actual transitive dependency is NOT compatible. Required min ver={}".format(encode_dep(cdata,use_quotes=False)) ))
             _display_trail(trail)
             exit(1)
        
@@ -525,16 +531,22 @@ def read_top_file( cpath, fname, trail, cache ):
         try:
             tar = tarfile.open( cpath )
             fh  = tar.extractfile( 'top/pkg.specification' )
-        
+       
+            # Make a temporary file that supports Unicode reads because the configParser only works with Unicode strings 
+            # Note: the 'raw' extracted tar file - the read operation returns 'str' not bytes/byte tuples (aka not Unicode strings)
+            fp  = tempfile.TemporaryFile(mode="w");
+            shutil.copy(fh,fp)
+   
         except Exception as ex:
-            print("ERROR: Trying to locate/read Package Top File: {}".format(cpath) )
+            print(("ERROR: Trying to locate/read Package Top File: {}".format(cpath) ))
             _display_trail(trail)
             exit(1)
     
         # Get child dependency data from the top file
-        info, d,w,t, cfg = read_package_spec( 'pkg.specification', fname, fh )
+        info, d,w,t, cfg = read_package_spec( 'pkg.specification', fname, fp )
         bhist            = _get_branching_history( tar, trail )
         cache[fname]     = (info,d,w,t,bhist)
+        fp.close();
         tar.close()
         _valid_no_duplicate_pkgs( d, w, t, fname ) 
 
@@ -555,7 +567,7 @@ def _get_branching_history( tar, trail ):
     
     # Some other error -->hard stop    
     except Exception as ex:
-        print("ERROR: Cannot open the 'pkg.branching' file in Package Top File: {}".format(cpath) )
+        print(("ERROR: Cannot open the 'pkg.branching' file in Package Top File: {}".format(cpath) ))
         _display_trail(trail)
         exit(1)
     

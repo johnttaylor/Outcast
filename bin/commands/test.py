@@ -21,12 +21,12 @@ Notes:
         
 """
 from docopt.docopt import docopt
-import subprocess, os, tarfile
+import subprocess, os
 import utils, deps
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'test', "Runs the package's test all script." )
+    print("{:<13}{}".format( 'test', "Runs the package's test all script." ))
     
 
 #------------------------------------------------------------------------------
@@ -49,7 +49,7 @@ def run( common_args, cmd_argv ):
 def _check_results( t, err_msg ):
     if ( t[0] != 0 ):
         if ( t[1] != None and t[1] != 'None None' ):
-            print t[1]
+            print(t[1])
         exit( err_msg )
         
         

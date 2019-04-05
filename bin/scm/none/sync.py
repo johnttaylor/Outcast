@@ -26,7 +26,7 @@ from docopt.docopt import docopt
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'sync', "Sync's the workspace with the SCM Repository" )
+    print("{:<13}{}".format( 'sync', "Sync's the workspace with the SCM Repository" ))
     
 
 #------------------------------------------------------------------------------

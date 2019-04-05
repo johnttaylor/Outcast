@@ -32,7 +32,7 @@ from docopt.docopt import docopt
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'commit', 'Commit changes of the Package Universe metadata files' )
+    print("{:<13}{}".format( 'commit', 'Commit changes of the Package Universe metadata files' ))
     
 
 #------------------------------------------------------------------------------
@@ -58,7 +58,7 @@ def run( common_args, cmd_argv ):
 def _check_results( t, err_msg ):
     if ( t[0] != 0 ):
         if ( t[1] != None and t[1] != 'None None' ):
-            print t[1]
+            print(t[1])
         exit( err_msg )
         
 def _clean_up():
@@ -70,6 +70,6 @@ def _clean_up():
 def _check_results( t, err_msg ):
     if ( t[0] != 0 ):
         if ( t[1] != None and t[1] != 'None None' ):
-            print t[1]
+            print(t[1])
         _clean_up()
         exit( err_msg )

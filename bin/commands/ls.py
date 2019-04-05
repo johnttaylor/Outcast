@@ -59,7 +59,7 @@ from my_globals import OUTCAST_LOCAL_PKG_SUFFIX
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'ls', 'Lists the mounted packages and available packages.' ) 
+    print("{:<13}{}".format( 'ls', 'Lists the mounted packages and available packages.' )) 
     
 
 #------------------------------------------------------------------------------
@@ -79,22 +79,22 @@ def run( common_args, cmd_argv ):
         # Short listing
         if ( args['--short'] ):
             parent0 = common_args['-p']
-            for g0 in os.walk(common_args['-p']).next()[1]:
+            for g0 in next(os.walk(common_args['-p']))[1]:
 
                 # Apply filter
                 if ( fnmatch.fnmatch( g0, filter ) ):
-                    print g0
+                    print(g0)
 
         # Full listing
         else:
             parent0 = common_args['-p']
-            for g0 in os.walk(common_args['-p']).next()[1]:
+            for g0 in next(os.walk(common_args['-p']))[1]:
                 parent1 = parent0 + os.sep + g0
-                for g1 in os.walk(parent1).next()[1]:
+                for g1 in next(os.walk(parent1))[1]:
 
                     # Process leaf
                     parent2 = parent1 + os.sep + g1
-                    for g2 in os.walk(parent2).next()[1]:
+                    for g2 in next(os.walk(parent2))[1]:
                         leaf = parent2 + os.sep + g2
                         
                         # Apply filter
@@ -103,7 +103,7 @@ def run( common_args, cmd_argv ):
                     
             # Display package
             for i in pkgs:
-                print i.replace(common_args['-p']+os.sep,'',1)
+                print(i.replace(common_args['-p']+os.sep,'',1))
             
 
     # List packages in the Native Package universe
@@ -125,9 +125,9 @@ def run( common_args, cmd_argv ):
                         continue
                     
                 if ( not args['--long'] ):
-                    print pname
+                    print(pname)
                 else:
-                    print "{}  {}".format( utils.epoch_secs_to_short_local(info['pubtime']), pname )
+                    print("{}  {}".format( utils.epoch_secs_to_short_local(info['pubtime']), pname ))
 
 
         
@@ -147,7 +147,7 @@ def run( common_args, cmd_argv ):
                 # Display package
                 else:    
                     if ( args['--short'] ):
-                        print d
+                        print(d)
                     else:
                         print ( f )
 

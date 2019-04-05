@@ -29,12 +29,12 @@ Notes:
 
 """
 from docopt.docopt import docopt
-import subprocess, os, tarfile
+import subprocess, os
 import utils, deps
 
 #------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'cd', 'Change CWD based on a Pacakge.' )
+    print("{:<13}{}".format( 'cd', 'Change CWD based on a Pacakge.' ))
     
 
 #------------------------------------------------------------------------------
@@ -47,18 +47,18 @@ def run( common_args, cmd_argv ):
     # Goto the Workspace root
     if ( args['<pkgname>'] == None ):
         cmd  = 'cd ' +  common_args['-w']
-        print ".run: " + cmd
+        print(".run: " + cmd)
 
     # Goto the Package root
     elif ( args['<path>'] == None ):
         path = os.path.join( common_args['-w'], args['<pkgname>'] )
         cmd  = 'cd ' +  path
-        print ".run: " + cmd
+        print(".run: " + cmd)
 
     # Goto the specified path relative to Package root
     else:
         path = os.path.join( common_args['-w'], args['<pkgname>'], args['<path>'] )
         cmd  = 'cd ' +  path
-        print ".run: " + cmd       
+        print(".run: " + cmd)       
     
 #------------------------------------------------------------------------------

@@ -88,7 +88,7 @@ from my_globals import OUTCAST_TOP_DIR
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'moddeps', "Adds, updates, and deletes a Package's dependencies" )
+    print("{:<13}{}".format( 'moddeps', "Adds, updates, and deletes a Package's dependencies" ))
     
 
 #------------------------------------------------------------------------------
@@ -175,8 +175,8 @@ def run( common_args, cmd_argv ):
     
     # Attemp to resolve dependency conflicts
     if ( not _reconcile_conflicts( root, common_args['--uverse'], cache ) ):
-        print "ERROR: final derived dependency tree"
-        print root
+        print("ERROR: final derived dependency tree")
+        print(root)
         exit( "ERROR: Unable to resolve the new dependency tree" )
 
     # Create new transitive list
@@ -221,10 +221,10 @@ def run( common_args, cmd_argv ):
 
     
     if ( args['--print'] ):
-        print "Derived Transitive tree."
-        print dep_tree
-        print "Actual Package tree."
-        print act_tree
+        print("Derived Transitive tree.")
+        print(dep_tree)
+        print("Actual Package tree.")
+        print(act_tree)
 
 
 #------------------------------------------------------------------------------
@@ -429,6 +429,6 @@ def _read_top_file( pbv, uverse, cache ):
 def _check_results( t, err_msg ):
     if ( t[0] != 0 ):
         if ( t[1] != None and t[1] != 'None None' ):
-            print t[1]
+            print(t[1])
         exit( err_msg )
                 

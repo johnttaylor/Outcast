@@ -29,7 +29,7 @@ from docopt.docopt import docopt
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( "sync", "Sync's the workspace with the SCM Repository" )
+    print("{:<13}{}".format( "sync", "Sync's the workspace with the SCM Repository" ))
     
 
 #------------------------------------------------------------------------------
@@ -58,5 +58,5 @@ def run( common_args, cmd_argv ):
 def _check_results( t, err_msg, clean_commit=False ):
     if ( t[0] != 0 ):
         if ( t[1] != None and t[1] != 'None None' ):
-            print t[1]
+            print(t[1])
         exit( err_msg )

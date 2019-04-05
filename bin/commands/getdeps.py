@@ -40,7 +40,7 @@ from my_globals import OUTCAST_TOP_DIR
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'getdeps', 'Pulls and Mounts dependent Packages.' )
+    print("{:<13}{}".format( 'getdeps', 'Pulls and Mounts dependent Packages.' ))
     
 
 #------------------------------------------------------------------------------

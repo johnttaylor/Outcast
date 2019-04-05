@@ -33,8 +33,8 @@ Notes:
 import os
 import symlinks
 import utils
-import ConfigParser
-import umount
+import configparser
+from . import umount
 
 from docopt.docopt import docopt
 
@@ -47,7 +47,7 @@ from my_globals import OUTCAST_EXPORT_HEADERS_FNAME
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'mount', "Mounts a Package into the current workspace's 'xpkgs/' directory" )
+    print("{:<13}{}".format( 'mount', "Mounts a Package into the current workspace's 'xpkgs/' directory" ))
     
 
 #------------------------------------------------------------------------------
@@ -205,7 +205,7 @@ def _process_export_header_file( pkgpath ):
 
 #------------------------------------------------------------------------------
 def _parse_spec_file( common_args, args ):
-    cfg = ConfigParser.RawConfigParser(allow_no_value=True)
+    cfg = configparser.RawConfigParser(allow_no_value=True)
     cfg.optionxform = str
     cfg.read( args['-f'] )
             

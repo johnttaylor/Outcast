@@ -33,7 +33,7 @@ from docopt.docopt import docopt
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'checkin', 'Checks in one or more files to the SCM repository.' )
+    print("{:<13}{}".format( 'checkin', 'Checks in one or more files to the SCM repository.' ))
     
 
 #------------------------------------------------------------------------------
@@ -72,7 +72,7 @@ def run( common_args, cmd_argv ):
 def _check_results( t, err_msg, clean_commit=False ):
     if ( t[0] != 0 ):
         if ( t[1] != None and t[1] != 'None None' ):
-            print t[1]
+            print(t[1])
         if ( clean_commit == True ):
             utils.run_shell( "git reset --hard HEAD~1" )
         exit( err_msg )

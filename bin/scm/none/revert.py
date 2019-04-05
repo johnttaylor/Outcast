@@ -27,14 +27,14 @@ from docopt.docopt import docopt
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print "{:<13}{}".format( 'revert', 'Reverts/cancels the checkouts for the speficied files' )
+    print("{:<13}{}".format( 'revert', 'Reverts/cancels the checkouts for the speficied files' ))
     
 
 #------------------------------------------------------------------------------
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
 
-    print "REVERTED: {} {}".format( args['<pkgname>'], args['FILES'] )
+    print("REVERTED: {} {}".format( args['<pkgname>'], args['FILES'] ))
 
     # Return 'error' since this is just a stub
     exit(1)

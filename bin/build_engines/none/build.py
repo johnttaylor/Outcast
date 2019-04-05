@@ -26,4 +26,4 @@ import utils
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv, options_first=True)
     
-    print "NOP.  The 'None' build engine was selected"
+    print("NOP.  The 'None' build engine was selected")
