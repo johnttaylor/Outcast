@@ -3,6 +3,7 @@
 from ftplib import FTP
 import os, configparser, tempfile
 import utils
+import six 
 
 # globals
 _found     = 0

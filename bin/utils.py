@@ -705,7 +705,7 @@ def _test_compatible( older, newer ):
 #-----------------------------------------------------------------------------
 def append_to_file( fd, filename ):
     try:
-        f   = open( filename, "rb" )
+        f   = open( filename, "r" )
         buf = f.read(1024)
         while( buf != '' ):
             fd.write(buf)
@@ -1081,7 +1081,7 @@ def update_journal_do_not_use( journal_file, user, summary_comment, comment_file
 
 def _update_journal( journal_file, comment_file, marker_string, exit_on_error=True ):
     try:
-        f = open( journal_file, "ab" )
+        f = open( journal_file, "a" )
         f.write( marker_string + "\n" )
         if ( comment_file ):
             append_to_file( f, comment_file )

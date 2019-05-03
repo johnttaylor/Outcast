@@ -54,12 +54,12 @@ import utils
 
 #------------------------------------------------------------------------------
 def load_command( name ):
-    try:
+    #try:
         command_module = __import__("commands.{}".format(name), fromlist=["commands"])
-    except ImportError:
-        exit("%r is not a Orc command. Use 'orc help' for list of commands." % name)
+    #except ImportError:
+    #     exit("{} is not a Orc command. Use 'orc help' for list of commands.".format(name) )
 
-    return command_module
+        return command_module
         
         
 #------------------------------------------------------------------------------

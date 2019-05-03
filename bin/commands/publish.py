@@ -286,7 +286,7 @@ def run( common_args, cmd_argv ):
         t   = utils.run_shell( cmd, common_args['-v'] )
         _check_results( t, "ERROR: Failed SCM checkout of {}.".format(chg_log) )
         utils.update_journal_publish( chg_log, common_args['--user'], args['<summary>'], args['--comments'], ver, bname, scmlabel )
-    
+        
     # Archive the package
     print("= Archiving the package...")
     global pkgtar
@@ -406,7 +406,7 @@ def _read_package_spec( args, pkg_spec, bname, minver ):
 
 def _update_package_spec( pkg_spec, cfg ):
     # Update the pkg.specification file
-    with open( pkg_spec, 'wb' ) as cfgfile:
+    with open( pkg_spec, 'w' ) as cfgfile:
         cfg.write(cfgfile)
         cfgfile.close()
 
