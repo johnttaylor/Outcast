@@ -196,7 +196,6 @@ def read_package_spec( filename, top_fname='', fh=None ):
 
     # load package info
     pkginfo = read_info(cfg, filename, top_fname)
-  
     return pkginfo, list_deps, list_weak, list_trans, cfg 
     
 
@@ -532,21 +531,22 @@ def read_top_file( cpath, fname, trail, cache ):
             tar = tarfile.open( cpath )
             fh  = tar.extractfile( 'top/pkg.specification' )
        
-            # Make a temporary file that supports Unicode reads because the configParser only works with Unicode strings 
-            # Note: the 'raw' extracted tar file - the read operation returns 'str' not bytes/byte tuples (aka not Unicode strings)
-            fp  = tempfile.TemporaryFile(mode="w");
-            shutil.copy(fh,fp)
-   
         except Exception as ex:
-            print(("ERROR: Trying to locate/read Package Top File: {}".format(cpath) ))
+            print(("ERROR: Trying to locate/read Package Top File: {} ({})".format(cpath, str(ex)) ))
             _display_trail(trail)
             exit(1)
+
+        # Make a temporary file that supports Unicode reads because the configParser only works with Unicode strings 
+        with open("deps.tmp", "wb" ) as fp:
+            fp.write( fh.read() )
+
     
         # Get child dependency data from the top file
-        info, d,w,t, cfg = read_package_spec( 'pkg.specification', fname, fp )
-        bhist            = _get_branching_history( tar, trail )
-        cache[fname]     = (info,d,w,t,bhist)
-        fp.close();
+        with open( "deps.tmp" ) as fp:
+            info, d,w,t, cfg = read_package_spec( 'pkg.specification', fname, fp )
+            bhist            = _get_branching_history( tar, trail )
+            cache[fname]     = (info,d,w,t,bhist)
+        os.remove( "deps.tmp" ) #fp.close();
         tar.close()
         _valid_no_duplicate_pkgs( d, w, t, fname ) 
 

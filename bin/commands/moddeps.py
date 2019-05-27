@@ -208,7 +208,7 @@ def run( common_args, cmd_argv ):
     _update_section( me_cfg, "weak_deps", me_w )
     _update_section( me_cfg, "transitive_deps", trans )
 
-    with open( pkg_spec, 'wb' ) as cfgfile:
+    with open( pkg_spec, 'w' ) as cfgfile:
         me_cfg.write(cfgfile)
         cfgfile.close()
 
