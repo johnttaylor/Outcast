@@ -76,7 +76,7 @@ def run( common_args, cmd_argv ):
     try:
         utils.print_verbose( "Uncompressing archive..." )
         tar = tarfile.open(fileobj=fd)
-        first = next(tar)
+        first = tar.next()
         if ( first.name != p ):
             exit( "ERROR: Contents of the archive file - {} - is not an Outcast Package archive.".format( archive ) )
         tar.extractall(tmp)
