@@ -12,6 +12,8 @@ Options:
     PATTERN              If a subdir under PRJDIR matches PATTERN, then that
                          directory is built.  Standard Python wildcards can
                          be used in the PATTERN.
+    --filter1 FILTER1    FILTER1 is and'd with PATTERN to determine what
+                         directories are built.
     --path PRJDIR        The full path to the project directory of the 
                          projects to build.  If no path is specified, the
                          current working directory is used for the project
@@ -112,7 +114,12 @@ def run( common_args, cmd_argv ):
         if ( args['here'] ):
             pattern = '*'
     
-        for p in _filter_prj_list( all_prjs, pattern, pkgroot ):
+        # Apply pattern/directories filter(s)
+        prj_list = _filter_prj_list( all_prjs, pattern, pkgroot )
+        if ( args['--filter1'] ):
+            prj_list = _filter_prj_list( prj_list, args['--filter1'], pkgroot )
+
+        for p in prj_list:
             _build_project(p, args['-v'], args['<opts>'], args['--config'], args['--xconfig'], pkgroot )
 
     # restore original cwd
