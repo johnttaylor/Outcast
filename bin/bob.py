@@ -51,7 +51,7 @@ def display_build_engine_list():
     if ( os.path.exists( bpath ) ):
         files = os.listdir(bpath)
         for f in files:
-            if ( os.path.isdir(os.path.join(bpath,f)) ):
+            if ( os.path.isdir(os.path.join(bpath,f)) and not f.startswith('__') ):
                 print(f)
       
     print( ' ' )
@@ -67,7 +67,7 @@ if ( args['--qry'] ):
 
 # Trap no command specified        
 elif ( not args['build'] ):
-        docopt(__doc__,argv=['--help'])
+    docopt(__doc__,argv=['--help'])
     
 
 # Invoke build engine

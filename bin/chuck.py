@@ -13,16 +13,15 @@ Arguments:
                          'PATTERN' is executed.  The optional '<testargs>' are 
                          passed to each instance executed.
     --file CMDLIST       A text file containing a list of test applications to 
-                         to run.  The format of file is a list of 'chuck' 
-                         commands. Blank lines and line starting with '#' are 
-                         skipped.
+                         run.  The format of file is a list of 'chuck' commands. 
+                         Blank lines and line starting with '#' are skipped.
     args                 When specifing '<testargs>' you must specify the 
-                         literaly 'args' (this is a work around on how 'chuck'
+                         literal 'args' (this is a work around on how 'chuck'
                          parses it command line options.
                          
                          
 Options:
-    --m2 PATTERN         A seconnd 'PATTERN' that will be OR'd with the --match
+    --m2 PATTERN         A second 'PATTERN' that will be OR'd with the --match
                          argument.
     --path TESTPATH      The full path to 'root' directory that will be used
                          when searching for test applications. If no path is 
@@ -33,7 +32,7 @@ Options:
                          trees that contain the pattern 'DIR' in the names.  
                          [Default: *]   
     --d2 DIR             A second directory condition that will be AND'd with 
-                         with the --dir option when restricting the directory
+                         the --dir option when restricting the directory
                          search.                    
     --loop N             Repeat the test 'N' times.  [default: 1] 
     -t,--turbo           Run the tests in parallel.                         
