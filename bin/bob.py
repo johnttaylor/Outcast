@@ -57,22 +57,24 @@ def display_build_engine_list():
     print( ' ' )
 
 #------------------------------------------------------------------------------
-# Parse command line
-args = docopt(__doc__, version=BOB_VERSION(), options_first=True )
-
-# Display list of build engines supported
-if ( args['--qry'] ):
-    display_build_engine_list()
-        
-
-# Trap no command specified        
-elif ( not args['build'] ):
-    docopt(__doc__,argv=['--help'])
+# BEGIN
+if __name__ == '__main__':
+    # Parse command line
+    args = docopt(__doc__, version=BOB_VERSION(), options_first=True )
     
-
-# Invoke build engine
-else:
-    load_command( args['-b'] ).run( args, args['<args>'] )
+    # Display list of build engines supported
+    if ( args['--qry'] ):
+        display_build_engine_list()
+            
+    
+    # Trap no command specified        
+    elif ( not args['build'] ):
+        docopt(__doc__,argv=['--help'])
+        
+    
+    # Invoke build engine
+    else:
+        load_command( args['-b'] ).run( args, args['<args>'] )
 
 
     

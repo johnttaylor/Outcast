@@ -37,6 +37,8 @@ Options:
                          config/setup is required.
     --config SCRIPT      Same as the '--xconfig' option, but the name and path 
                          are relative to the package root directory
+    -2                   Run two builds at the same time
+    -4                   Run four builds at the same time
     -v                   Be verbose 
     -h, --help           Display help for common options/usage
     
@@ -57,6 +59,9 @@ import sys
 import os
 import subprocess
 import fnmatch
+from multiprocessing import Process
+import multiprocessing
+import time
 
 sys.path.append( os.path.dirname(__file__) + os.sep + ".." )
 from docopt.docopt import docopt
@@ -129,8 +134,42 @@ def run( common_args, cmd_argv ):
         jobs = _filter_prj_list( all_prjs, pattern, pkgroot, args['--exclude'], args['--e2'], args['--e3'], args['--p2'], args['--p3'] )
        
         # Run the Jobs serially
-        for p in jobs:
-            _build_project(p, args['-v'], args['<opts>'], args['--config'], args['--xconfig'], pkgroot )
+        if ( not args['-2'] and not args['-4'] ):
+            for p in jobs:
+                _build_project(p, args['-v'], args['<opts>'], args['--config'], args['--xconfig'], pkgroot )
+
+        # Run the Jobs in PARALLEL
+        else:
+            max     = len(jobs)
+            index   = 0
+            busy    = 0
+            cpus    = 2 if args['-2'] else 4
+            handles = []
+            for h in range(0,cpus):
+                handles.append( None )
+
+            # Process 'n' directories at a time
+            while( index < max or busy > 0 ):
+                # Start multiple processes
+                for i in range(0, cpus):
+                    if ( handles[i] == None and index < max ):
+                        j         = jobs[index]
+                        index     += 1
+                        busy      += 1
+                        handles[i] = Process(target=_build_project, args=(j, args['-v'], args['<opts>'], args['--config'], args['--xconfig'], pkgroot) )
+                        handles[i].start()
+
+                # Poll for processes being done
+                for i in range(0, cpus):
+                    if ( handles[i] != None and not handles[i].is_alive() ):
+                        if ( handles[i].exitcode != 0 ):
+                            exit( handles[i].exitcode )
+                        handles[i] = None
+                        busy      -= 1
+
+                # sleep for 10ms before polling to see if a process has completed
+                if ( busy >= cpus ):
+                    time.sleep( 0.010 )
 
     # restore original cwd
     utils.pop_dir()
