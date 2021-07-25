@@ -4,18 +4,22 @@ import configparser, os, tarfile
 import utils
 import tempfile
 import shutil
+
+LOCAL_MARKER = "**Local**"
+
 #------------------------------------------------------------------------------
-def validate_dependencies( pkginfo, list_deps, list_weak, list_trans, common_args, nocheck_flag, file_name, cache=None ):
+def validate_dependencies( pkginfo, list_deps, list_weak, list_trans, list_local, common_args, nocheck_flag, file_name, cache=None ):
 
     # check for duplicate names in a package file
     if ( not nocheck_flag ):
-        _valid_no_duplicate_pkgs( list_deps, list_weak, list_trans, file_name ) 
+        _valid_no_duplicate_pkgs( list_deps, list_weak, list_trans, list_local, file_name ) 
     
     # Housekeeping
-    t     = (pkginfo['name'], pkginfo['branch'], pkginfo['version'])
-    trail = []
-    all   = []
-    root  = utils.Node( t )
+    t         = (pkginfo['name'], pkginfo['branch'], pkginfo['version'])
+    trail     = []
+    all       = []
+    immediate = []
+    root      = utils.Node( t )
     all.extend( list_deps )
     all.extend( list_weak )
     if ( cache == None ):
@@ -23,20 +27,20 @@ def validate_dependencies( pkginfo, list_deps, list_weak, list_trans, common_arg
         
     # calculate all of the possible transitive dependencies
     trail.append( (file_name, t[0], t[1], t[2]) )   
-    build_node( root, all, common_args['--uverse'], trail, cache, list_weak )
+    build_node( root, all, list_local, common_args['--uverse'], trail, cache, list_weak )
 
     # Skip most of the test(s) when --nocheck
     root_actual = utils.Node( t )
     if ( not nocheck_flag ):
         # Housekeeping for: verify listed transitive dependencies are valid
-        allall = list(all)
+        allall    = list(all)
         allall.extend( list_trans )
         
         # check against "do-not-use" packages
         check_against_blacklist( common_args['--uverse'], allall, common_args, warn_on_do_not_use="Initial check shows a dependency on a 'Do-Not-Use' Package: {}-{}-{}." )
 
         # Run algorithm
-        _build_actual( root_actual, all, allall, common_args['--uverse'], trail, cache, list_weak )
+        _build_actual( root_actual, all, allall, list_local, common_args['--uverse'], trail, cache, list_weak )
 
         # Check for stale transitive dependencies
         stale = find_unused_dependencies( root_actual, list_trans )
@@ -53,9 +57,9 @@ def validate_dependencies( pkginfo, list_deps, list_weak, list_trans, common_arg
         # Find weak ONLY dependencies
         trail = [t]
         root_noweak = utils.Node(t)
-        build_node( root_noweak, list_deps, common_args['--uverse'], trail, cache, None )
+        build_node( root_noweak, list_deps, list_local, common_args['--uverse'], trail, cache, None )
         root_actual_noweak = utils.Node(t)
-        _build_actual( root_actual_noweak, list_deps, allall, common_args['--uverse'], trail, cache, list_weak )
+        _build_actual( root_actual_noweak, list_deps, allall, list_local, common_args['--uverse'], trail, cache, list_weak )
             
         # update returned trees with weak-ONLY info
         _mark_weak_only_nodes( root, root_noweak )
@@ -183,6 +187,7 @@ def read_package_spec( filename, top_fname='', fh=None ):
     list_deps  = []
     list_weak  = []
     list_trans = []
+    list_local = []
     
     # load dependencys sections
     if ( cfg.has_section('immediate_deps') ):
@@ -194,9 +199,12 @@ def read_package_spec( filename, top_fname='', fh=None ):
     if ( cfg.has_section('transitive_deps') ):
         list_trans = _load_section( 'transitive_deps', cfg, fname )
 
+    if ( cfg.has_section('local_overrides') ):
+        list_local = _load_override_section( 'local_overrides', cfg, fname )
+
     # load package info
     pkginfo = read_info(cfg, filename, top_fname)
-    return pkginfo, list_deps, list_weak, list_trans, cfg 
+    return pkginfo, list_deps, list_weak, list_trans, list_local, cfg 
     
 
 
@@ -221,9 +229,17 @@ def read_spec_from_tar_file( f ):
 
 
 #------------------------------------------------------------------------------
-def build_node( parent_node, children_data, path_to_uverse, trail, cache, weak_deps, no_warn_on_weakcycle=False, trans=None ):
+def build_node( parent_node, children_data, list_local, path_to_uverse, trail, cache, weak_deps, no_warn_on_weakcycle=False, trans=None ):
     parent_node.add_children_data( children_data )
+    override_pkgs = _extract_pkgnames( list_local )
+
     for cnode in parent_node.get_children():
+        # Skip local overrides
+        pkg,b,v = cnode.get_data()
+        if ( pkg in override_pkgs ):
+            cnode.set_data( (pkg, LOCAL_MARKER, '') )
+            continue
+
         p,b,v = _get_node_data_and_substitute( cnode, trans )
         fname = build_top_fname(p,b,v)
         cpath = os.path.join( path_to_uverse, fname )
@@ -253,7 +269,7 @@ def build_node( parent_node, children_data, path_to_uverse, trail, cache, weak_d
         # Process the child top file
         i,d,w,t,bhist = info
         if ( len(d) > 0 ):
-            build_node( cnode, d, path_to_uverse, trail, cache, weak_deps, no_warn_on_weakcycle, trans )
+            build_node( cnode, d, list_local, path_to_uverse, trail, cache, weak_deps, no_warn_on_weakcycle, trans )
             
         trail.remove(n)
     
@@ -333,13 +349,28 @@ def _load_section( section, cfg, fname ):
 
     return children       
     
+def _load_override_section( section, cfg, fname, sep=';' ):
+    children = []
+    options  = cfg.options(section)
+    
+    for entry in options:
+        entry = entry.replace(' ','')
+        try:
+            pkg, repo, branch, path = entry.split(sep)
+        except:
+            exit( "ERROR: Malformed dependency entry [{}.{}] in file: {} (must be: pkg;repo;branch;path)".format(section,entry,fname) )
+        children.append( (pkg, repo, branch, path) )
+
+    return children       
+
 #------------------------------------------------------------------------------
-def _valid_no_duplicate_pkgs( list_deps, list_weak, list_trans, fname ):
+def _valid_no_duplicate_pkgs( list_deps, list_weak, list_trans, list_local, fname ):
     
     # check by section
     _valid_no_duplicate_pkgs_in_section( list_deps,  fname, "Duplicate Package name(s) within section: [immediate_deps]" )
     _valid_no_duplicate_pkgs_in_section( list_weak,  fname, "Duplicate Package name(s) within section: [weak_deps]" )
     _valid_no_duplicate_pkgs_in_section( list_trans, fname, "Duplicate Package name(s) within section: [transitive_deps]" )
+    _valid_no_duplicate_pkgs_in_section( list_local, fname, "Duplicate Package name(s) within section: [local_overrides]" )
 
     # check for dups across sections
     l = []
@@ -361,8 +392,8 @@ def _valid_no_duplicate_pkgs_in_section( list_deps, fname, msg ):
     
 def _extract_pkgnames( list_of_deps ):
     list = []
-    for p,b,v in list_of_deps:
-        list.append(p.lower())
+    for v in list_of_deps:
+        list.append(v[0].lower())
         
     return list     
 
@@ -428,59 +459,49 @@ def _walk_tree( node, list ):
         _walk_tree( cnode, list )
           
 #------------------------------------------------------------------------------
+def _read_string_value( pkginfo, cfg, section, key, filename, topfname, default_value=None ):
+    if ( not cfg.has_option(section,key) ):
+        exit( f"ERROR: Missing [{section}.{key}] option in file:{filename} (in top file:{topfname})" )
+    pkginfo[key] = default_value if ( cfg.get(section,key ) == None or cfg.get(section,key ) == '' ) else  cfg.get(section,key )
+     
+def _read_int_value( pkginfo, cfg, section, key, filename, topfname, default_value=None ):
+    if ( not cfg.has_option(section,key) ):
+        exit( f"ERROR: Missing [{section}.{key}] option in file:{filename} (in top file:{topfname})" )
+    pkginfo[key] = default_value if ( cfg.get(section,key ) == None or cfg.get(section,key ) == '' ) else  int(cfg.get(section,key ))
+
 def read_info( cfg, filename, top_fname ):
     
     if ( not cfg.has_section('info') ):
         exit( "ERROR: Missing [info] section in file:{} (in top file:{})".format(filename, top_fname) )
 
     pkginfo = {}    
-    if ( not cfg.has_option('info','name') ):
-        exit( "ERROR: Missing [info.name] option in file:{} (in top file:{})".format(filename, top_fname) )
-    pkginfo['name'] = cfg.get('info','name')
-    
-    if ( not cfg.has_option('info','branch') ):
-        exit( "ERROR: Missing [info.branch] option in file:{} (in top file:{})".format(filename, top_fname) )
-    pkginfo['branch'] = cfg.get('info','branch')
-
-    if ( not cfg.has_option('info','version') ):
-        exit( "ERROR: Missing [info.version] option in file:{} (in top file:{})".format(filename, top_fname) )
-    pkginfo['version'] = cfg.get('info','version')
-    
-    if ( not cfg.has_option('info','pubtime') ):
-        exit( "ERROR: Missing [info.pubtime] option in file:{} (in top file:{})".format(filename, top_fname) )
-    pkginfo['pubtime'] = int(float(cfg.get('info','pubtime')))
-    
-    if ( not cfg.has_option('info','pubtimelocal') ):
-        exit( "ERROR: Missing [info.pubtimelocal] option in file:{} (in top file:{})".format(filename, top_fname) )
-    pkginfo['pubtimelocal'] = cfg.get('info','pubtimelocal')
-    
-    if ( not cfg.has_option('info','desc') ):
-        exit( "ERROR: Missing [info.desc] option in file:{} (in top file:{})".format(filename, top_fname) )
-    pkginfo['desc'] = cfg.get('info','desc')
-    
-    if ( not cfg.has_option('info','owner') ):
-        exit( "ERROR: Missing [info.desc] option in file:{} (in top file:{})".format(filename, top_fname) )
-    pkginfo['owner'] = cfg.get('info','owner')
-    
-    if ( not cfg.has_option('info','email') ):
-        exit( "ERROR: Missing [info.email] option in file:{} (in top file:{})".format(filename, top_fname) )
-    pkginfo['email'] = cfg.get('info','email')
-    
-    pkginfo['url'] = ''
-    if ( not cfg.has_option('info','url') ):
-        pkginfo['url'] = cfg.get('info','url')
+    _read_string_value( pkginfo, cfg, 'info','name', filename, top_fname )
+    _read_string_value( pkginfo, cfg, 'info','branch', filename, top_fname )
+    _read_string_value( pkginfo, cfg, 'info','version', filename, top_fname )
+    _read_int_value( pkginfo, cfg, 'info','pubtime', filename, top_fname )
+    _read_string_value( pkginfo, cfg, 'info','pubtimelocal', filename, top_fname )
+    _read_string_value( pkginfo, cfg, 'info','desc', filename, top_fname )
+    _read_string_value( pkginfo, cfg, 'info','owner', filename, top_fname )
+    _read_string_value( pkginfo, cfg, 'info','email', filename, top_fname )
+    _read_string_value( pkginfo, cfg, 'info','url', filename, top_fname )
 
     return pkginfo
     
         
 #------------------------------------------------------------------------------
-def _build_actual( node, children_data, all_entries, path_to_uverse, trail, cache, weak_deps ):
+def _build_actual( node, children_data, all_entries, list_local, path_to_uverse, trail, cache, weak_deps ):
+    override_pkgs = _extract_pkgnames( list_local )
     node.add_children_data( children_data )
     for cnode in node.get_children():
         p,b,v = cdata = cnode.get_data()
-        entry = _find_pkg_in_list( p, all_entries )
-        
+
+        # Skip over local-overrides
+        if ( p in override_pkgs ):
+            cnode.set_data( (p, LOCAL_MARKER, '') )
+            continue
+
         # Trap missing transitive dependency (and properly handle the weak-cyclic condition)
+        entry = _find_pkg_in_list( p, all_entries )
         if ( entry == None ):
             if ( not _test_for_weak_cyclic( ("",p,b,v), trail, weak_deps ) ):
                 print(("ERROR: Missing a transitive dependency: {}".format(encode_dep(cdata,use_quotes=False)) ))
@@ -511,7 +532,7 @@ def _build_actual( node, children_data, all_entries, path_to_uverse, trail, cach
         
         # process the child
         if ( len(d) > 0 ):
-            _build_actual( cnode, d, all_entries, path_to_uverse, trail, cache, weak_deps )
+            _build_actual( cnode, d, all_entries, list_local, path_to_uverse, trail, cache, weak_deps )
         trail.remove(a)
 
 
@@ -543,12 +564,12 @@ def read_top_file( cpath, fname, trail, cache ):
     
         # Get child dependency data from the top file
         with open( "deps.tmp" ) as fp:
-            info, d,w,t, cfg = read_package_spec( 'pkg.specification', fname, fp )
+            info, d,w,t,l, cfg = read_package_spec( 'pkg.specification', fname, fp )
             bhist            = _get_branching_history( tar, trail )
             cache[fname]     = (info,d,w,t,bhist)
         os.remove( "deps.tmp" ) #fp.close();
         tar.close()
-        _valid_no_duplicate_pkgs( d, w, t, fname ) 
+        _valid_no_duplicate_pkgs( d, w, t, l, fname ) 
 
     return cache[fname]
     

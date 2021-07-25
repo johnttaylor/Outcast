@@ -20,10 +20,6 @@ Arguments:
     --version VER       Sets the version number explicitly.  Note: Can include
                         a prelease identifier.                    
     <summary>           Summary/short comments (enclose in quotes)
-    --revert            This option is used to clean-up after a failed publish
-                        attempt.  It does no harm to call the publish command
-                        with the --revert option even if there is nothing to
-                        clean-up.
     
 Options:
     --prerelease VAL    Publishes the package with a prelease value of 'VAL'.
@@ -33,44 +29,18 @@ Options:
     --pkgroot PATH      Explicit path to the package's root directory.  If not
                         specified, the package root is assume to be the Workspace 
                         directory.
-    --label PREFIX      Prefix to use when generating the SCM label. 
-                        [Default: OUTCAST_]
     --format FMT        Sets the compressor format to FMT [Default: gztar]
     --vault VFILE       The contents of VFILE specify which Package Vault to 
                         publish the package to.  The default is used to your
                         site's default Package Vault.
     -o, --override      If the package already exists in the Native Package
                         Universe or Package Vault - overwrite current contents.
-    --retry             USE THIS COMMAND WITH CAUTION.  This option essential
-                        runs the '--revert' command first and the performs the
-                        attempts the publish with the '--overrride' option
-                        turned on.
-    --dry-run           Peforms all of the publish steps EXCEPT no changes and
-                        or updates are made to the package specification, 
-                        Package Vault or Package Universe.
-    --nopending         Skips enforcing that no pending changes to the SCM 
-                        repository before publishing
     --nodeps            Skips checking/verifying the package's dependencies
-    --nogetdeps         Skips pulling and mounting dependent packages.
-    --noclean           Does not executes the package's top/tools/clean script
-    --notests           Does not executes the package's top/tools/tests script
-    --nobuild           Does not executes the package's top/tools/build script
     --nons              Does not update the packages's pkg.namespaces AND does
                         not check for namespace collisions.
     --nonewer           Does not enforce the requirement that the publish 
                         version be newer than the last publish of the package
                         on the branch.
-    --keeptars          When this option is set AND the --dry-run option is 
-                        set, then the generated tar files are NOT deleted when
-                        the script ends.  The typical use of this option is for
-                        use with build machines.
-    --ci script         This is used when performing Continious Integration 
-                        builds to provide additional actions just after the
-                        get dependencies step and just prior to executings the
-                        packagees 'clean' script.  In addition, this option 
-                        enables the '--dry-run' switch.
-
-                  
     -h, --help          Display help for this command
 
 Common Options:
@@ -81,8 +51,6 @@ Notes:
     o It is STRONGLY recommended to NOT USE the any of the '--noxxx' options!
     o If a '.' is used for <pkgname> then <pkgname> is derived from the
       the current working directory where the command was invoked from.  
-     
-    
     
 """
 import os
@@ -115,14 +83,10 @@ def run( common_args, cmd_argv ):
     # Trap the '.' notation for <pkgname> argument
     utils.check_use_current_package( args )
 
-    # Force the dry-run option when the --ci option is set
-    if ( args['--ci'] != None ):
-        args['--dry-run'] = True
-
     # Capture publish time
     now, local = utils.mark_time(common_args['--now'])
 
-    
+   
     # House keeping
     override   = '--override' if args['--override'] else ""
     root       = args['--pkgroot'] if args['--pkgroot'] else common_args['-w']
@@ -212,28 +176,6 @@ def run( common_args, cmd_argv ):
         t   = utils.run_shell( cmd, common_args['-v'] )
         _check_results( t, "ERROR: Failed getting (and mounting) dependencies." )
 
-    # Run CI script (when provided)
-    if ( args['--ci'] != None ):
-        print("= Continiouse Integration (CI) script ...") 
-        cmd = args['--ci']
-        t   = utils.run_shell( cmd, common_args['-v'] )
-        _check_results( t, "ERROR: Failed CI script." )
-            
-    # Clean everthing before building
-    if ( not args['--noclean'] ):
-        print("= Pre-cleaning...") 
-        p   = os.path.join( pathtools, "clean.py" )
-        cmd = "{} {}".format(p, pkgroot )
-        t   = utils.run_shell( cmd, common_args['-v'] )
-        _check_results( t, "ERROR: Failed Pre-clean." )
-                   
-    # Build...
-    if ( not args['--nobuild'] ):
-        print("= Building...")
-        p   = os.path.join( pathtools, "build.py" )
-        cmd = "{} {}".format(p, pkgroot )
-        t   = utils.run_shell( cmd, common_args['-v'] )
-        _check_results( t, "ERROR: Failed Building." )
                    
     # Update namespaces (I do this after the build to handle the case of autogen'd source code)
     if ( not args['--nons'] ):
@@ -253,23 +195,6 @@ def run( common_args, cmd_argv ):
         t   = utils.run_shell( cmd, common_args['-v'] )
         _check_results( t, "ERROR: Failed the namespace collision check." )
           
-    # Test...
-    if ( not args['--notests'] ):
-        print("= Run tests...")
-        p   = os.path.join( pathtools, "test.py" )
-        cmd = "{} {}".format(p, pkgroot )
-        t   = utils.run_shell( cmd, common_args['-v'] )
-        _check_results( t, "ERROR: Failed tests." )
-
-    # Clean everthing before archiving/publishing
-    if ( not args['--noclean'] ):
-        print("= Post-cleaning...") 
-        p   = os.path.join( pathtools, "clean.py" )
-        cmd = "{} {}".format(p, pkgroot )
-        t   = utils.run_shell( cmd, common_args['-v'] )
-        _check_results( t, "ERROR: Failed Pre-clean." )
-                   
-
     # edit pkg.specification 
     print("= Updating pkg.specification...")
     cmd = 'evie.py -v -w {} --user "{}" --passwd "{}" --now {} checkout {} {}'.format(root, common_args['--user'], common_args['--passwd'], now, args['<pkgname>'], pkg_spec )
@@ -277,15 +202,11 @@ def run( common_args, cmd_argv ):
     _check_results( t, "ERROR: Failed SCM checkout of {}.".format(pkg_spec) )
     _update_package_spec( pkg_spec, cfg )
     
-    # update changelog
-    if ( args['--dry-run'] ):
-        print("= Updating pkg.journal... SKIPPING (dry-run)")
-    else:
-        print("= Updating pkg.journal...")
-        cmd = 'evie.py -v -w {} --user "{}" --passwd "{}" --now {} checkout {} {}'.format(root, common_args['--user'], common_args['--passwd'], now, args['<pkgname>'], chg_log )
-        t   = utils.run_shell( cmd, common_args['-v'] )
-        _check_results( t, "ERROR: Failed SCM checkout of {}.".format(chg_log) )
-        utils.update_journal_publish( chg_log, common_args['--user'], args['<summary>'], args['--comments'], ver, bname, scmlabel )
+    print("= Updating pkg.journal...")
+    cmd = 'evie.py -v -w {} --user "{}" --passwd "{}" --now {} checkout {} {}'.format(root, common_args['--user'], common_args['--passwd'], now, args['<pkgname>'], chg_log )
+    t   = utils.run_shell( cmd, common_args['-v'] )
+    _check_results( t, "ERROR: Failed SCM checkout of {}.".format(chg_log) )
+    utils.update_journal_publish( chg_log, common_args['--user'], args['<summary>'], args['--comments'], ver, bname, scmlabel )
         
     # Archive the package
     print("= Archiving the package...")

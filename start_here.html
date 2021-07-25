@@ -223,6 +223,8 @@ Error message and password prompt
 
 <li>$:/state/tab-1749438307</li>
 
+<li>$:/state/toc/Contents-Branching--242358753</li>
+
 <li>$:/state/toc/Contents-Directories &amp; Files--242358753</li>
 
 <li>$:/state/toc/Contents-Glossary--1025088837</li>
@@ -297,6 +299,8 @@ Error message and password prompt
 
 <li>Other</li>
 
+<li>outcast/ directory</li>
+
 <li>Overview</li>
 
 <li>Package Dependencies</li>
@@ -320,6 +324,8 @@ Error message and password prompt
 <li>References</li>
 
 <li>SDLC and Methodology</li>
+
+<li>Source Code Organization</li>
 
 <li>Tools</li>
 
@@ -9431,13 +9437,16 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div created="20180707151857053" modified="20180707152024556" title="$:/state/tab-1749438307">
 <pre>$:/core/ui/ControlPanel/Info</pre>
 </div>
+<div created="20210705204424573" modified="20210705204424573" title="$:/state/toc/Contents-Branching--242358753">
+<pre>open</pre>
+</div>
 <div created="20180714153847444" modified="20180714153847444" title="$:/state/toc/Contents-Directories &amp; Files--242358753">
 <pre>open</pre>
 </div>
 <div created="20180713005402899" modified="20180713005402899" title="$:/state/toc/Contents-Glossary--1025088837">
 <pre>open</pre>
 </div>
-<div list="Overview" title="$:/StoryList">
+<div list="[[Branch Log]] [[Branch Weight Algorithm]] [[Branching Rules]] [[Branching Example]] [[outcast/ directory]] [[Source Code Organization]] [[Workspace Directory]] [[Directories &amp; Files]] Overview" title="$:/StoryList">
 <pre></pre>
 </div>
 <div plugin-type="info" title="$:/temp/info-plugin" type="application/json">
@@ -9453,7 +9462,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
         },
         &quot;$:/info/url/full&quot;: {
             &quot;title&quot;: &quot;$:/info/url/full&quot;,
-            &quot;text&quot;: &quot;file:///E:/_workspaces/Outcast/start_here.html&quot;
+            &quot;text&quot;: &quot;file:///C:/_workspaces/Outcast/start_here.html&quot;
         },
         &quot;$:/info/url/host&quot;: {
             &quot;title&quot;: &quot;$:/info/url/host&quot;,
@@ -9473,7 +9482,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
         },
         &quot;$:/info/url/pathname&quot;: {
             &quot;title&quot;: &quot;$:/info/url/pathname&quot;,
-            &quot;text&quot;: &quot;/E:/_workspaces/Outcast/start_here.html&quot;
+            &quot;text&quot;: &quot;/C:/_workspaces/Outcast/start_here.html&quot;
         },
         &quot;$:/info/url/search&quot;: {
             &quot;title&quot;: &quot;$:/info/url/search&quot;,
@@ -9485,11 +9494,11 @@ html .solidborders td {  border: 1px solid black; }</pre>
         },
         &quot;$:/info/browser/screen/width&quot;: {
             &quot;title&quot;: &quot;$:/info/browser/screen/width&quot;,
-            &quot;text&quot;: &quot;2048&quot;
+            &quot;text&quot;: &quot;1920&quot;
         },
         &quot;$:/info/browser/screen/height&quot;: {
             &quot;title&quot;: &quot;$:/info/browser/screen/height&quot;,
-            &quot;text&quot;: &quot;1152&quot;
+            &quot;text&quot;: &quot;1080&quot;
         }
     }
 }</pre>
@@ -10373,6 +10382,30 @@ Packages can be branched and/or forked.  All packages are assumed to on the //ma
 &lt;/h3&gt;
 </pre>
 </div>
+<div created="20210705202913625" modified="20210705211245787" tags="[[Directories &amp; Files]] Directories" title="outcast/ directory">
+<pre>!!TODO
+The `outcast/` directory is not under SCM (e.g. add to the .gitignore file)
+
+Directory is a workspace for updating the pkg.* files.  Initial publish - the files are created using orc.  On subsequence published - the 'previous' files are 'extracted' - then updated as part of the publishing process.
+
+How to define 'previous' when branching is involved?
+
+What about non pkg.* file content?
+
+* not really scalable to a commercial tool - but I vote for a single tiddlewiki page and any support files
+
+
+Is outcast/ a directory? or is it a temp directory?
+
+* temp directory
+* pkg.* is essential meta data
+** implies a single source of truth for meta data, i.e. a Universe is SCM repo
+*** Could the SCM Branching be used to manage branching of packages? I am going to say no.  The meta data is 'global' - not physically branched when a package is branched
+*** The branch.log file must be a single file (i.e. not branched in the SCM)
+*** What about //private forks//? How does this work/compatible with  a single source of truth for the meta data?
+
+* `top/` is user managed content for the package file - is under SCM control (I.e. updated prior to publishing)</pre>
+</div>
 <div created="20140726152202471" creator="JohnTaylor" modified="20150226023527895" modifier="JohnTaylor" tags="Contents" title="Overview">
 <pre>Outcast is a project that was started as part of [[Project Eden|http://www.integerfox.com/#Eden]].  Outcast is for the lack of better term - a software development paradigm- that encompasses SCM and build processes, requirements trace-ability, design methodologies, unit testing, programming languages, and documentation. All this was a result of trying to solve the problem of how to manage, in a team environment, a scalable reusable code base.
 
@@ -10652,6 +10685,14 @@ While I don't believe in //one SDLC process to rule them all// - I do have stron
  
  </pre>
 </div>
+<div created="20210705202726712" modified="20210705202907218" tags="[[Directories &amp; Files]] Directories" title="Source Code Organization">
+<pre>!!TODO
+Source is organized by namespace (For C code this is a convention).  
+
+Conceptually all code (internal + external) exists under  a single `src/` directory.  
+
+Put excepts from PIM here</pre>
+</div>
 <div created="20150224215003080" modified="20150226030134115" tags="Contents" title="Tools">
 <pre>A set command line tools have been created to manage and publish packages as part of the Outcast proof-of-concept.  Below is an overview of these tools.  
 
@@ -10761,7 +10802,7 @@ These tools use a small number of environment variables.  A description of the t
 |default vault | ''default.vault'' |A vault file contained in a [[Native Package Universe|Package Universe]] that specifies the default vault(s) to use when publishing/installing package archives. |
 |[[Branch log|Branch Log]] | ''branch.log'' |Contains the branch history of package. |</pre>
 </div>
-<div created="20140803153042238" creator="JohnTaylor" modified="20150226032129377" modifier="JohnTaylor" tags="Directories [[Directories &amp; Files]] Glossary" title="Workspace Directory">
+<div created="20140803153042238" creator="JohnTaylor" modified="20210705211328328" modifier="JohnTaylor" tags="Directories [[Directories &amp; Files]] Glossary" title="Workspace Directory">
 <pre>!!An Outcast workspace has the following structure/organization
 
 @@.dirtree
@@ -10769,10 +10810,10 @@ These tools use a small number of environment variables.  A description of the t
 *`&lt;WorkspaceRoot&gt;`
 **`xpkgs` ; Root directory for loaded external packages
 ***`&lt;symlink_ext_pkg#1&gt;` ; Symbolic link to an external Package in the //'packages/'// directory
-**** `top` ; External Package's Outcast pkg info 
-**** `projects` ; External Package's build directories
+**** `outcast` ; External Package's Outcast pkg info 
 **** `src` ; External Package's  source directories
-**** `tests` ;External Package's  unit/dev test directories
+**** `top` ; External Package's  top directory
+**** `...` ;External Package's specific directories 
 ***`&lt;symlink_ext_pkg#2&gt;` ; Symbolic link to an external Package in the //'packages/'// directory
 ****`...`
 **`xinc`; Root directory for public interfaces of the loaded/mounted external packages. Note: All files in directory tree are symbolic links to either external or local Packages.
@@ -10781,10 +10822,10 @@ These tools use a small number of environment variables.  A description of the t
 ***`&lt;namespace2&gt;`  
 ****`...`
 ** `&lt;local_pkg #1&gt;` ; Local package, i.e. contents are pulled/pushed directly to your SCM
-*** `top` ; Outcast pkg info 
-*** `projects` ; ~LocalPackage's build directories
-*** `src` ; ~LocalPackage's source directories
-*** `tests` ;~LocalPackage's unit/dev test directories
+*** `outcast` ; Outcast pkg info 
+*** `src` ;  Local Package's source directories
+*** `top` ; Local Package's top directory
+*** `...` ; Local Package's specific directories
 ** `&lt;local_pkg #2&gt;`
 ***`...`
 

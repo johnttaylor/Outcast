@@ -124,7 +124,6 @@ else:
         utils.set_user_name( args )
         utils.set_password( args )
         utils.set_workspace( args )
-
  
         # run the command
         load_command( scm, args['<command>'] ).run( args, [args['<command>']] + args['<args>'] )

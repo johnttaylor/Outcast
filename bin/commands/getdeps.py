@@ -59,8 +59,8 @@ def run( common_args, cmd_argv ):
          
 
     # Get dependency list
-    p, d,w,t, cfg = deps.read_package_spec( pkgspec )
-    dep_tree, act_tree = deps.validate_dependencies( p, d,w,t, common_args, False, pkgspec )
+    p, d,w,t,l, cfg = deps.read_package_spec( pkgspec )
+    dep_tree, act_tree = deps.validate_dependencies( p, d,w,t,l common_args, False, pkgspec )
 
     # Drop first element in the list since it will be <pkgname>
     packages = deps.convert_tree_to_list( act_tree )[1:]

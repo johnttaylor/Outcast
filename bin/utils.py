@@ -64,7 +64,7 @@ def detect_workspace_root( starting_dirname ):
         
         # get parent directory
         parent = os.path.abspath(os.path.join(starting_dirname, os.path.pardir))
-        
+
         # Fail if I get to the root directory without finding my markers
         if ( os.path.split(parent)[0] == starting_dirname ):
             return None
@@ -484,8 +484,25 @@ class Node(object):
             newnode = Node(None)
             self.add_child_node( newnode )
             newnode.clone_sub_tree_from( x )
-                             
+        
+def flatten_tree_to_list( root_node, list_to_append_to ):
+    for cnode in root_node.get_children():
+        list_to_append_to.append(cnode.get_data())
+        flatten_tree_to_list( cnode, list_to_append_to )    
                                
+# Format is <pkg>\<branch>\<ver>
+def convert_to_long_format( entry, stripLeadingChar='*', sep=os.sep ):
+    p,b,v = entry
+    if ( p[0] == stripLeadingChar ):
+        p = p[1:]
+
+    c = f'{p}{sep}{b}'
+    if ( v != '' ):
+        c = f'{c}{sep}{v}'
+    
+    return c
+        
+
 #-----------------------------------------------------------------------------
 def find_duplicates_in_list(l):
     """ Returns a list of duplicate entries.  If no duplicates, then an empty list is returned"""

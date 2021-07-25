@@ -20,6 +20,13 @@ Options:
     --nocheck           Skips most error checking and produces just the '.dot'
                         files.  Note: Some error checking can not be bypassed,
                         e.g. cyclic dependency check.
+    --compare           Generates the 'actual' dependency tree and 
+                        compares it against what is currently mounted
+                        in the local workspace.  The command returns non
+                        zero if one or more mounted dependent packages
+                        do meet the 'mimimum versions'. Note: Local
+                        package overrides are ASSUMED to meet the required
+                        mimimum version(s).
     -h, --help          Display help for this command
 
 Common Options:
@@ -27,8 +34,8 @@ Common Options:
 
 
 Notes:
-    o Two '.dot' files are created: 'derived' and 'actual'.  The 'derived' tree 
-      contains all dependencies as defined by the package's 1st level 
+    o Two '.dot' files are created: 'derived' and 'actual'.  The 'derived' 
+      tree contains all dependencies as defined by the package's 1st level 
       dependencies and all of the subsequent dependencies as defined by the
       transitive packages' dependencies.  The 'actual' tree contains the 
       dependencies as enumerated solely by package's 'pkg.specification' file.
@@ -38,6 +45,9 @@ Notes:
       vesion.  The 'actual' graph shows what version where installed when the
       package was pushed.
     o For more details about GraphViz, see http://www.graphviz.org/
+    o The 'compare' operation will fail (i.e return non-zero) if there are 
+      local packages mounted AND there are no matching 'local-override' 
+      directive(s) in the package's specification file.
     o If a '.' is used for <pkgname> then <pkgname> is derived from the
       the current working directory where the command was invoked from.  
     
@@ -76,25 +86,31 @@ def run( common_args, cmd_argv ):
         _check_results( t, "ERROR: Failed Refresh the Native Package Universe." )
 
 
-    p, d,w,t, cfg = deps.read_package_spec( file )
-    dep_tree, act_tree = deps.validate_dependencies( p, d,w,t, common_args, args['--nocheck'], file )
+    p, d,w,t,l, cfg = deps.read_package_spec( file )
+    dep_tree, act_tree = deps.validate_dependencies( p, d,w,t,l, common_args, args['--nocheck'], file )
     if ( not args['--nocheck'] ):
         print("All dependency checks PASSED.")
     else:
         print("SKIPPED one or more dependency checks.")
          
-    # generate .DOT file
-    if ( args['--dot'] or args['--graph'] ):
-        _create_dot_file( file, "derived", dep_tree, args['--graph'] )
-        _create_dot_file( file, "actual", act_tree, args['--graph'] )
+    # Compare operation
+    if ( args['--compare'] ):
+        compare_workspace( dep_tree, common_args['-v'], args['<pkgname>'] );
+
+    # Other options...
+    else:
+        # generate .DOT file
+        if ( args['--dot'] or args['--graph'] ):
+            _create_dot_file( file, "derived", dep_tree, args['--graph'] )
+            _create_dot_file( file, "actual", act_tree, args['--graph'] )
 
 
-    if ( args['--print'] ):
-        print("Derived Transitive tree.")
-        print(dep_tree)
-        if ( not args['--nocheck'] ):
-            print("Actual Package tree.")
-            print(act_tree)
+        if ( args['--print'] ):
+            print("Derived Transitive tree.")
+            print(dep_tree)
+            if ( not args['--nocheck'] ):
+                print("Actual Package tree.")
+                print(act_tree)
 
     
     
@@ -116,3 +132,58 @@ def _check_results( t, err_msg ):
         if ( t[1] != None and t[1] != 'None None' ):
             print(t[1])
         exit( err_msg )
+
+#------------------------------------------------------------------------------
+def compare_workspace( dep_tree, verbose, pkg ):
+    # Pull the package
+    cmd = f'orc.py ls'
+    t   = utils.run_shell( cmd, verbose )
+    _check_results( t, "ERROR: Failed to get the list of currently mounted packages" )
+    mounted = t[1].splitlines()
+    
+    # Convert my dep tree into something more useful
+    dlist = []
+    utils.flatten_tree_to_list( dep_tree, dlist )
+
+    # Compare my device to the mounted packages
+    success = True
+    for p,b,v in dlist:
+        # Remove leading '*' for weak dep marker
+        pn = p[1:] if ( p[0] == '*' ) else p
+
+        # Is package mounted?
+        mnt = get_from_mounted_list( mounted, pn )
+        if ( mnt == None ):
+            print( f"NO PACKAGE mounted for: ({p}, {b}, {v})" );
+            success = False
+            continue
+
+        # Is local mount AND there is override specified?
+        if ( b == "**Local**" ): 
+            print( f"({p}, **Local**)" );
+            continue
+        
+        # Local mount -->but no override
+        if ( mnt[1] == "**Local**" ):
+            print( f"UN-EXPECTED LOCAL mount mounted for: ({p}, {b}, {v})" );
+            success = False
+            continue
+
+        # Is the mounted version compatible?
+        if ( utils.is_ver1_backwards_compatible_with_ver2( (pn,b,v), mnt ) ):
+            print( f"({p}, {b}, {v})" );
+        else:
+            print( f"NO COMPATIBLE Pkg mounted for: ({p}, {b}, {v}) [mounted: {mnt[0]}{os.sep}{mnt[1]}{os.sep}{mnt[2]}]" );
+            success = False
+
+    if ( not success ):
+        exit( "Compare failed!" )
+
+
+def get_from_mounted_list( mlist, pkg_to_find ):
+
+    for i in mlist:
+        p = i.split(os.sep)
+        if ( p[0] == pkg_to_find ):
+            return p
+    return None

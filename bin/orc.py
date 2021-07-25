@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 """
- 
 Orc is a Outcast tool for managing packaging and/or workspaces
 ===============================================================================
 usage: orc [options] <command> [<args>...]
@@ -38,7 +37,6 @@ Options:
     
 
 Type 'orc help <command>' for help on a specific command.
-
 """
 
 import sys
@@ -137,9 +135,10 @@ if __name__ == '__main__':
             print(args['-w'])
             exit(0)
         
-        # Trap the specia --qry-pkg option
+        # Trap the special --qry-pkg option
         if ( args['--qry-pkg'] ):
-            here = os.getcwd().replace(args['-w']+os.sep,'')
+            cwd  = os.path.realpath( os.getcwd() ) 
+            here = cwd.replace(args['-w']+os.sep,'')
             pkg  = here.split(os.sep)[0]
             print(args['-w'] + os.sep + pkg)
             exit(0)
