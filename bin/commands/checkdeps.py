@@ -158,16 +158,22 @@ def compare_workspace( dep_tree, verbose, pkg ):
             success = False
             continue
 
+        #print("DBG", b,mnt)
         # Is local mount AND there is override specified?
         if ( b == "**Local**" ): 
-            print( f"({p}, **Local**)" );
-            continue
+            if ( mnt[1] == "**Local**" ): 
+                print( f"({p}, **Local**)" );
+                continue
         
-        # Local mount -->but no override
-        if ( mnt[1] == "**Local**" ):
+            # Local mount -->but no override
+            else:
+                print( f"MISSING LOCAL mount for: ({p})" );
+                success = False
+                continue
+        elif ( mnt[1] == "**Local**" ): 
             print( f"UN-EXPECTED LOCAL mount mounted for: ({p}, {b}, {v})" );
             success = False
-            continue
+            continue                    
 
         # Is the mounted version compatible?
         if ( utils.is_ver1_backwards_compatible_with_ver2( (pn,b,v), mnt ) ):
@@ -178,6 +184,8 @@ def compare_workspace( dep_tree, verbose, pkg ):
 
     if ( not success ):
         exit( "Compare failed!" )
+    else:
+        print("The workspace matches the Package's dependency configuration")
 
 
 def get_from_mounted_list( mlist, pkg_to_find ):

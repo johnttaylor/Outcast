@@ -96,6 +96,7 @@ else:
         scm = 'git'
     if ( args['--scm'] ):
         scm = args['--scm']    
+    args['--scm'] = scm
 
     # Trap help on a specific command
     if ( args['<command>'] == 'help' ):

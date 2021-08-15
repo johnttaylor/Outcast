@@ -167,7 +167,7 @@ def remove_duplicate_children( node, seen ):
 #------------------------------------------------------------------------------
 def read_package_spec( filename, top_fname='', fh=None ):
 
-    cfg = configparser.RawConfigParser(allow_no_value=True)
+    cfg = configparser.RawConfigParser(allow_no_value=True,delimiters=('='))
     cfg.optionxform = str
     fname           = filename
     
@@ -359,6 +359,7 @@ def _load_override_section( section, cfg, fname, sep=';' ):
             pkg, repo, branch, path = entry.split(sep)
         except:
             exit( "ERROR: Malformed dependency entry [{}.{}] in file: {} (must be: pkg;repo;branch;path)".format(section,entry,fname) )
+        print("LOAD  ", pkg, repo, branch, path, entry)
         children.append( (pkg, repo, branch, path) )
 
     return children       

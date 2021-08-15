@@ -21,12 +21,13 @@ Options:
     
 Notes:
     o The retrieved repository is located in the Workspace Root directory
+    o The retrieved repository is 'at' the 'HEAD' of the specified <branch>
     o Returns zero if the repository was succesfully retreived/cloned; else 
       non-zero is returned.  Note: if the pkgname already exists under the
       Workspace Root, the command will fail.
     
 Examples (using GIT):
-    evie clone colony.core dev-john https://github.com/johnttaylor
+    evie clone colony.core dev_john https://github.com/johnttaylor
 
 """
 import os
@@ -58,6 +59,14 @@ def run( common_args, cmd_argv ):
     cmd = f'git clone {opts} {args["<source>"]}/{reponame}.git {pkg}'
     t   = utils.run_shell( cmd, common_args['-v'] )
     _check_results( t, "ERROR: Failed the retreive/clone  the specified package/repository." )
+
+    # Set the branch
+    utils.push_dir( reponame );
+    cmd = f'git checkout {args["<branch>"]}'
+    t   = utils.run_shell( cmd, common_args['-v'] )
+    utils.pop_dir()
+    _check_results( t, f'ERROR: Failed to checkout the {args["<branch>"]} branch.' )
+
 
 
 def _check_results( t, err_msg ):

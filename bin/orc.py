@@ -45,6 +45,7 @@ from subprocess import call
 
 from docopt.docopt import docopt
 from my_globals import ORC_VERSION
+from my_globals import OUTCAST_SCM_TOOL
 import utils
 
 
@@ -52,12 +53,12 @@ import utils
 
 #------------------------------------------------------------------------------
 def load_command( name ):
-    #try:
+    try:
         command_module = __import__("commands.{}".format(name), fromlist=["commands"])
-    #except ImportError:
-    #     exit("{} is not a Orc command. Use 'orc help' for list of commands.".format(name) )
+    except ImportError:
+        exit("{} is not a Orc command. Use 'orc help' for list of commands.".format(name) )
 
-        return command_module
+    return command_module
         
         
 #------------------------------------------------------------------------------
@@ -83,6 +84,14 @@ def display_command_list():
 if __name__ == '__main__':
     # Parse command line
     args = docopt(__doc__, version=ORC_VERSION(), options_first=True )
+
+    # Determine which SCM tool to use
+    scm = os.environ.get( OUTCAST_SCM_TOOL() )
+    if ( scm == None ):
+        scm = 'git'
+    if ( args['--scm'] ):
+        scm = args['--scm']    
+    args['--scm'] = scm
 
     # Trap the special where option
     if ( args['--where'] ):

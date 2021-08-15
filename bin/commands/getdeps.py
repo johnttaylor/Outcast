@@ -60,11 +60,11 @@ def run( common_args, cmd_argv ):
 
     # Get dependency list
     p, d,w,t,l, cfg = deps.read_package_spec( pkgspec )
-    dep_tree, act_tree = deps.validate_dependencies( p, d,w,t,l common_args, False, pkgspec )
+    dep_tree, act_tree = deps.validate_dependencies( p, d,w,t,l, common_args, False, pkgspec )
 
     # Drop first element in the list since it will be <pkgname>
     packages = deps.convert_tree_to_list( act_tree )[1:]
-    
+
     # Filter in/out weak deps 
     filtered = []
     for p in packages:
@@ -93,21 +93,44 @@ def run( common_args, cmd_argv ):
         # Housekeeping
         pkg, branch, version = p.split(os.sep)
         archive = "{}-{}-{}".format( pkg, branch, version )
-
-        # Pull the package
-        cmd = 'orc.py {} -w {} --user "{}" --passwd "{}" pullv --vault {} {} {}-{}-{}'.format(verbose, common_args['-w'], common_args['--user'], common_args['--passwd'], args['--vault'], override, pkg, branch, version  )
-        t   = utils.run_shell( cmd, common_args['-v'] )
-        _check_results( t )
-
-    
-        # Mount the package
-        cmd = 'orc.py {} -w {} mount {} {}-{}-{}'.format(verbose, common_args['-w'], override, pkg, branch, version  )
-        t   = utils.run_shell( cmd, common_args['-v'] )
-        _check_results( t )
-    
-    
+        
+        # Using a released packages
+        if ( branch != '**LOCAL**' and version != '' ):
+            # Pull the package
+            cmd = 'orc.py {} -w {} --user "{}" --passwd "{}" pullv --vault {} {} {}-{}-{}'.format(verbose, common_args['-w'], common_args['--user'], common_args['--passwd'], args['--vault'], override, pkg, branch, version  )
+            t   = utils.run_shell( cmd, common_args['-v'] )
+            _check_results( t )
 
     
+            # Mount the package
+            cmd = 'orc.py {} -w {} mount {} {}-{}-{}'.format(verbose, common_args['-w'], override, pkg, branch, version  )
+            t   = utils.run_shell( cmd, common_args['-v'] )
+            _check_results( t )
+    
+        # Using 'local' packages
+        else:
+            # Get the repo info for the local package. Tuple: (pkg, repo, branch, path)
+            info = get_local_info(l, pkg)
+            if ( info == None ):
+                exit( f"Internal error - package '{pkg}' was NOT found in my local overrides list {l}" )
+        
+            # Retreive the repository
+            cmd = 'evie.py {} -w {} --scm {} clone --repo {} {} {} {} '.format(verbose, common_args['-w'], common_args['--scm'], info[1], info[0], info[2], info[3]  )
+            t   = utils.run_shell( cmd, common_args['-v'] )
+            _check_results( t )
+
+            # Mount the local package
+            cmd = 'orc.py {} -w {} mount {} {} '.format(verbose, common_args['-w'], override, pkg )
+            t   = utils.run_shell( cmd, common_args['-v'] )
+            _check_results( t )
+
+#--------------------------------------------------------------------------
+def get_local_info( local_list, pkg_to_find ):
+    for (pkg, repo, branch, path) in local_list:
+        if ( pkg == pkg_to_find ):
+            return pkg, repo, branch, path
+    return None
+
 
 def _check_results( t ):
     if ( t[1] != None and t[1] != 'None None'):
