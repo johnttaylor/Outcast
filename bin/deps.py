@@ -359,7 +359,6 @@ def _load_override_section( section, cfg, fname, sep=';' ):
             pkg, repo, branch, path = entry.split(sep)
         except:
             exit( "ERROR: Malformed dependency entry [{}.{}] in file: {} (must be: pkg;repo;branch;path)".format(section,entry,fname) )
-        print("LOAD  ", pkg, repo, branch, path, entry)
         children.append( (pkg, repo, branch, path) )
 
     return children       
