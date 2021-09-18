@@ -45,15 +45,16 @@ def display_summary():
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
 
+    # Delete Repo first when requested
+    if ( args['--rm'] ):
+        if ( os.path.isdir(pkg) ):
+            shutil.rmtree(pkg)
+
     # check if the pkg already exists in the workspace
     pkg = os.path.join( common_args['-w'], args['<pkgname>'] )
     if ( os.path.isfile(pkg) or os.path.isdir(pkg) ):
         exit( f'ERROR: The package ({pkg}) already exists in the Workspace.' )
 
-    # Delete Repo first when requested
-    if ( args['--rm'] ):
-        if ( os.path.isdir(pkg) ):
-            shutil.rmtree(pkg)
 
     # Set repo name
     reponame = args['<pkgname>'] if ( args['--repo'] == None ) else args['--repo']
