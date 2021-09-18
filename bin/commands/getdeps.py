@@ -20,6 +20,8 @@ Options:
     -o,--override       Overwrites the Pacakge Archive(s) if they already exist
                         in Packages Directory. Also overrides existing symoblic
                         links when mounting the pulled package(s)
+    --rmlocal           When pulling a local package, the previous local package
+                        (if it exists) will be deleted.
     -h, --help          Display help for this command
 
     
@@ -114,8 +116,11 @@ def run( common_args, cmd_argv ):
             if ( info == None ):
                 exit( f"Internal error - package '{pkg}' was NOT found in my local overrides list {l}" )
         
+            # Set --rmlocal option
+            rmopt = '--rmlocal' if ( args['--rmlocal'] ) else ''
+
             # Retreive the repository
-            cmd = 'evie.py {} -w {} --scm {} clone --repo {} {} {} {} '.format(verbose, common_args['-w'], common_args['--scm'], info[1], info[0], info[2], info[3]  )
+            cmd = 'evie.py {} -w {} --scm {} clone {} --repo {} {} {} {} '.format(verbose, common_args['-w'], common_args['--scm'], rmopt, info[1], info[0], info[2], info[3]  )
             t   = utils.run_shell( cmd, common_args['-v'] )
             _check_results( t )
 

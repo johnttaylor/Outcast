@@ -16,6 +16,7 @@ Options:
                         only used when doing formal buildls
     --repo NAME         Name of the SCM repository if different from 
                         the <pkgname>
+    --rm                Deletes the current repository first (if it exists)
     -h, --help          Display help for this command
 
     
@@ -33,7 +34,7 @@ Examples (using GIT):
 import os
 import utils
 from docopt.docopt import docopt
-
+import shutil
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
@@ -48,6 +49,11 @@ def run( common_args, cmd_argv ):
     pkg = os.path.join( common_args['-w'], args['<pkgname>'] )
     if ( os.path.isfile(pkg) or os.path.isdir(pkg) ):
         exit( f'ERROR: The package ({pkg}) already exists in the Workspace.' )
+
+    # Delete Repo first when requested
+    if ( args['--rm'] ):
+        if ( os.path.isdir(pkg) ):
+            shutil.rmtree(pkg)
 
     # Set repo name
     reponame = args['<pkgname>'] if ( args['--repo'] == None ) else args['--repo']
