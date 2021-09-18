@@ -69,7 +69,7 @@ def run( common_args, cmd_argv ):
     _check_results( t, "ERROR: Failed the retreive/clone  the specified package/repository." )
 
     # Set the branch
-    utils.push_dir( reponame );
+    utils.push_dir( pkg );
     cmd = f'git checkout {args["<branch>"]}'
     t   = utils.run_shell( cmd, common_args['-v'] )
     utils.pop_dir()
