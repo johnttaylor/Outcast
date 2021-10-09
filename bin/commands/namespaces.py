@@ -209,6 +209,7 @@ def run( common_args, cmd_argv ):
             all, pkgsall = utils.workspace_namespaces_as_list( common_args['-w'] ) 
                                    
             # Find duplicates
+            print( "all", all )
             dups = utils.find_duplicates_in_list( all )
             if ( len(dups) == 0 ):
                 print("No namespace collisions.")

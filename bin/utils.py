@@ -504,8 +504,16 @@ def convert_to_long_format( entry, stripLeadingChar='*', sep=os.sep ):
         
 
 #-----------------------------------------------------------------------------
-def find_duplicates_in_list(l):
+def find_duplicates_in_list(l, filter_blank_comment_lines=False):
     """ Returns a list of duplicate entries.  If no duplicates, then an empty list is returned"""
+    if ( filter_blank_comment_lines ):
+        filtered = []
+        for x in l:
+            if ( x.startswith('#') or x.strip() == '' ):
+                continue
+            filtered.append( x )
+        l = filtered
+
     return list(set([x for x in l if l.count(x) > 1]))
 
 
@@ -1079,8 +1087,8 @@ def get_marked_time():
     
     
 #------------------------------------------------------------------------------
-def update_journal_publish( journal_file, user, summary_comment, comment_file, version, branch_name, scm_label, exit_on_error=True ):
-    return _update_journal( journal_file, comment_file, _create_journal_publish_marker( summary_comment, user, version, branch_name, scm_label), exit_on_error  )
+def update_journal_publish( journal_file, user, summary_comment, comment_file, version, branch_name, exit_on_error=True ):
+    return _update_journal( journal_file, comment_file, _create_journal_publish_marker( summary_comment, user, version, branch_name ), exit_on_error  )
  
     
 def update_journal_promote( journal_file, user, summary_comment, comment_file, version, branch_name, from_package_nbv, exit_on_error=True  ):
@@ -1112,13 +1120,13 @@ def _update_journal( journal_file, comment_file, marker_string, exit_on_error=Tr
 
     return None        
         
-def _create_journal_publish_marker( summary, user, version, branch_name, scmlabel ):
+def _create_journal_publish_marker( summary, user, version, branch_name ):
     now, local = get_marked_time()
-    return "{}; {}; {}; PUBLISH; {}; {}; {}; {}; {}".format( '~' * 5, now, local, user, version, branch_name, scmlabel, summary )
+    return "{}; {}; {}; PUBLISH; {}; {}; {}; {}".format( '~' * 5, now, local, user, version, branch_name, summary )
 
 def _create_journal_promote_marker( summary, user, version, branch_name, from_package_nbv ):
     now, local = get_marked_time()
-    return "{}; {}; {}; PROMOTE; {}; {}; {}; {}; {}".format( '~' * 5, now, local, user, version, branch_name, scmlabel, from_package_nbv )
+    return "{}; {}; {}; PROMOTE; {}; {}; {}; {}".format( '~' * 5, now, local, user, version, branch_name, from_package_nbv )
 
 def _create_journal_do_not_use_marker( summary, user, version, branch_name ):
     now, local = get_marked_time()

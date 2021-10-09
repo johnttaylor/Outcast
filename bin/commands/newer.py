@@ -53,6 +53,8 @@ import subprocess, os
 import utils, deps
 from my_globals import OUTCAST_TOP_DIR
 
+LOCAL_MARKER = '**Local**'
+
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
     print("{:<13}{}".format( 'newer', 'Checks if there are newer dependent packages available.' ))
@@ -78,12 +80,13 @@ def run( common_args, cmd_argv ):
         # find spec file based on package name (local to the Workspace)
         else:
             pkgspec = os.path.join( common_args['-w'], args['<pkgname>'], OUTCAST_TOP_DIR(), "pkg.specification" )
-            p, d,w,t, cfg = deps.read_package_spec( pkgspec )
+            p, d,w,t,l, cfg = deps.read_package_spec( pkgspec )
+            
          
 
         
     # Get dependency list
-    dep_tree, act_tree = deps.validate_dependencies( p, d,w,t, common_args, False, pkgspec )
+    dep_tree, act_tree = deps.validate_dependencies( p, d,w,t,l, common_args, False, pkgspec )
     
     # Drop first element in the list since it will be <pkgname>    
     packages = deps.convert_tree_to_list( act_tree )[1:]
@@ -91,6 +94,10 @@ def run( common_args, cmd_argv ):
     # Filter in/out weak deps 
     filtered = []
     for p in packages:
+        # Skip 'locally mount' packages
+        if ( LOCAL_MARKER in p ):
+            continue
+
         if ( args['--noweak'] ):
             if ( p.startswith('*') ):
                 continue

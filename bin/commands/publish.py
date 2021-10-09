@@ -41,6 +41,12 @@ Options:
     --nonewer           Does not enforce the requirement that the publish 
                         version be newer than the last publish of the package
                         on the branch.
+    --dry-run           Peforms all of the publish steps EXCEPT no changes and
+                        or updates are made to the package specification, 
+                        Package Vault or Package Universe.
+    --keeptars          When this option is set AND the --dry-run option is 
+                        set, then the generated tar files are NOT deleted when
+                        the script ends.  
     -h, --help          Display help for this command
 
 Common Options:
@@ -69,7 +75,6 @@ from my_globals import OUTCAST_TOP_DIR
 
 toptar = ''
 pkgtar = ''
-scmlabel = ''
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
@@ -105,20 +110,6 @@ def run( common_args, cmd_argv ):
     if ( not args['--vault'] ):
         args['--vault'] = os.path.join( common_args['--uverse'], "default.vault" )
 
-    # REVERT
-    if ( args['--revert'] or args['--retry'] ):
-        print("= Reverting SCM checkouts...")
-        cmd = 'evie.py -v -w {} revert {} {} {}'.format( root, args['<pkgname>'], pkg_spec, chg_log )
-        t   = utils.run_shell( cmd, common_args['-v'] )
-        _check_results( t, "ERROR: Failed revert of SCM checkouts.", cleanall_flag=False )
-        _clean_up(all=False)
-        if ( not args['--retry'] ):
-            exit(0)
-        
-        # If I get here than retry option has been set -->so force the override option to be on
-        args['--override'] = True
-        override           = '--override'        
-        
     # PUBLISH
     utils.push_dir( pathtop )
 
@@ -136,10 +127,8 @@ def run( common_args, cmd_argv ):
 
 
     # Read the current pkg.specification (also determines branch/version# for the publish operation) 
-    global scmlabel
     ver, bname, cfg = _read_package_spec( args, pkg_spec, bname, minver )
     pkgname         = "{}-{}-{}".format( args['<pkgname>'], bname, ver )
-    scmlabel        = args['--label'] + pkgname
     
 
     # Ensure the Native Package universe is current
@@ -155,13 +144,6 @@ def run( common_args, cmd_argv ):
         _enforce_newer( common_args['--uverse'], args['<pkgname>'], bname, ver )
 
 
-    # Check for pending checkings
-    if ( not args['--nopending'] ):
-        print("= Checking for pending changes...")
-        cmd = 'evie.py -v -w {} --user "{}" --passwd "{}" --now {} pending {}'.format( root, common_args['--user'], common_args['--passwd'], now, args['<pkgname>'] )
-        t   = utils.run_shell( cmd, common_args['-v'] )
-        _check_results( t, "ERROR: Failed pending check." )
-        
     # Check dependencies
     if ( not args['--nodeps'] ):
         print("= Checking dependencies...")
@@ -169,14 +151,6 @@ def run( common_args, cmd_argv ):
         t   = utils.run_shell( cmd, common_args['-v'] )
         _check_results( t, "ERROR: Failed the dependency check." )
         
-    # get needed dependencies
-    if ( not args['--nogetdeps'] ):
-        print("= Getting dependencies...")
-        cmd = 'orc.py -v -w {} --user "{}" --passwd "{}" --norefresh --now {} getdeps {} --override'.format(root, common_args['--user'], common_args['--passwd'], now, args['<pkgname>'] ) 
-        t   = utils.run_shell( cmd, common_args['-v'] )
-        _check_results( t, "ERROR: Failed getting (and mounting) dependencies." )
-
-                   
     # Update namespaces (I do this after the build to handle the case of autogen'd source code)
     if ( not args['--nons'] ):
         print("= Updating pkg.namespaces...")
@@ -206,7 +180,7 @@ def run( common_args, cmd_argv ):
     cmd = 'evie.py -v -w {} --user "{}" --passwd "{}" --now {} checkout {} {}'.format(root, common_args['--user'], common_args['--passwd'], now, args['<pkgname>'], chg_log )
     t   = utils.run_shell( cmd, common_args['-v'] )
     _check_results( t, "ERROR: Failed SCM checkout of {}.".format(chg_log) )
-    utils.update_journal_publish( chg_log, common_args['--user'], args['<summary>'], args['--comments'], ver, bname, scmlabel )
+    utils.update_journal_publish( chg_log, common_args['--user'], args['<summary>'], args['--comments'], ver, bname )
         
     # Archive the package
     print("= Archiving the package...")
@@ -250,7 +224,7 @@ def run( common_args, cmd_argv ):
         
         # Checkin files
         print("= Checkin files and labeling the package in the SCM repository...")
-        cmd = 'evie.py -v -w {} --user "{}" --passwd "{}" --now {} checkin {} {} {} "{}" {} {} {}'.format(root, common_args['--user'], common_args['--passwd'], now, override, args['<pkgname>'], scmlabel, args['<summary>'], pkg_spec, chg_log, checkin_ns )
+        cmd = 'evie.py -v -w {} --user "{}" --passwd "{}" --now {} checkin --nolabel {} {} "{}" {} {} {}'.format(root, common_args['--user'], common_args['--passwd'], now, override, args['<pkgname>'], args['<summary>'], pkg_spec, chg_log, checkin_ns )
         t   = utils.run_shell( cmd, common_args['-v'] )
         _check_results( t, "ERROR: Failed Checking and Labeling in the SCM repository." )
     
@@ -274,11 +248,6 @@ def _clean_up(all=True, args=None):
     if ( os.path.isfile(toptar) and keeptars == False ):
         os.remove( toptar )
 
-    if ( all ):
-        global scmlabel
-        cmd = 'evie.py -v label delete {}'.format( scmlabel )
-        utils.run_shell( cmd )
-            
 
 def _check_results( t, err_msg, cleanall_flag=True ):
     if ( t[0] != 0 ):

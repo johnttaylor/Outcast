@@ -112,7 +112,7 @@ else:
 
     # Trap no command specified        
     elif ( args['<command>'] == None ):
-            docopt(__doc__,argv=['--help'])
+        docopt(__doc__,argv=['--help'])
     
 
     # Run the command (if it exists)

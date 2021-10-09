@@ -181,8 +181,11 @@ def read_package_spec( filename, top_fname='', fh=None ):
     else:
         utils.print_verbose( "Reading file: "  + top_fname  )
         fname = top_fname
-        cfg.read_file( fh )
+        d = fh.read()
         fh.close()
+        if ( 'bytes' in str(type(d)) ):
+            d = d.decode("utf-8")
+        cfg.read_string( d )
     
     list_deps  = []
     list_weak  = []
@@ -214,12 +217,15 @@ def read_spec_from_tar_file( f ):
         tar = tarfile.open( f , mode="r:*")
         fh  = tar.extractfile( 'top/pkg.specification' )
 
-        # Make a temporary file that 'supports Unicode reads' (the tar file reads are 'str' not bytes/byte tuples)
-        fp  = tempfile.TemporaryFile(mode="w");
-        shutil.copy(fh,fp)
+        ## Make a temporary file that 'supports Unicode reads' (the tar file reads are 'str' not bytes/byte tuples)
+        fp = tempfile.TemporaryFile(mode="w+b")
+        d = fh.read()
+        fh.close()
+        fp.write( d )
+        fp.seek(0)
 
     except Exception as ex:
-        exit("ERROR: Trying to locate/read Package Top File: {}".format(f) )
+        exit(f"ERROR: Trying to locate/read Package Top File: {f} ({ex})" )
     
     # Get pkg.specification info from the top file
     pkginfo  = read_package_spec( 'pkg.specification', f, fp )
@@ -232,7 +238,6 @@ def read_spec_from_tar_file( f ):
 def build_node( parent_node, children_data, list_local, path_to_uverse, trail, cache, weak_deps, no_warn_on_weakcycle=False, trans=None ):
     parent_node.add_children_data( children_data )
     override_pkgs = _extract_pkgnames( list_local )
-
     for cnode in parent_node.get_children():
         # Skip local overrides
         pkg,b,v = cnode.get_data()
@@ -560,13 +565,13 @@ def read_top_file( cpath, fname, trail, cache ):
         # Make a temporary file that supports Unicode reads because the configParser only works with Unicode strings 
         with open("deps.tmp", "wb" ) as fp:
             fp.write( fh.read() )
+            fp.seek(0)
 
-    
-        # Get child dependency data from the top file
-        with open( "deps.tmp" ) as fp:
-            info, d,w,t,l, cfg = read_package_spec( 'pkg.specification', fname, fp )
-            bhist            = _get_branching_history( tar, trail )
-            cache[fname]     = (info,d,w,t,bhist)
+            # Get child dependency data from the top file
+            with open( "deps.tmp" ) as fp:
+                info, d,w,t,l, cfg = read_package_spec( 'pkg.specification', fname, fp )
+                bhist            = _get_branching_history( tar, trail )
+                cache[fname]     = (info,d,w,t,bhist)
         os.remove( "deps.tmp" ) #fp.close();
         tar.close()
         _valid_no_duplicate_pkgs( d, w, t, l, fname ) 
