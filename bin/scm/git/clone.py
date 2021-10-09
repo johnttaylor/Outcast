@@ -50,7 +50,7 @@ def run( common_args, cmd_argv ):
     if ( args['--rm'] ):
         if ( os.path.isdir(pkg) ):
             # Issue a shell command to delete the tree becaue shutil.rmtree() does NOT work on Windows when deleting a GIT repo :(
-            utils.run_shell( f'rm -rf {pkg}' )
+            utils.run_shell( f'rm -r -f {pkg}' )
 
     # check if the pkg already exists in the workspace
     if ( os.path.isfile(pkg) or os.path.isdir(pkg) ):
@@ -69,7 +69,7 @@ def run( common_args, cmd_argv ):
     _check_results( t, "ERROR: Failed the retreive/clone  the specified package/repository." )
 
     # Set the branch
-    utils.push_dir( reponame );
+    utils.push_dir( pkg );
     cmd = f'git checkout {args["<branch>"]}'
     t   = utils.run_shell( cmd, common_args['-v'] )
     utils.pop_dir()
