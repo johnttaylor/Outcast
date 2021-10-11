@@ -1,17 +1,10 @@
 """Collection of helper functions"""
 
 
-import os, errno, fnmatch, subprocess, time, copy
-import symlinks, platform, tarfile
+import sys, os, errno, fnmatch, subprocess, time, copy
+import errno, stat, shutil
+import platform, tarfile
 from collections import deque
-
-# Globals
-from my_globals import OUTCAST_XPKGS_DIRNAME
-from my_globals import OUTCAST_XINC_DIRNAME
-from my_globals import OUTCAST_LOCAL_PKG_SUFFIX
-from my_globals import OUTCAST_USER_NAME
-from my_globals import OUTCAST_PKGS_UVERSE
-from my_globals import OUTCAST_PKGS_ROOT
 
 
 # Module globals
@@ -41,123 +34,14 @@ def render_dot_file_as_pic( pictype, oname ):
         
 
 
-#-----------------------------------------------------------------------------
-def set_workspace( args, skipwrk=False ):
-    if ( skipwrk ):
-        return
-        
-    if ( not args['-w'] ):
-        wrkroot = detect_workspace_root( os.getcwd() )
-        if ( wrkroot == None ):
-            exit( "ERROR: Can not auto detect the Workspace root directory" )
-        args['-w'] = wrkroot
-
-    args['-w'] = standardize_dir_sep( os.path.realpath(args['-w']) )  
-    if ( not os.path.exists( args['-w'] ) ):
-        exit( "ERROR: Invalid path - {} - for the Workspace root directory".format( args['-w'] ) ) 
-        
-        
-def detect_workspace_root( starting_dirname ):
-    result = starting_dirname
-    
-    if ( _test_for_markers( starting_dirname ) == False ):
-        
-        # get parent directory
-        parent = os.path.abspath(os.path.join(starting_dirname, os.path.pardir))
-
-        # Fail if I get to the root directory without finding my markers
-        if ( os.path.split(parent)[0] == starting_dirname ):
-            return None
-
-        # Try my parent
-        result = detect_workspace_root( parent )
-     
-    return result
-        
-def _test_for_markers( dir ):
-    result = False
-
-    if ( os.path.isdir(dir + os.sep + OUTCAST_XPKGS_DIRNAME()) and os.path.isdir(dir + os.sep + OUTCAST_XINC_DIRNAME()) ):
-        result = True
-
-    return result    
-
-
-def check_use_current_package( args ):
-    if ( args['<pkgname>'] == '.' ):
-        path   = os.getcwd();
-        wspace = detect_workspace_root( path )
-        pkg    = path[len(wspace):]
-        args['<pkgname>'] = pkg.split(os.sep)[1]
-        
-
-#-----------------------------------------------------------------------------
-def set_uverse( args, skipenv=False ):
-    if ( skipenv ):
-        return
-        
-    # Check the environment variable 
-    if ( not args['--uverse'] ):
-        uverse = os.environ.get( OUTCAST_PKGS_UVERSE() )
-        if ( uverse == None ):
-            exit( "ERROR: The {} environment variable is not set.".format(OUTCAST_PKGS_UVERSE()) )
-        args['--uverse'] = uverse
-    
-    args['--uverse'] = standardize_dir_sep( os.path.realpath(args['--uverse']) )  
-
-    if ( not os.path.exists( args['--uverse'] ) ):
-        exit( "ERROR: Invalid path - {} - for native Outcast universe directory".format( args['--uverse'] ) ) 
-    
-    
-def set_packages_dir( args, skipenv=False ):
-    if ( skipenv ):
-        return
-        
-    # Check the environment variable 
-    if ( not args['-p'] ):
-        pkgroot = os.environ.get( OUTCAST_PKGS_ROOT() )
-        if ( pkgroot == None ):
-            exit( "ERROR: The {} environment variable is not set.".format(OUTCAST_PKGS_ROOT()) )
-        args['-p'] = pkgroot
-            
-    args['-p'] = standardize_dir_sep( os.path.realpath(args['-p']) )  
-
-    if ( not os.path.exists( args['-p'] ) ):
-        exit( "ERROR: Invalid path - {} - for the Packages directory".format( args['-p'] ) ) 
-    
-    
-def set_user_name( args, skipenv=False ):
-    if ( skipenv ):
-        return
-        
-    # Get user name from the environment
-    if ( not args['--user'] ):
-        user = os.environ.get( OUTCAST_USER_NAME() )
-        if ( user == None ):
-            exit( "ERROR: The {} environment variable is not set.".format(OUTCAST_USER_NAME()) )
-        args['--user'] = user
-    
-        
-def set_password( args ):
-    # Set an empty/blank password when not explicitly specified
-    if ( not args['--passwd'] ):
-        args['--passwd'] = 'none'   
-                    
 
 #-----------------------------------------------------------------------------
 def standardize_dir_sep( pathinfo ):
     return pathinfo.replace( '/', os.sep ).replace( '\\', os.sep )
     
+def force_unix_dir_sep( pathinfo ):
+    return pathinfo.replace( '\\', '/')
 
-def epoch_secs_to_short_local( epoch_secs ):
-    sec = int(epoch_secs)
-    return time.strftime("%Y/%m/%d %H:%M:%S", time.localtime(sec))
-
-
-def short_local_to_epoch_secs( string ):
-    return int( time.mktime( time.strptime( string, "%Y/%m/%d %H:%M:%S" ) ) )
-    
-    
 def push_dir( newDir ):
     global _dirstack
     
@@ -201,26 +85,15 @@ def set_verbose_mode( newstate ):
     verbose_mode = newstate
        
         
-#-----------------------------------------------------------------------------
-def get_pkg_source( pkg_symlink, pkg_root, wrk_root=None, suffix=None ):
-    info   = symlinks.get_link_source( pkg_symlink )
-    result = info.replace( pkg_root, '', 1  )
-    if ( wrk_root != None ):
-        if ( info.startswith(wrk_root) ):
-            result = info.replace( wrk_root, '', 1 ) + os.sep + suffix
-
-    return result
   
 #-----------------------------------------------------------------------------
 def mkdirs( dirpath ):
     
     # Attempt to create the workspace directory    
     try:
-        os.makedirs(dirpath)
+        os.makedirs(dirpath, exist_ok=True)
     except OSError as exc: 
-        if exc.errno == errno.EEXIST and os.path.isdir(dirpath):
-            pass
-        else: raise
+        sys.exit( f"Unable to create directory path: {dirpath} ({exc})" )
 
     
 def cat_file( fobj, strip_comments=True, strip_blank_lines=True ):
@@ -239,7 +112,26 @@ def cat_file( fobj, strip_comments=True, strip_blank_lines=True ):
 
         print( line )
         
-        
+def remove_tree( root, err_msg=None, warn_msg=None ):
+    try:
+        shutil.rmtree( root, _handleRemoveReadonly )
+    except Exception as exc:
+        if ( err_msg != None ):
+            sys.exit( f'{err_msg} ({exc})' )
+        elif ( warn_msg != None ):
+            print_warning( f'{warn_msg} ({exc})' )
+
+
+# This function handles issue with Windows when deleting files marked as readonly
+def _handleRemoveReadonly(func, path, exc):
+  excvalue = exc[1]
+  if func in (os.rmdir, os.remove) and excvalue.errno == errno.EACCES:
+      os.chmod(path, stat.S_IRWXU| stat.S_IRWXG| stat.S_IRWXO) # 0777
+      func(path)
+  else:
+      raise   
+  
+
 #-----------------------------------------------------------------------------
 def parse_pattern( string ):
     # default result values
@@ -540,6 +432,17 @@ def run_shell( cmd, verbose_flag=False, on_err_msg=None ):
     
     return (p.returncode, "{} {}".format(r0,r1) )
 
+def is_error( t ):
+    if ( t[0] != 0 ):
+        return True;
+
+    return False
+
+def check_results( t, err_msg ):
+    if ( t[0] != 0 ):
+        if ( t[1] != None and t[1] != 'None None' ):
+            print(t[1])
+        exit( err_msg )
 
 #-----------------------------------------------------------------------------
 def parse_vernum( string ):
@@ -752,322 +655,6 @@ def print_tar_list( tar_file_name, verbose=False ):
         
 
 
-
-#------------------------------------------------------------------------------
-#
-# BRANCHING SUPPORT
-#
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-def parse_branch_log( fobj, fname='' ):
-    
-    nodes    = {}
-    last     = None
-    branches = set()
-
-    # process all entries in the file        
-    for line in fobj:
-       
-        # drop comments and blank lines
-        line = line.strip()
-        if ( line.startswith('#') ):
-            continue
-        if ( line == '' ):
-            continue
-   
-        # tokenize the line
-        tokens = line.split()
-    
-        # Parse BRANCH entries
-        if ( tokens[0] == 'BRANCH' and tokens[2] == 'TO' ):
-        
-            # create new nodes (but only when needed)
-            src = _get_node( nodes, tokens[1] )
-            dst = _get_node( nodes, tokens[3] )
-    
-            # capture the semantics from the entry
-            src.add_branch( dst )
-            dst.set_parent( src )
-
-            # House keeping
-            last = dst
-            branches.add( src.name )
-            branches.add( dst.name )
-                            
-        # Parse MERGE entries
-        elif ( tokens[0] == 'MERGE' and tokens[5] == 'TO' ):
-        
-            # Parse 'weight' fields
-            wgt_stp = _parse_wgt(tokens[2])
-            wgt_par = _parse_wgt(tokens[4]) 
-            if ( wgt_stp == None ):
-                print_warning( "Invalid entry - bad <src-wgt> [{}]".format(line) )
-                continue
-            if ( wgt_par == None ):
-                print_warning( "Invalid entry - bad <dst-wgt> [{}]".format(line) )
-                continue
-            
-            # create new nodes (but only when needed)
-            step   = _get_node( nodes, tokens[1] )
-            parent = _get_node( nodes, tokens[3] )
-            dst    = _get_node( nodes, tokens[6] ) 
-
-            # capture the semantics from the entry
-            step.add_merged_to( dst, wgt_stp )
-            parent.set_child( dst )
-            parent.set_wgt( wgt_par )
-            dst.set_parent( parent )
-            dst.set_stepparent( step )
-            
-            # House keeping
-            last = dst
-            branches.add( parent.name )
-            branches.add( step.name )
-            branches.add( dst.name )
-                            
-        # Spit out a warning for invalid entries
-        else:
-            print_warning( "Invalid entry [{}]".format(line) )
-                
-
-
-    first, blists = _derive_child_links( nodes, branches )
-    if ( first == None ):
-        exit( "ERROR: There is no valid 'root' to the branch history in file:{}.  The branch history MUST start with a BRANCH entry from 'main'.".format(fname) )
-    return (nodes, first, last, blists)
-
-    
-def get_branch_and_min_ver_info( fobj, fname='' ):
-    # process all entries in the file        
-    last = None
-    for line in fobj:
-       
-        # drop comments and blank lines
-        line = line.strip()
-        if ( line.startswith('#') ):
-            continue
-        if ( line == '' ):
-            continue
-   
-        # tokenize the line
-        tokens = line.split()
-    
-        # Parse BRANCH entries
-        if ( tokens[0] == 'BRANCH' and tokens[2] == 'TO' ):
-            last = tokens[3]
-                            
-        # Parse MERGE entries
-        elif ( tokens[0] == 'MERGE' and tokens[5] == 'TO' ):
-            last = tokens[6]
-                            
-        # Spit out a warning for invalid entries
-        else:
-            print_warning( "Invalid entry [{}]".format(line) )
-                
-    # Spit an warning if no entries found
-    if ( last == None ):
-        print_warning( "No valid entries in the branch history file: {}.  Default to 'NO BRANCHES'.".format(fname) )
-        return (None, None)
-        
-    return standardize_dir_sep(last).split(os.sep)   
-     
-        
-#------------------------------------------------------------------------------
-def _derive_child_links( nodes, branches ):
-
-    # set child links one branch at time
-    fist  = None
-    lists = []
-    for b in branches:
-        l = []
-        for n in nodes.values():
-            if ( n.name == b ):
-                l.append( n )
-        
-        # Sort oldest to newest
-        l.sort(BranchNode.cmp)
-        
-        # update child pointers
-        next  = 1
-        count = len(l)
-        for i in l:
-            if ( next < count ): 
-                child = l[next].fullname
-                i.set_child( nodes[child] )
-                i.child.set_parent( i )
-            next += 1
-                
-        # capture the root of branch history (MUST be main/* something by definition)
-        if ( b == 'main' ):
-            first = l[0]
-            lists.insert(0,l)
-        else:
-            lists.append( l )
-            
-    return first, lists
-                            
-def _get_node( nodes, name_ver, create_if_not_found=True ):
-    key = standardize_dir_sep(name_ver)
-    if ( key in nodes ):
-        return nodes[key]
-    elif ( create_if_not_found ):
-        n = BranchNode( key )
-        nodes[key] = n
-        return n
-    else:
-        return None
-
-def _parse_wgt( token ):
-    w = token.strip("()")
-    if ( w == 'major' ):
-        return w
-    if ( w == 'minor' ):
-        return w
-    if ( w == 'patch' ):
-        return w
-    if ( w == 'zero' ):
-        return w
-        
-    return None
-       
-#------------------------------------------------------------------------------
-def print_branch_history( bhist ):
-    nodes, first, last, blists = bhist
-    
-    for b in blists:
-        print_single_branch_history( b, nodes )
-        print()
-
-def print_single_branch_history( blist, nodes ):
-    for i in blist:
-        if ( i.stepparent != None ):
-            print( " "*4, "<-- MERGE ", i.stepparent.fullname, "({})".format( _get_merge_wgt(i.stepparent,i) ), "({})".format(i.parent.wgt), )
-        print( i.fullname )
-        if ( len(i.branches) > 0 ):
-            for b in i.branches:
-                print( " "*4, "BRANCH -->", b.fullname )
-        if ( len(i.mergedto) > 0 ):
-            for m in i.mergedto:
-                print( " "* 4, "MERGE  -->", m.fullname )
-
-def _get_merge_wgt( src, dst ):
-    idx = 0
-    for i in src.mergedto:
-        if ( i.fullname == dst.fullname ):
-            return src.merge_wgts[idx]
-        idx += 1
-        
-    return None
-                           
-#------------------------------------------------------------------------------
-def create_branch_dot_file( fname, bhist ):
-    with open(fname, 'w' ) as f:
-        f.write( "digraph { \n" )
-        
-        nodes, first, last, blists = bhist
-        for branch in blists:
-            for n in branch:
-                p = n.fullname.replace(os.sep,"/")
-                if ( n.child ):
-                    value = None
-                    if ( n.wgt != None ):
-                        value = n.wgt
-                    _write_trans( f, p, n.child.fullname, bold=True, label=value )
-                for b in n.branches:
-                    _write_trans( f, p, b.fullname, arrow_empty=True )
-                for m in n.mergedto:
-                    _write_trans( f, p, m.fullname, dashed=True, arrow_empty=True, label=_get_merge_wgt(n,m) )
-
-        f.write( "}\n" )
-
-
-def _write_trans( fd, p, childname, bold=False, solid=True, dotted=False, dashed=False, arrow_empty=False, arrow_normal=True, label=None ):
-    c = childname.replace(os.sep,"/")
-    fd.write( '"{}" -> "{}"'.format(p,c) )
-    if ( bold ):
-        fd.write( ' [style=bold]' )
-    elif( dotted ):
-        fd.write( ' [style=dotted]' )
-    elif( dashed ):
-        fd.write( ' [style=dashed]' )
-    elif( solid ):
-        fd.write( ' [style=solid]' )
-    
-    if ( arrow_empty ):
-        fd.write( ' [arrowhead=empty]' )
-    elif ( arrow_normal ):
-        fd.write( ' [arrowhead=normal]' )
-    
-    if ( label != None ):
-        fd.write( ' [label={}]'.format(label) )
-                
-    fd.write( ' \n' )
-
-#------------------------------------------------------------------------------
-class BranchNode:
-    def __init__(self,name_and_version=None):
-        self.name       = ''
-        self.version    = ''
-        self.branches   = []
-        self.child      = None
-        self.mergedto   = []
-        self.merge_wgts = []
-        self.parent     = None
-        self.stepparent = None
-        self.wgt        = None
-        
-
-        # Set name & version when provided: format is "<name>/<vernum>"
-        if ( name_and_version != None ):
-            self.name, self.version = standardize_dir_sep(name_and_version).split(os.sep)
-        
-        self.fullname = self.name + os.sep + self.version
-            
-    def add_branch(self, branch_node):
-        self.branches.append( branch_node )
-        
-    def add_merged_to(self, merge_node, merge_wgt ):
-        self.mergedto.append( merge_node )
-        self.merge_wgts.append( merge_wgt )
-        
-    def set_parent(self, parent ):
-        self.parent = parent
-        
-    def set_stepparent(self, stepparent ):
-        self.stepparent = stepparent
-        
-    def set_child(self, child ):
-        self.child = child
-    
-    def set_wgt(self, wgt ):
-        self.wgt = wgt
-        
-    def cmp(self,other):
-        if ( other != None ):
-            return numerically_compare_versions(self.version, other.version)
-        return NotImplemented
-
-    def __str__(self):
-        return self.fullname
-        
-    def _repr__(self):
-        return self.fullname
-        
-    def print_all(self):
-        print( "{}/{}: P={}, C={}, wgt={}. Branches={}, Merges={}, MWgts={}".format( self.name, self.version, self.parent, self.child, self.wgt, self.branches, self.mergedto, self.merge_wgts ) )
-
-        self.name       = ''
-        self.version    = ''
-        self.branches   = []
-        self.child      = None
-        self.mergedto   = []
-        self.merge_wgts = []
-        self.parent     = None
-        self.stepparent = None
-        self.wgt        = None
-        
-
-                 
 #------------------------------------------------------------------------------
 now   = 0
 local = None
@@ -1085,187 +672,4 @@ def get_marked_time():
     global now, local
     return now, local
     
-    
-#------------------------------------------------------------------------------
-def update_journal_publish( journal_file, user, summary_comment, comment_file, version, branch_name, exit_on_error=True ):
-    return _update_journal( journal_file, comment_file, _create_journal_publish_marker( summary_comment, user, version, branch_name ), exit_on_error  )
- 
-    
-def update_journal_promote( journal_file, user, summary_comment, comment_file, version, branch_name, from_package_nbv, exit_on_error=True  ):
-    return _update_journal( journal_file, comment_file, _create_journal_promote_marker( summary_comment, user, version, branch_name, from_package_nbv), exit_on_error  )
- 
-    
-def update_journal_deprecate( journal_file, user, summary_comment, comment_file, version, branch_name, exit_on_error=True  ):
-    return _update_journal( journal_file, comment_file, _create_journal_deprecate_marker( summary_comment, user, version, branch_name), exit_on_error  )
-    
-
-def update_journal_do_not_use( journal_file, user, summary_comment, comment_file, version, branch_name, exit_on_error=True  ):
-    return _update_journal( journal_file, comment_file, _create_journal_do_not_use_marker( summary_comment, user, version, branch_name), exit_on_error  )
-    
-    
-
-def _update_journal( journal_file, comment_file, marker_string, exit_on_error=True ):
-    try:
-        f = open( journal_file, "a" )
-        f.write( marker_string + "\n" )
-        if ( comment_file ):
-            append_to_file( f, comment_file )
-        f.write( "\n\n" )
-        f.close()
-        
-    except Exception as ex:
-        if ( exit_on_error ):
-            exit( "ERROR: {}".format(ex) )        
-        return ex
-
-    return None        
-        
-def _create_journal_publish_marker( summary, user, version, branch_name ):
-    now, local = get_marked_time()
-    return "{}; {}; {}; PUBLISH; {}; {}; {}; {}".format( '~' * 5, now, local, user, version, branch_name, summary )
-
-def _create_journal_promote_marker( summary, user, version, branch_name, from_package_nbv ):
-    now, local = get_marked_time()
-    return "{}; {}; {}; PROMOTE; {}; {}; {}; {}".format( '~' * 5, now, local, user, version, branch_name, from_package_nbv )
-
-def _create_journal_do_not_use_marker( summary, user, version, branch_name ):
-    now, local = get_marked_time()
-    return "{}; {}; {}; DO_NOT_USE; {}; {}; {}; {}".format( '~' * 5, now, local, user, version, branch_name, summary )
-
-def _create_journal_deprecate_marker( summary, user, version, branch_name ):
-    now, local = get_marked_time()
-    return "{}; {}; {}; DEPRECATE; {}; {}; {}; {}".format( '~' * 5, now, local, user, version, branch_name, summary )
-
-
-#------------------------------------------------------------------------------
-def read_journal_file( file_name, fh=None ):
-    # Open local file
-    if ( fh == None ):
-        try:
-            fh = open( file_name, "r" )
-        except:
-            exit( "ERROR: File - {} - does not exist or is not a valid file name.".format( file_name ) )
-        
-        print_verbose( "Reading file: " + file_name )
-                
-    # Provided a file handle (e.g. reading the file from a tar file)
-    else:
-        utils.print_verbose( "Reading file: "  + file_name  )
-
- 
-    # Scan file and load markers
-    publish_list     = []
-    promote_list     = []   
-    do_not_use_list  = []
-    deprecate_list   = []
-    linenum          = 0
-    for line in fh:
-        # skip ALL non-marker lines
-        linenum += 1
-        if ( not line.startswith('~' * 5) ):
-            continue    
-         
-        # Break into fields
-        tokens = line.split(';')
-        tokens = [x.strip() for x in tokens]
-        if ( tokens[3] == "PUBLISH" ):
-            publish_list.append( tokens[1:] )
-        elif ( tokens[3] == "DO_NOT_USE" ):
-            do_not_use_list.append( tokens[1:] )
-        elif ( tokens[3] == "DEPRECATE" ):
-            deprecate_list.append( tokens[1:] )
-        elif ( tokens[3] == "PROMOTE" ):
-            promote_list.append( tokens[1:] )
-        else:
-            print_warning( "Invalid Journal marker at line {} [{}].".format( linenum, line ) )
- 
-    # clean-up
-    fh.close()    
-
-    # return markers
-    markers = {}
-    markers['publish']    = publish_list
-    markers['promote']    = promote_list
-    markers['do_not_use'] = do_not_use_list
-    markers['deprecate']  = deprecate_list
-    return markers
-
-    
-def extract_pbv_from_journal( journal, entry_type, pkgname ):
-    entries  = journal[entry_type]
-    pbv_list = []    
-    for e in entries:
-        pbv_list.append( (pkgname, e[5], e[4]) )
-
-    return pbv_list    
-             
-
-#------------------------------------------------------------------------------
-def workspace_namespaces_as_list( wrkspace ):
-    pkgs = os.listdir( wrkspace )
-    
-    # Attempt to filter out all non-package directories
-    remove_from_list( OUTCAST_XINC_DIRNAME(), pkgs )
-    remove_from_list( OUTCAST_XPKGS_DIRNAME(), pkgs )
-    for p in pkgs:
-        if ( not p[0:1].isalpha() ):
-            pkgs.remove(p)
-
-    # Create a super list of namespaces
-    all     = []
-    pkgsall = []
-    for p in pkgs:
-        ns = read_namespaces_local( wrkspace, p )
-        if ( len(ns) > 0 ):
-            all.extend( ns )
-            pkgsall.append( (p,ns) )
-
-    return (all, pkgsall)
-    
-    
-def read_namespaces_local( wrkspace, pkgname ):
-    f = os.path.join( wrkspace, pkgname, 'top', 'pkg.namespaces' )
-    if ( not os.path.isfile( f ) ):
-        return []
-        
-    try:
-        fd = open( f, 'r' )
-        ns = _read_namespaces( fd )
-        fd.close()
-        
-    except Exception as ex:
-        exit( "ERROR: Unable to open/read pkg.namespaces file: {})".format(f,ex) )
-
-    return ns
-    
-        
-def read_namespaces_top( uverse, pkgnbv ):
-    
-    # Open top file
-    f = os.path.join( uverse, pkgnbv + '.top' )
-    try:
-        tar = tarfile.open( f )
-        fh  = tar.extractfile( 'top/pkg.namespaces' )
-    
-    except KeyError:
-        print_warning( "No pkg.namespace file in package: {}".format( f ) )
-        tar.close()
-        return []
-        
-    except Exception as ex:
-        exit("ERROR: Trying to locate/read Package Top File: {}".format(f) )
-    
-    # Read the namespaces file
-    ns  = _read_namespaces( fh )
-    tar.close()
-    return ns
-
-
-def _read_namespaces( fh ):
-    namespaces = []
-    for line in fh:
-        line = line.strip()
-        namespaces.append( line )    
-    
-    return namespaces
         

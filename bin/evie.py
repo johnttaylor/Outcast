@@ -8,18 +8,9 @@ usage: evie [options] <command> [<args>...]
        evie [--help]
 
 Options:
-    --user USER          Set the user id (overrides the environment varaible
-                         settings for the user id).
-    --passwd PASS        Password for the asscoiated user id
-    -w WPATH             Explicity sets the path of the workspace root 
-                         directory.  The default behavior is to auto-detect the
-                         workspace root directory.
     --scm TOOL           Selects the SCM tool (overrides the environment 
                          OUTCAST_SCM_TOOL setting). The default SCM tool is:
                          git 
-    --now EPOCHSEC       Explicilty provides the 'timestamp' for the distribute
-                         operation.  The default is use the current time when
-                         the command is executed
     --qry                List the supported SCM tools.
     -q                   Suppresses Warning messages
     -v                   Be verbose 
@@ -121,11 +112,6 @@ else:
         utils.set_quite_mode( args['-q'] )
         utils.set_verbose_mode( args['-v'] )
     
-        # Housekeeping
-        utils.set_user_name( args )
-        utils.set_password( args )
-        utils.set_workspace( args )
- 
         # run the command
         load_command( scm, args['<command>'] ).run( args, [args['<command>']] + args['<args>'] )
 
