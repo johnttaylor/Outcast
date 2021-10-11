@@ -9,8 +9,8 @@ usage: evie [options] <command> [<args>...]
 
 Options:
     --scm TOOL           Selects the SCM tool (overrides the environment 
-                         OUTCAST_SCM_TOOL setting). The default SCM tool is:
-                         git 
+                         OUTCAST_SCM_ADOPTED_TOOL setting). The default SCM 
+                         tool is: git 
     --qry                List the supported SCM tools.
     -q                   Suppresses Warning messages
     -v                   Be verbose 
@@ -29,7 +29,7 @@ from docopt.docopt import docopt
 import utils
 
 from my_globals import EVIE_VERSION
-from my_globals import OUTCAST_SCM_TOOL
+from my_globals import OUTCAST_SCM_ADOPTED_TOOL
 
 
 
@@ -82,7 +82,7 @@ if ( args['--qry'] ):
 
 else:
     # Determine which SCM tool to use
-    scm = os.environ.get( OUTCAST_SCM_TOOL() )
+    scm = os.environ.get( OUTCAST_SCM_ADOPTED_TOOL() )
     if ( scm == None ):
         scm = 'git'
     if ( args['--scm'] ):

@@ -8,9 +8,14 @@ def ORC_VERSION():
 def EVIE_VERSION():
     return ORC_VERSION()
     
-def OUTCAST_SCM_TOOL():
-    return 'OUTCAST_SCM_TOOL'
+# SCM for adopted packages
+def OUTCAST_SCM_ADOPTED_TOOL():
+    return 'OUTCAST_SCM_ADOPTED_TOOL'
    
+# SCM for primary/local package
+def OUTCAST_SCM_PRIMARY_TOOL():
+    return 'OUTCAST_SCM_PRIMARY_TOOL'
+
 #
 #def NQBP_PRJ_DIR( newval=None ):
 #    global _NQBP_PRJ_DIR

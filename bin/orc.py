@@ -7,8 +7,11 @@ usage: orc [options] <command> [<args>...]
 
 Options:
     --scm TOOL           Selects the SCM tool (overrides the environment 
-                         OUTCAST_SCM_TOOL setting). The default SCM tool is:
-                         git. 
+                         OUTCAST_SCM_ADOPTED_TOOL setting) with respect to 
+                         adopted packages. The default SCM tool is: git. 
+    --primary-scm TOOL   Selects the SCM tool (overrides the environment 
+                         OUTCAST_SCM_PRIMARY_TOOL setting) with respect to 
+                         primary repository. The default SCM tool is: git. 
     -q                   Suppresses Warning messages.
     -v                   Be verbose. 
     --where              Only display the path to where 'orc' is located.
@@ -24,7 +27,8 @@ from subprocess import call
 
 from docopt.docopt import docopt
 from my_globals import ORC_VERSION
-from my_globals import OUTCAST_SCM_TOOL
+from my_globals import OUTCAST_SCM_ADOPTED_TOOL
+from my_globals import OUTCAST_SCM_PRIMARY_TOOL
 import utils
 
 
@@ -64,13 +68,22 @@ if __name__ == '__main__':
     # Parse command line
     args = docopt(__doc__, version=ORC_VERSION(), options_first=True )
 
-    # Determine which SCM tool to use
-    scm = os.environ.get( OUTCAST_SCM_TOOL() )
+    # Determine which 'adopted' SCM tool to use
+    scm = os.environ.get( OUTCAST_SCM_ADOPTED_TOOL() )
     if ( scm == None ):
         scm = 'git'
     if ( args['--scm'] ):
         scm = args['--scm']    
     args['--scm'] = scm
+
+    # Determine which 'primary' SCM tool to use
+    scm = os.environ.get( OUTCAST_SCM_PRIMARY_TOOL() )
+    if ( scm == None ):
+        scm = 'git'
+    if ( args['--primary-scm'] ):
+        scm = args['--primary-scm']    
+    args['--primary-scm'] = scm
+
 
     # Trap the special where option
     if ( args['--where'] ):
@@ -94,8 +107,11 @@ if __name__ == '__main__':
         # Set quite & verbose modes
         utils.set_quite_mode( args['-q'] )
         utils.set_verbose_mode( args['-v'] )
-        skip = False
     
+        # Set the current working directory to the root directory
+        repo_root = utils.find_root( args['--primary-scm'], args['-v'] )
+        utils.push_dir( repo_root )
+
         # run the command
         load_command( args['<command>'] ).run( args, [args['<command>']] + args['<args>'] )
 

@@ -12,28 +12,6 @@ _dirstack = []
 quite_mode   = False
 verbose_mode = False
 
-#-----------------------------------------------------------------------------
-def render_dot_file_as_pic( pictype, oname ):
-    if ( pictype ):
-        cmd   = "dot -T{} -x -O {}".format(pictype,oname)
-        fname = "{}.{}".format( oname, pictype )
-        if ( os.path.isfile(fname) ):
-            print_warning("Removing existing rendered {} file: {}".format(pictype,fname) )
-            try:
-                os.remove(fname)
-            except Exception as ex:
-                exit( "ERROR: {}".format(ex) )
-        
-        p  = subprocess.Popen( cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
-        r  = p.communicate()
-        r0 = '' if r[0] == None else r[0].decode()
-        r1 = '' if r[1] == None else r[1].decode()
-        if ( p.returncode ):
-            print( r0 + ' ' + r1 )
-            exit( "ERROR: Failed rendering the .DOT file (ensure that the GraphVis 'bin/' directory is in your path)" )
-        
-
-
 
 #-----------------------------------------------------------------------------
 def standardize_dir_sep( pathinfo ):
@@ -66,7 +44,6 @@ def set_quite_mode( newstate ):
     quite_mode = newstate
        
 
-#-----------------------------------------------------------------------------
 def print_verbose( msg, no_new_line=False, bare=False ):
     if ( verbose_mode ):
         if ( not no_new_line ):
@@ -131,6 +108,13 @@ def _handleRemoveReadonly(func, path, exc):
   else:
       raise   
   
+# This function returns true the root the primary repository
+def find_root( primary_scm_tool, verobse ):
+    cmd = f'evie.py --scm {primary_scm_tool} findroot'
+    t   = run_shell( cmd, verobse )
+    check_results( t, "ERROR: Failed find the root of the primary/local Repository" )
+    return t[1].strip()
+        
 
 #-----------------------------------------------------------------------------
 def parse_pattern( string ):
@@ -444,6 +428,8 @@ def check_results( t, err_msg ):
             print(t[1])
         exit( err_msg )
 
+
+
 #-----------------------------------------------------------------------------
 def parse_vernum( string ):
     pre = None
@@ -673,3 +659,25 @@ def get_marked_time():
     return now, local
     
         
+#-----------------------------------------------------------------------------
+def render_dot_file_as_pic( pictype, oname ):
+    if ( pictype ):
+        cmd   = "dot -T{} -x -O {}".format(pictype,oname)
+        fname = "{}.{}".format( oname, pictype )
+        if ( os.path.isfile(fname) ):
+            print_warning("Removing existing rendered {} file: {}".format(pictype,fname) )
+            try:
+                os.remove(fname)
+            except Exception as ex:
+                exit( "ERROR: {}".format(ex) )
+        
+        p  = subprocess.Popen( cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
+        r  = p.communicate()
+        r0 = '' if r[0] == None else r[0].decode()
+        r1 = '' if r[1] == None else r[1].decode()
+        if ( p.returncode ):
+            print( r0 + ' ' + r1 )
+            exit( "ERROR: Failed rendering the .DOT file (ensure that the GraphVis 'bin/' directory is in your path)" )
+        
+
+
