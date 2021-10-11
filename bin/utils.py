@@ -3,8 +3,12 @@
 
 import sys, os, errno, fnmatch, subprocess, time, copy
 import errno, stat, shutil
-import platform, tarfile
-from collections import deque
+import json
+#import platform, tarfile
+#from collections import deque
+
+from my_globals import ADOPTED_PKGS_DIR
+from my_globals import DEPS_FILE
 
 
 # Module globals
@@ -115,7 +119,30 @@ def find_root( primary_scm_tool, verobse ):
     check_results( t, "ERROR: Failed find the root of the primary/local Repository" )
     return t[1].strip()
         
+#-----------------------------------------------------------------------------
+# return None if not able to load the file
+def load_deps_file():
+    f = os.path.join(  ADOPTED_PKGS_DIR(),DEPS_FILE() )
 
+    try:
+        with open(f) as f:
+            return json.load( f )
+    except:
+        return None
+
+def json_get_package( dep_list, package_to_find ):
+    for p in dep_list:
+        if ( p['pkgname'] == package_to_find ):
+            return p['pkgname']
+    return None
+
+def json_create_dep_entry( pkgname, pkgtype, parentdir, date_adopted, ver_sem, ver_branch, ver_id, repo_name, repo_type, repo_origin ):
+    ver_dict  = { "semanticVersion" : ver_sem, "branch" : ver_branch, "tag" : ver_id }
+    repo_dict = { "name" : repo_name, "type": repo_type, "origin" : repo_origin }
+    dep_dict  = { "pkgname" : pkgname, "packageType" : pkgtype, "adoptedDate": date_adopted, "parentDir" : parentdir, "version" : ver_dict, "repo": repo_dict }
+    return json.dumps(dep_dict, indent=2)
+
+                 
 #-----------------------------------------------------------------------------
 def parse_pattern( string ):
     # default result values

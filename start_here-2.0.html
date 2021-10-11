@@ -239,6 +239,12 @@ Error message and password prompt
 
 <li>$:/state/toc/Contents-Overview--242358753</li>
 
+<li>$:/state/toc/Contents-Proof-of-Concept--242358753</li>
+
+<li>$:/state/toc/Contents-References--242358753</li>
+
+<li>$:/state/toc/Contents-Tools--242358753</li>
+
 <li>$:/state/toc/Contents/Overview-Proof-of-Concept--242358753</li>
 
 <li>$:/StoryList</li>
@@ -298,6 +304,8 @@ Error message and password prompt
 <li>Draft of 'Overview'</li>
 
 <li>Environment Variables</li>
+
+<li>Example deps.json file</li>
 
 <li>Export Headers File</li>
 
@@ -9486,13 +9494,22 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div created="20180713005402899" modified="20180713005402899" title="$:/state/toc/Contents-Glossary--1025088837">
 <pre>open</pre>
 </div>
-<div created="20211010132020521" modified="20211010192504919" title="$:/state/toc/Contents-Overview--242358753">
-<pre>open</pre>
+<div created="20211010132020521" modified="20211011193513137" title="$:/state/toc/Contents-Overview--242358753">
+<pre>close</pre>
+</div>
+<div created="20211011193515091" modified="20211011193517442" title="$:/state/toc/Contents-Proof-of-Concept--242358753">
+<pre>close</pre>
+</div>
+<div created="20211011193520835" modified="20211011193526340" title="$:/state/toc/Contents-References--242358753">
+<pre>close</pre>
+</div>
+<div created="20211011193523237" modified="20211011193525460" title="$:/state/toc/Contents-Tools--242358753">
+<pre>close</pre>
 </div>
 <div created="20211010192419705" modified="20211010192424460" title="$:/state/toc/Contents/Overview-Proof-of-Concept--242358753">
 <pre>close</pre>
 </div>
-<div list="Overview" title="$:/StoryList">
+<div list="References [[Example deps.json file]] [[Detailed MCP relationships]] Overview" title="$:/StoryList">
 <pre></pre>
 </div>
 <div plugin-type="info" title="$:/temp/info-plugin" type="application/json">
@@ -10070,6 +10087,31 @@ The Outcast 2.0 scripts and tools are contained in the [[Outcast repository|http
 |`OUTCAST_UVERSE_TYPE`| n |This variable sets the default universe type. If not set, the default is 'git' |
 |`OUTCAST_SCM_TOOL` | n |This variable sets the default SCM tool. If not set, the default is 'git' |
 </pre>
+</div>
+<div created="20211011193436494" modified="20211011195516573" tags="Proof-of-Concept" title="Example deps.json file">
+<pre>```
+  # Updated when adopting/including a secondary repo
+{
+  &quot;immediateDeps&quot;: [
+    {
+      &quot;pkgname&quot;: &quot;nqbb&quot;,
+      &quot;packageType&quot;: &quot;foreign&quot;, # enumeration foreign, readonly, overlay 
+      &quot;parentDir&quot;:&quot;xsrc/&quot;, # only for RO and FO
+      &quot;version&quot;: {
+        &quot;semanticVersion&quot;: &quot;2.0.0&quot;, # Optional
+        &quot;branch&quot;: &quot;develop&quot;,        # Optional (only used when SCM requires/uses branch specifier - this is NOT use with GIT)
+        &quot;tag&quot;: &quot;develop-bldnum-984&quot; # or hash, or verisonNumb, ..
+      },
+      &quot;repo&quot;: {
+        &quot;name&quot;: &quot;colony.core&quot;,
+        &quot;type&quot;: &quot;git&quot;,
+        &quot;origin&quot;: &quot;https://github.com/johnttaylor&quot;
+      }
+    }
+  ],
+  &quot;weakDeps&quot;: []  # Same contents as 'immediateDeps'
+}
+```</pre>
 </div>
 <div created="20140809035342632" creator="JohnTaylor" modified="20150221160353385" modifier="JohnTaylor" tags="Files [[Directories &amp; Files]]" title="Export Headers File">
 <pre>The file &lt;code&gt;export_headers.lst&lt;/code&gt; in a package's &lt;code&gt;top/&lt;/code&gt; directory is used to list which headers to expose (i.e. what gets mounted/linked into the Workspace's &lt;code&gt;xinc/&lt;/code&gt; directory) for use by client packages.
