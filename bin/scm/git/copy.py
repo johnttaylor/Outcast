@@ -42,7 +42,7 @@ def run( common_args, cmd_argv ):
 
     # -b option is not supported/needed
     if ( args['-b'] != None ):
-        sys.exit( "The '-b' option is not supported/needed.  Use a 'remote-ref' as the <id> argument" )
+        utils.print_verbose( "The '-b' option is not supported/needed.  Use a 'remote-ref' as the <id> argument" )
 
     # Default Package name
     pkg = args['<repo>']

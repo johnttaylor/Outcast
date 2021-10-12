@@ -2,9 +2,12 @@
  
 Removes a previously 'mounted' repository
 ===============================================================================
-usage: evie [common-opts] umount [options] <repo> <origin> <id>
+usage: evie [common-opts] mount [options] <dst> <repo> <origin> <id>
 
 Arguments:
+    <dst>            PARENT directory for where the package was mounted.  The
+                     directory is specified as a relative path to the root
+                     of primary repository.
     <repo>           Name of the repository to unmount
     <origin>         Path/URL to the repository
     <id>             Label/Tag/Hash/Version of code to be unmounted

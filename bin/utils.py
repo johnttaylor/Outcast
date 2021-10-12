@@ -122,13 +122,24 @@ def find_root( primary_scm_tool, verobse ):
 #-----------------------------------------------------------------------------
 # return None if not able to load the file
 def load_deps_file():
-    f = os.path.join(  ADOPTED_PKGS_DIR(),DEPS_FILE() )
+    f = os.path.join(  ADOPTED_PKGS_DIR(), DEPS_FILE() )
 
     try:
         with open(f) as f:
             return json.load( f )
     except:
         return None
+
+def write_deps_file( json_dictionary ):
+    # make sure the pkgs.adopted directory exists
+    if ( not os.path.isdir( ADOPTED_PKGS_DIR() ) ):
+        mkdirs( ADOPTED_PKGS_DIR() )
+
+    f = os.path.join(  ADOPTED_PKGS_DIR(),DEPS_FILE() )
+    data = json.dumps( json_dictionary, indent=2 )
+    with open( f, "w+" ) as file:
+        file.write( data )
+
 
 def json_get_package( dep_list, package_to_find ):
     for p in dep_list:
@@ -140,9 +151,15 @@ def json_create_dep_entry( pkgname, pkgtype, parentdir, date_adopted, ver_sem, v
     ver_dict  = { "semanticVersion" : ver_sem, "branch" : ver_branch, "tag" : ver_id }
     repo_dict = { "name" : repo_name, "type": repo_type, "origin" : repo_origin }
     dep_dict  = { "pkgname" : pkgname, "packageType" : pkgtype, "adoptedDate": date_adopted, "parentDir" : parentdir, "version" : ver_dict, "repo": repo_dict }
-    return json.dumps(dep_dict, indent=2)
+    return dep_dict
 
-                 
+def json_update_deps_file_with_new_entry( current_deps, new_dep_entry, is_weak_dep=False ):
+    if ( is_weak_dep ):
+        current_deps['weakDeps'].append( new_dep_entry )
+    else:
+        current_deps['immediateDeps'].append( new_dep_entry )
+    write_deps_file( current_deps )
+
 #-----------------------------------------------------------------------------
 def parse_pattern( string ):
     # default result values

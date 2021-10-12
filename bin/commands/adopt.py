@@ -33,9 +33,14 @@ Common Options:
     
     
 Notes:
-    
+    o READONLY: If you are using GIT for the primary repo and you get the 
+      following error when you adopt a readonly package it is because you need 
+      to first do 'git commit'.
+      
+        Working tree has modifications.  Cannot add.
+
 """
-import os
+import os, sys
 import utils
 from docopt.docopt import docopt
 from datetime import datetime, date, time, timezone
@@ -54,27 +59,53 @@ def run( common_args, cmd_argv ):
     if ( args['-p'] ):
         pkg = args['-p']
 
+    # default branch option
+    branch_opt = ""
+    if ( args['-b'] ):
+        branch_opt = '-b ' + args['-b']
+
     # Get the current time
     dt_string = datetime.now().strftime("%Y %b %d %H:%M:%S")
 
     # check for already adopted
     deps = utils.load_deps_file()
     if ( deps != None ):
-        if ( json_get_package( deps['immediateDeps'], pkg ) != None ):
+        if ( utils.json_get_package( deps['immediateDeps'], pkg ) != None ):
             sys.exit( f'Package {pkg} already has been adopted as immediate dependency' );
-        if ( json_get_package( deps['weakDeps'], pkg ) != None ):
+        if ( utils.json_get_package( deps['weakDeps'], pkg ) != None ):
             sys.exit( f'Package {pkg} already has been adopted as weak dependency' );
+    else:
+        deps = { "immediateDeps":[], "weakDeps": []}
+        
+    # double check if the package has already been adopted (i.e. there was manual edits to the deps.json file)
+    dstpkg = os.path.join( args['<dst>'], pkg)
+    if ( os.path.exists( dstpkg ) ):
+        sys.exit( f"ERROR: The destination - {dstpkg} - already exists" )
 
     #
     # Adopt: Foreign
-    #
+    # 
     if ( args['foreign'] ):
         # Copy the FO package
+        cmd = f"evie.py --scm {common_args['--scm']} copy -p {pkg} {branch_opt} {args['<dst>']} {args['<repo>']} {args['<origin>']} {args['<id>']}"
+        t   = utils.run_shell( cmd, common_args['-v'] )
+        utils.check_results( t, f"ERROR: Failed to make a copy of the repo: {args['<repo>']}" )
+
         # update the deps.json file
         d = utils.json_create_dep_entry( pkg, "foreign", args['<dst>'], dt_string, args['--semver'], args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
-        print(d)
+        utils.json_update_deps_file_with_new_entry( deps, d, args['--weak'] )
 
-        # clean-up if error
+    #
+    # Adopt: ReadOnly
+    # 
+    elif ( args['readonly'] ):
+        # Mount the RO package
+        cmd = f"evie.py --scm {common_args['--scm']} mount -p {pkg} {branch_opt} {args['<dst>']} {args['<repo>']} {args['<origin>']} {args['<id>']}"
+        t   = utils.run_shell( cmd, common_args['-v'] )
+        utils.check_results( t, f"ERROR: Failed to mount the repo: {args['<repo>']}" )
 
+        # update the deps.json file
+        d = utils.json_create_dep_entry( pkg, "readonly", args['<dst>'], dt_string, args['--semver'], args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
+        utils.json_update_deps_file_with_new_entry( deps, d, args['--weak'] )
         
 
