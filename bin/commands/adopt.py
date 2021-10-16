@@ -70,10 +70,9 @@ def run( common_args, cmd_argv ):
     # check for already adopted
     deps = utils.load_deps_file()
     if ( deps != None ):
-        if ( utils.json_get_package( deps['immediateDeps'], pkg ) != None ):
-            sys.exit( f'Package {pkg} already has been adopted as immediate dependency' );
-        if ( utils.json_get_package( deps['weakDeps'], pkg ) != None ):
-            sys.exit( f'Package {pkg} already has been adopted as weak dependency' );
+        pkgobj, deptype, pkgidx = utils.json_find_dependency( deps, pkg )
+        if ( pkgobj != None ):
+            sys.exit( f'Package {pkg} already has been adopted as {deptype} dependency' );
     else:
         deps = { "immediateDeps":[], "weakDeps": []}
         
@@ -89,23 +88,32 @@ def run( common_args, cmd_argv ):
         # Copy the FO package
         cmd = f"evie.py --scm {common_args['--scm']} copy -p {pkg} {branch_opt} {args['<dst>']} {args['<repo>']} {args['<origin>']} {args['<id>']}"
         t   = utils.run_shell( cmd, common_args['-v'] )
-        utils.check_results( t, f"ERROR: Failed to make a copy of the repo: {args['<repo>']}" )
+        utils.check_results( t, f"ERROR: Failed to make a copy of the repo: {args['<repo>']}", 'copy', 'get-error-msg', common_args['--scm']  )
 
         # update the deps.json file
         d = utils.json_create_dep_entry( pkg, "foreign", args['<dst>'], dt_string, args['--semver'], args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
         utils.json_update_deps_file_with_new_entry( deps, d, args['--weak'] )
 
+        # Display parting message (if there is one)
+        utils.display_scm_message( 'copy', 'get-success-msg', common_args['--scm'] )
+
     #
-    # Adopt: ReadOnly
+    # Adopt: ReadOnly 
     # 
     elif ( args['readonly'] ):
         # Mount the RO package
         cmd = f"evie.py --scm {common_args['--scm']} mount -p {pkg} {branch_opt} {args['<dst>']} {args['<repo>']} {args['<origin>']} {args['<id>']}"
         t   = utils.run_shell( cmd, common_args['-v'] )
-        utils.check_results( t, f"ERROR: Failed to mount the repo: {args['<repo>']}" )
+        utils.check_results( t, f"ERROR: Failed to mount the repo: {args['<repo>']}", 'mount', 'get-error-msg', common_args['--scm'] )
 
         # update the deps.json file
         d = utils.json_create_dep_entry( pkg, "readonly", args['<dst>'], dt_string, args['--semver'], args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
         utils.json_update_deps_file_with_new_entry( deps, d, args['--weak'] )
+
+        # Mark files as readonly
+        utils.set_tree_readonly( dstpkg )
+
+        # Display parting message (if there is one)
+        utils.display_scm_message( 'mount', 'get-success-msg', common_args['--scm'] )
         
 

@@ -65,7 +65,13 @@ def set_verbose_mode( newstate ):
     global verbose_mode
     verbose_mode = newstate
        
-        
+       
+def display_scm_message( cmd, msg, scm ):
+    cmd = f"evie.py --scm {scm} {cmd} {msg}"
+    t = run_shell( cmd, False )
+    if ( not is_error(t) and t[1] != None and t[1] != '' ):
+        print( t[1] )
+
   
 #-----------------------------------------------------------------------------
 def mkdirs( dirpath ):
@@ -114,11 +120,20 @@ def _handleRemoveReadonly(func, path, exc):
   
 # This function returns true the root the primary repository
 def find_root( primary_scm_tool, verobse ):
+    # Note: Running the SCM command creates a nested run_shell scenario - it only works if 'verbose' is turned off (not sure why!!!)
     cmd = f'evie.py --scm {primary_scm_tool} findroot'
-    t   = run_shell( cmd, verobse )
+    t   = run_shell( cmd, False )
     check_results( t, "ERROR: Failed find the root of the primary/local Repository" )
     return t[1].strip()
         
+# Sets/clears the 'readonly' bit/flag for the entire specified directory tree
+def set_tree_readonly( root, set_as_read_only = True ):
+    mode = stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH if set_as_read_only else stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH
+    for root,dirs,files in os.walk(root):
+        for f in files:
+            filename = os.path.join(root, f)
+            os.chmod(filename, mode)
+    
 #-----------------------------------------------------------------------------
 # return None if not able to load the file
 def load_deps_file():
@@ -142,15 +157,23 @@ def write_deps_file( json_dictionary ):
 
 
 def json_get_package( dep_list, package_to_find ):
-    for p in dep_list:
-        if ( p['pkgname'] == package_to_find ):
-            return p['pkgname']
-    return None
+    if ( len(dep_list) > 0 ):
+        try:
+            idx = 0
+            for p in dep_list:
+                if ( p['pkgname'] == package_to_find ):
+                    return p, idx
+                idx = idx + 1
+
+            return None, None
+        except Exception as e:
+            sys.exit( f"ERROR: Dependency file is corrupt {e}" )
+    return None, None
 
 def json_create_dep_entry( pkgname, pkgtype, parentdir, date_adopted, ver_sem, ver_branch, ver_id, repo_name, repo_type, repo_origin ):
     ver_dict  = { "semanticVersion" : ver_sem, "branch" : ver_branch, "tag" : ver_id }
     repo_dict = { "name" : repo_name, "type": repo_type, "origin" : repo_origin }
-    dep_dict  = { "pkgname" : pkgname, "packageType" : pkgtype, "adoptedDate": date_adopted, "parentDir" : parentdir, "version" : ver_dict, "repo": repo_dict }
+    dep_dict  = { "pkgname" : pkgname, "pkgtype" : pkgtype, "adoptedDate": date_adopted, "parentDir" : parentdir, "version" : ver_dict, "repo": repo_dict }
     return dep_dict
 
 def json_update_deps_file_with_new_entry( current_deps, new_dep_entry, is_weak_dep=False ):
@@ -159,6 +182,16 @@ def json_update_deps_file_with_new_entry( current_deps, new_dep_entry, is_weak_d
     else:
         current_deps['immediateDeps'].append( new_dep_entry )
     write_deps_file( current_deps )
+
+def json_find_dependency( deps, pkgname ):
+    deptype    = 'immediateDeps'
+    pkgobj,idx = json_get_package( deps[deptype], pkgname )
+    if ( pkgobj == None ):
+        deptype    = 'weakDeps'
+        pkgobj,idx = json_get_package( deps[deptype], pkgname )
+        if ( pkgobj == None ):
+            return None, None, None
+    return pkgobj, deptype, idx
 
 #-----------------------------------------------------------------------------
 def parse_pattern( string ):
@@ -457,8 +490,7 @@ def run_shell( cmd, verbose_flag=False, on_err_msg=None ):
     r1 = '' if r[1] == None else r[1].decode()
     if ( p.returncode != 0 and on_err_msg != None ):
         exit(on_err_msg)
-    
-    return (p.returncode, "{} {}".format(r0,r1) )
+    return (p.returncode, f"{r0} {r1}" )
 
 def is_error( t ):
     if ( t[0] != 0 ):
@@ -466,11 +498,16 @@ def is_error( t ):
 
     return False
 
-def check_results( t, err_msg ):
+def check_results( t, err_msg, scm_cmd=None, scm_msg=None, scm=None ):
     if ( t[0] != 0 ):
         if ( t[1] != None and t[1] != 'None None' ):
             print(t[1])
-        exit( err_msg )
+        if ( scm_cmd == None ):
+            sys.exit( err_msg )
+        else:
+            print( err_msg )
+            display_scm_message( scm_cmd, scm_msg, scm )
+            sys.exit(1)
 
 
 

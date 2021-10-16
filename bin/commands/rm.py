@@ -38,11 +38,9 @@ def run( common_args, cmd_argv ):
     deps = utils.load_deps_file()
     if ( deps == None ):
         sys.exit( 'ERROR: No packages have been adopted' )
-    pkgobj = utils.json_get_package( deps['immediateDeps'], pkg )
+    pkgobj, deptype, pkgidx = utils.json_find_dependency( deps, pkg )
     if ( pkgobj == None ):
-        pkgobj = utils.json_get_package( deps['weakDeps'], pkg )
-        if ( pkgobj == None ):
-            sys.exit( f'Cannot find the package - {pkg} - in the list of adopted packages' );
+        sys.exit( f'Cannot find the package - {pkg} - in the list of adopted packages' );
 
     # default branch option
     branch_opt = ""
@@ -54,13 +52,34 @@ def run( common_args, cmd_argv ):
         if ( pkgobj['parentDir'] == None ):
             sys.exit( "ERROR: the deps.json file is corrupt - there is no parent directory for the package" )
 
+        # Remove the package
         cmd = f"evie.py --scm {pkgobj['repo']['type']} umount -p {pkgobj['pkgname']} {branch_opt} {pkgobj['parentDir']} {pkgobj['repo']['name']} {pkgobj['repo']['origin']} {pkgobj['version']['tag']}"
         t   = utils.run_shell( cmd, common_args['-v'] )
-        utils.check_results( t, f"ERROR: Failed to umount the repo: {pkgobj['repo']['name']}" )
+        utils.check_results( t, f"ERROR: Failed to umount the repo: {pkgobj['repo']['name']}, 'umount', 'get-error-msg', common_args['--scm']" )
         
+        # Remove the package from the deps list
+        deps[deptype].pop(pkgidx)
+        utils.write_deps_file( deps )
+
+        # Display parting message (if there is one)
+        utils.display_scm_message( 'umount', 'get-success-msg', common_args['--scm'] )
+
     # FOREIGN Package
     elif ( pkgobj['pkgtype'] == 'foreign' ):
-        pass
+        if ( pkgobj['parentDir'] == None ):
+            sys.exit( "ERROR: the deps.json file is corrupt - there is no parent directory for the package" )
+
+        # Remove the package
+        cmd = f"evie.py --scm {pkgobj['repo']['type']} rm -p {pkgobj['pkgname']} {branch_opt} {pkgobj['parentDir']} {pkgobj['repo']['name']} {pkgobj['repo']['origin']} {pkgobj['version']['tag']}"
+        t   = utils.run_shell( cmd, common_args['-v'] )
+        utils.check_results( t, f"ERROR: Failed to remove the package: {pkgobj['repo']['name']}, 'rm', 'get-error-msg', common_args['--scm']" )
+        
+        # Remove the package from the deps list
+        deps[deptype].pop(pkgidx)
+        utils.write_deps_file( deps )
+
+        # Display parting message (if there is one)
+        utils.display_scm_message( 'rm', 'get-success-msg', common_args['--scm'] )
 
     # OVERALY Package
     elif ( pkgobj['pkgtype'] == 'overlay' ):

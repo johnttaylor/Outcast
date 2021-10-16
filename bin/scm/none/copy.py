@@ -1,44 +1,16 @@
-"""
- 
-Creates a non-tracked/local copy of the specified repository/branch/reference
-===============================================================================
-usage: evie [common-opts] copy [options] <dst> <repo> <origin> <id>
-
-Arguments:
-    <dst>            Parent directory for where the copy is placed.
-    <repo>           Name of the repository to copy
-    <origin>         Path/URL to the repository
-    <id>             Label/Tag/Hash/Version of code to be copied
-    
-Options:
-    -p PKGNAME       Specifies the Package name if different from the <repo> 
-                     name
-    -b BRANCH        Specifies the source branch in <repo>.  The use/need
-                     of this option in dependent on the <repo> SCM type.
-                        
-Options:
-    -h, --help          Display help for this command
-
-    
-Notes:
-    o The command MUST be run in the root of the primary respostiory.
-    
-"""
 import os
 import utils
 from docopt.docopt import docopt
-
+import scm.copy 
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print("{:<13}{}".format( 'copy', "Creates a non-tracked/local copy of a SCM Repository" ))
+    scm.copy.display_summary()
     
 
 #------------------------------------------------------------------------------
 def run( common_args, cmd_argv ):
-    args = docopt(__doc__, argv=cmd_argv)
+    args = docopt(scm.copy.USAGE, argv=cmd_argv)
 
-    # C
-    
     # Return 'error' since this is just a stub
     exit(1)
