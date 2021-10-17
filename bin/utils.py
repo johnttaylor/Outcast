@@ -193,6 +193,28 @@ def json_find_dependency( deps, pkgname ):
             return None, None, None
     return pkgobj, deptype, idx
 
+
+def json_get_parentdir( pkgdict ):
+    return '<none>' if pkgdict['parentDir'] == None else pkgdict['parentDir']
+
+def json_get_semver( pkgdict ):
+    return '<none>' if pkgdict['version']['semanticVersion'] == None else pkgdict['version']['semanticVersion']
+
+def json_get_branch( pkgdict ):
+    return '<none>' if pkgdict['version']['branch'] == None else pkgdict['version']['branch']
+
+def json_get_tag( pkgdict ):
+    return '<none>' if pkgdict['version']['tag'] == None else pkgdict['version']['tag']
+
+def json_get_repo_name( pkgdict ):
+    return '<none>' if pkgdict['repo']['name'] == None else pkgdict['repo']['name']
+
+def json_get_repo_type( pkgdict ):
+    return '<none>' if pkgdict['repo']['type'] == None else pkgdict['repo']['type']
+
+def json_get_repo_origin( pkgdict ):
+    return '<none>' if pkgdict['repo']['origin'] == None else pkgdict['repo']['origin']
+
 #-----------------------------------------------------------------------------
 def parse_pattern( string ):
     # default result values

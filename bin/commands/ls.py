@@ -8,6 +8,12 @@ Arguments:
     
     
 Options:
+    -v                  Display version info
+    -r                  Display repo info
+    -l                  Displays all details (i.e. -vr)
+    -w                  Display only weak dependencies
+    -i                  Display only immediate dependencies
+    -x                  Suppress column headers
     -h, --help          Display help for this command
 
 Common Options:
@@ -30,7 +36,49 @@ def display_summary():
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
 
-    print("ls: work-in-progress")
+    # Get the list of adopted packages
+    deps = utils.load_deps_file()
+    if ( deps == None ):
+        sys.exit( 'ERROR: No packages have been adopted' )
+
+    # Get immeidate deps
+    pkgs = []
+    if ( not args['-w'] ):
+        for p in deps['immediateDeps']:
+            p['depType'] = 'I'
+            pkgs.append( p )
+
+    # Get weak deps
+    if ( not args['-i'] ):
+        for p in deps['weakDeps']:
+            p['depType'] = 'W'
+            pkgs.append( p )
+
+    # Sort the list
+    pkgs = sorted( pkgs, key = lambda i: i['pkgname'] )
+    if ( not args['-x'] ):
+        header  = "PkgName          D PkType    AdoptedDate           ParentDir        "
+        rheader = "RepoName         RepoType RepoOrigin                               "
+        vheader = "SemVer   Branch           Tag"
+        if ( args['-l'] or args['-r'] ):
+            header = header + rheader
+        if ( args['-l'] or args['-v'] ):
+            header = header + vheader
+        print( header )
+
+    # display the list
+    for p in pkgs:
+        info = f"{p['pkgname']:<16} {p['depType']} {p['pkgtype']:<8}  {p['adoptedDate']}  {utils.json_get_parentdir(p):<16}"
         
-        
+        # Repo info
+        if ( args['-l'] or args['-r'] ):
+            info = info + f" {utils.json_get_repo_name(p):<16} {utils.json_get_repo_type(p):<8} {utils.json_get_repo_origin(p):40}"
+
+        # Version info
+        if ( args['-l'] or args['-v'] ):
+            info = info + f" {utils.json_get_semver(p):<8} {utils.json_get_branch(p):<16} {utils.json_get_tag(p)}"
+
+        # display output
+        print( info )  
+
 
