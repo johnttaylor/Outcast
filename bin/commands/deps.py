@@ -6,7 +6,7 @@ usage: orc [common-opts] deps [options]
 
 Arguments:
     
-    
+    <change-type>
 Options:
     -h, --help          Display help for this command
 
@@ -31,6 +31,4 @@ def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
 
     print("deps: work-in-progress")
-        
-        
-
+    

@@ -4,6 +4,7 @@
 import sys, os, errno, fnmatch, subprocess, time, copy
 import errno, stat, shutil
 import json
+from gitignore_parser import parse_gitignore
 #import platform, tarfile
 #from collections import deque
 
@@ -214,6 +215,21 @@ def json_get_repo_type( pkgdict ):
 
 def json_get_repo_origin( pkgdict ):
     return '<none>' if pkgdict['repo']['origin'] == None else pkgdict['repo']['origin']
+
+#-----------------------------------------------------------------------------
+# Filters the directory list by the 'ignore file', dirs with no files
+def walk_dir_ignored( root, ignore_file ):
+    push_dir( root )
+    ignored = parse_gitignore( ignore_file )
+    pop_dir()
+
+    list = []
+    for root, dirs, files in os.walk(root):
+        if ( len(files) > 0 ):
+            if ( ignored( root ) == False ):
+                list.append( root )
+            
+    return list        
 
 #-----------------------------------------------------------------------------
 def parse_pattern( string ):

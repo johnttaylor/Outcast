@@ -2,7 +2,7 @@
  
 Displays/Derives the directory list for the Primary package's 'Owned' dirs
 ===============================================================================
-usage: orc [common-opts] deps [options] 
+usage: orc [common-opts] dirs [options] <dir>
 
 Arguments:
     
@@ -30,7 +30,10 @@ def display_summary():
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
 
-    print("dirs: work-in-progress")
-        
+    #print("dirs: work-in-progress")
+    f = os.path.join( os.getcwd(), 'myignore.txt' )
+    dirs =utils.walk_dir_ignored( args['<dir>'], f )
+    for d in dirs:
+        print(d)
         
 

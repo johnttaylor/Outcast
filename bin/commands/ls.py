@@ -2,10 +2,12 @@
  
 Lists the adopted packages
 ===============================================================================
-usage: orc [common-opts] ls [options] 
+usage: orc [common-opts] ls [options] [<wildcard>]
 
 Arguments:
-    
+    <wildcard>          Filters the list agains the package names by specified 
+                        <wildcard>.  The notation for <wildcard> is Python's 
+                        Unix filename pattern matching.
     
 Options:
     -v                  Display version info
@@ -23,8 +25,9 @@ Common Options:
 Notes:
     
 """
-import os
+import os, sys
 import utils
+import fnmatch
 from docopt.docopt import docopt
 
 #---------------------------------------------------------------------------------------------------------
@@ -35,6 +38,8 @@ def display_summary():
 #------------------------------------------------------------------------------
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
+    if ( args['<wildcard>'] == None ):
+        args['<wildcard>'] = '*'
 
     # Get the list of adopted packages
     deps = utils.load_deps_file()
@@ -68,17 +73,18 @@ def run( common_args, cmd_argv ):
 
     # display the list
     for p in pkgs:
-        info = f"{p['pkgname']:<16} {p['depType']} {p['pkgtype']:<8}  {p['adoptedDate']}  {utils.json_get_parentdir(p):<16}"
+        if ( fnmatch.fnmatch(p['pkgname'], args['<wildcard>']) ):
+            info = f"{p['pkgname']:<16} {p['depType']} {p['pkgtype']:<8}  {p['adoptedDate']}  {utils.json_get_parentdir(p):<16}"
         
-        # Repo info
-        if ( args['-l'] or args['-r'] ):
-            info = info + f" {utils.json_get_repo_name(p):<16} {utils.json_get_repo_type(p):<8} {utils.json_get_repo_origin(p):40}"
+            # Repo info
+            if ( args['-l'] or args['-r'] ):
+                info = info + f" {utils.json_get_repo_name(p):<16} {utils.json_get_repo_type(p):<8} {utils.json_get_repo_origin(p):40}"
 
-        # Version info
-        if ( args['-l'] or args['-v'] ):
-            info = info + f" {utils.json_get_semver(p):<8} {utils.json_get_branch(p):<16} {utils.json_get_tag(p)}"
+            # Version info
+            if ( args['-l'] or args['-v'] ):
+                info = info + f" {utils.json_get_semver(p):<8} {utils.json_get_branch(p):<16} {utils.json_get_tag(p)}"
 
-        # display output
-        print( info )  
+            # display output
+            print( info )  
 
 
