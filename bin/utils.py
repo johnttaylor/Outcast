@@ -14,6 +14,8 @@ from my_globals import PACKAGE_FILE
 from my_globals import PKG_DIRS_FILE
 from my_globals import IGNORE_DIRS_FILE
 from my_globals import PACKAGE_FILE
+from my_globals import OVERLAY_PKGS_DIR
+
 
 # Module globals
 _dirstack = []
@@ -140,8 +142,8 @@ def set_tree_readonly( root, set_as_read_only = True ):
     
 #-----------------------------------------------------------------------------
 # return None if not able to load the file
-def load_package_file():
-    f = os.path.join(  PACKAGE_INFO_DIR(), PACKAGE_FILE() )
+def load_package_file( path=PACKAGE_INFO_DIR(), file=PACKAGE_FILE()):
+    f = os.path.join(  path, file )
 
     try:
         with open(f) as f:
@@ -202,7 +204,7 @@ def json_find_dependency( deps, pkgname ):
 def json_get_list_adopted_overlay_deps( json_dictionary):
     olist = []
     try:
-        deps = json_dictionary['immeidateDeps']
+        deps = json_dictionary['immediateDeps']
         for d in deps:
             if ( d['pkgtype'] == 'overlay' ):
                 olist.append( d )
@@ -264,8 +266,8 @@ def save_dirs_list_file( list_of_dirs, path=PACKAGE_INFO_DIR(), file=PKG_DIRS_FI
         sys.exit( f"WARNING: Failed to update the {f} with the directory list" )
 
 # return None if not able to load the file
-def load_overlaid_dirs_list_file( adopted_pkg_name ):
-    p = os.path.join( OVERLAY_PKGS_DIR(), adopted_pkg_name )
+def load_overlaid_dirs_list_file( adopted_pkg_name, dir_list_file_root=OVERLAY_PKGS_DIR() ):
+    p = os.path.join( dir_list_file_root, adopted_pkg_name, PACKAGE_INFO_DIR() )
     return load_dirs_list_file( path=p )
 
 # returns None if there is no 'ignore file' in the pkg.info dir
@@ -278,12 +280,13 @@ def get_ignore_file( root=os.getcwd() ):
 
 # Filters the directory list by the 'ignore file', dirs with no files
 # If 'ignore_file' does NOT exist - than all dirs are returned
-def walk_dir_filtered_by_ignored( tree_to_walk, ignore_file ):
+def walk_dir_filtered_by_ignored( tree_to_walk, ignore_file, pkgroot=os.getcwd() ):
+    push_dir(pkgroot)
     ignored = None
     if ( ignore_file != None ):
         try:
             # Temporarly make a copy of the ignore file in the package root
-            tmpname = os.path.join( os.getcwd(), TEMP_IGNORE_FILE_NAME )
+            tmpname = os.path.join( pkgroot, TEMP_IGNORE_FILE_NAME )
             shutil.copy( ignore_file, tmpname )
             ignored = parse_gitignore( tmpname )
             os.remove( TEMP_IGNORE_FILE_NAME )
@@ -296,21 +299,45 @@ def walk_dir_filtered_by_ignored( tree_to_walk, ignore_file ):
             if ( ignored == None or ignored( root ) == False ):
                 list.append( standardize_dir_sep(root) )
             
+    pop_dir()
     return list        
 
 
 # create list of dirs from adopted overlay dependencies
-def get_adopted_overlaid_dirs_list( list_of_dep_pkgs ):
+def get_adopted_overlaid_dirs_list( list_of_dep_pkgs, dir_list_file_root=OVERLAY_PKGS_DIR() ):
     result = []
     try:
         for p in list_of_dep_pkgs:
-            d = load_dirs_list_file( p['pkgname'] )
+            d = load_overlaid_dirs_list_file( p['pkgname'], dir_list_file_root )
             if ( d != None ):
                 result.extend( d )
-    except:
-        pass
+    except Exception as e:
+        print(f'{e}')
 
     return result
+
+# Gets list of a packages owned directories
+def get_owned_dirs( path_to_package_file=PACKAGE_INFO_DIR(), dir_list_file_root=OVERLAY_PKGS_DIR(), pkgroot=os.getcwd() ):
+    package_json = load_package_file( path_to_package_file);
+    overlay_deps = json_get_list_adopted_overlay_deps( package_json )
+    odirs        = get_adopted_overlaid_dirs_list( overlay_deps, dir_list_file_root )
+    print("odirs", odirs)
+    primarydirs  = json_get_package_primary_dirs(package_json) 
+    localdirs    = []
+    ignorefile   = get_ignore_file()
+    for d in primarydirs:
+        l = walk_dir_filtered_by_ignored( d, ignorefile, pkgroot ) 
+        localdirs.extend( l )
+    
+    # Remove overlaid directories
+    return [x for x in localdirs if x not in odirs]
+
+#-----------------------------------------------------------------------------
+def copy_pkg_info_dir( dstdir, srcdir ):
+    if ( not os.path.isdir( srcdir ) ):
+        sys.exit( f"ERROR: Missing package info directory ({srcdir})" )
+    mkdirs( dstdir )
+    shutil.copytree( srcdir, dstdir, dirs_exist_ok=True )
 
 #-----------------------------------------------------------------------------
 def parse_pattern( string ):

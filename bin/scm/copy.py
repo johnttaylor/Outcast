@@ -29,6 +29,8 @@ Options:
                      name
     -b BRANCH        Specifies the source branch in <repo>.  The use/need
                      of this option in dependent on the <repo> SCM type.
+    --force          Forces a true copy/clone to be created.  The default
+                     behavior is SCM type specific.
                        
 Options:
     -h, --help       Display help for this command.

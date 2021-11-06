@@ -109,22 +109,13 @@ def run( common_args, cmd_argv ):
 
     # derive directories
     if ( args['ls'] ):
-        package_json = utils.load_package_file();
-        overlay_deps = utils.json_get_list_adopted_overlay_deps( package_json )
-        odirs        = utils.get_adopted_overlaid_dirs_list( overlay_deps )
-        primarydirs  = utils.json_get_package_primary_dirs(package_json) 
-        localdirs    = []
-        ignorefile   = utils.get_ignore_file()
-        for d in primarydirs:
-            l = utils.walk_dir_filtered_by_ignored( d, ignorefile ) 
-            localdirs.extend( l )
-        
-        for d in localdirs:
+        owndirs = utils.get_owned_dirs()
+        for d in owndirs:
             print(d)
 
         # Update the directory list file
         if ( args['-u'] ):
-            utils.save_dirs_list_file( localdirs )
+            utils.save_dirs_list_file( owndirs )
 
         sys.exit(0)
 

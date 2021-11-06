@@ -3,7 +3,7 @@
 Adopts the specified Repo/Package package
 ===============================================================================
 usage: orc [common-opts] adopt [options] readonly <dst> <repo> <origin> <id>
-       orc [common-opts] adopt [options] foreign <dst> <repo> <origin> <id>               
+       orc [common-opts] adopt [options] foreign  <dst> <repo> <origin> <id>               
        orc [common-opts] adopt [options] overlay  <repo> <origin> <id>
 
 Arguments:
@@ -17,8 +17,7 @@ Arguments:
 Options:
     --weak           Adopt the package as 'weak' dependencies.  The default is
                      to adopt as an 'immediate' dependency. A 'weak' dependency 
-                     is not required to be progated when determining transitive 
-                     dependencies.
+                     is not progated when determining transitive dependencies.
     --semver VER     Specifies the semantic version info for the package
                      being adopted. This information is not required, but
                      recommended if it is available.
@@ -33,17 +32,16 @@ Common Options:
     
     
 Notes:
-    o READONLY: If you are using GIT for the primary repo and you get the 
-      following error when you adopt a readonly package it is because you need 
-      to first do 'git commit'.
-      
-        Working tree has modifications.  Cannot add.
 
 """
 import os, sys
 import utils
+import uuid
 from docopt.docopt import docopt
 from datetime import datetime, date, time, timezone
+from my_globals import OVERLAY_PKGS_DIR
+from my_globals import PACKAGE_INFO_DIR
+from my_globals import TEMP_DIR_NAME
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
@@ -77,9 +75,10 @@ def run( common_args, cmd_argv ):
         deps = { "immediateDeps":[], "weakDeps": []}
         
     # double check if the package has already been adopted (i.e. there was manual edits to the deps.json file)
-    dstpkg = os.path.join( args['<dst>'], pkg)
-    if ( os.path.exists( dstpkg ) ):
-        sys.exit( f"ERROR: The destination - {dstpkg} - already exists" )
+    if ( not args['overlay'] ):
+        dstpkg = os.path.join( args['<dst>'], pkg)
+        if ( os.path.exists( dstpkg ) ):
+            sys.exit( f"ERROR: The destination - {dstpkg} - already exists" )
 
     #
     # Adopt: Foreign
@@ -116,4 +115,25 @@ def run( common_args, cmd_argv ):
         # Display parting message (if there is one)
         utils.display_scm_message( 'mount', 'get-success-msg', common_args['--scm'] )
         
+    #
+    # Adopt: overlay
+    # 
+    else:
+        # Get a temporary copy of the OV package
+        tmpdst = os.path.join( PACKAGE_INFO_DIR(), TEMP_DIR_NAME() )
+        cmd = f"evie.py --scm {common_args['--scm']} copy --force -p {pkg} {branch_opt} {tmpdst} {args['<repo>']} {args['<origin>']} {args['<id>']}"
+        t   = utils.run_shell( cmd, common_args['-v'] )
+        utils.check_results( t, f"ERROR: Failed to make a copy of the repo: {args['<repo>']}", 'copy', 'get-error-msg', common_args['--scm']  )
 
+        # Copy the adoptee's package info directory
+        utils.copy_pkg_info_dir( os.path.join( OVERLAY_PKGS_DIR(), pkg, PACKAGE_INFO_DIR() ), os.path.join( tmpdst, pkg, PACKAGE_INFO_DIR() ) )
+
+        # Get list of directories to copy/overlay
+        d = utils.get_owned_dirs( os.path.join( tmpdst, pkg, PACKAGE_INFO_DIR()), os.path.join( tmpdst, pkg, OVERLAY_PKGS_DIR()), os.path.join( tmpdst, pkg ) )
+        # do copy
+        # update the adoptee's pkg-dirs.lst file 
+        print(d)
+
+        # update the deps.json file
+        #d = utils.json_create_dep_entry( pkg, "overlay", args['<dst>'], dt_string, args['--semver'], args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
+        #utils.json_update_package_file_with_new_dep_entry( deps, d, args['--weak'] )

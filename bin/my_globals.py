@@ -31,6 +31,9 @@ def PKG_DIRS_FILE():
 def IGNORE_DIRS_FILE():
     return 'ignore-dirs.lst'
 
+def TEMP_DIR_NAME():
+    return '__temp_delete_me__'
+
 #
 #def NQBP_PRJ_DIR( newval=None ):
 #    global _NQBP_PRJ_DIR
