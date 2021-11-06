@@ -68,7 +68,7 @@ def run( common_args, cmd_argv ):
     dt_string = datetime.now().strftime("%Y %b %d %H:%M:%S")
 
     # check for already adopted
-    deps = utils.load_deps_file()
+    deps = utils.load_package_file()
     if ( deps != None ):
         pkgobj, deptype, pkgidx = utils.json_find_dependency( deps, pkg )
         if ( pkgobj != None ):
@@ -92,7 +92,7 @@ def run( common_args, cmd_argv ):
 
         # update the deps.json file
         d = utils.json_create_dep_entry( pkg, "foreign", args['<dst>'], dt_string, args['--semver'], args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
-        utils.json_update_deps_file_with_new_entry( deps, d, args['--weak'] )
+        utils.json_update_package_file_with_new_dep_entry( deps, d, args['--weak'] )
 
         # Display parting message (if there is one)
         utils.display_scm_message( 'copy', 'get-success-msg', common_args['--scm'] )
@@ -108,7 +108,7 @@ def run( common_args, cmd_argv ):
 
         # update the deps.json file
         d = utils.json_create_dep_entry( pkg, "readonly", args['<dst>'], dt_string, args['--semver'], args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
-        utils.json_update_deps_file_with_new_entry( deps, d, args['--weak'] )
+        utils.json_update_package_file_with_new_dep_entry( deps, d, args['--weak'] )
 
         # Mark files as readonly
         utils.set_tree_readonly( dstpkg )

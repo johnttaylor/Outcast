@@ -4,20 +4,23 @@
 import sys, os, errno, fnmatch, subprocess, time, copy
 import errno, stat, shutil
 import json
+import collections
 from gitignore_parser import parse_gitignore
 #import platform, tarfile
 #from collections import deque
 
-from my_globals import ADOPTED_PKGS_DIR
-from my_globals import DEPS_FILE
-
+from my_globals import PACKAGE_INFO_DIR
+from my_globals import PACKAGE_FILE
+from my_globals import PKG_DIRS_FILE
+from my_globals import IGNORE_DIRS_FILE
+from my_globals import PACKAGE_FILE
 
 # Module globals
 _dirstack = []
 quite_mode   = False
 verbose_mode = False
 
-
+TEMP_IGNORE_FILE_NAME = '__temp_' + IGNORE_DIRS_FILE() + "._delete_me__"
 #-----------------------------------------------------------------------------
 def standardize_dir_sep( pathinfo ):
     return pathinfo.replace( '/', os.sep ).replace( '\\', os.sep )
@@ -137,8 +140,8 @@ def set_tree_readonly( root, set_as_read_only = True ):
     
 #-----------------------------------------------------------------------------
 # return None if not able to load the file
-def load_deps_file():
-    f = os.path.join(  ADOPTED_PKGS_DIR(), DEPS_FILE() )
+def load_package_file():
+    f = os.path.join(  PACKAGE_INFO_DIR(), PACKAGE_FILE() )
 
     try:
         with open(f) as f:
@@ -146,18 +149,19 @@ def load_deps_file():
     except:
         return None
 
-def write_deps_file( json_dictionary ):
-    # make sure the pkgs.adopted directory exists
-    if ( not os.path.isdir( ADOPTED_PKGS_DIR() ) ):
-        mkdirs( ADOPTED_PKGS_DIR() )
+def write_package_file( json_dictionary ):
+    # make sure the pkgs.info directory exists
+    if ( not os.path.isdir( PACKAGE_INFO_DIR() ) ):
+        mkdirs( PACKAGE_INFO_DIR() )
 
-    f = os.path.join(  ADOPTED_PKGS_DIR(),DEPS_FILE() )
-    data = json.dumps( json_dictionary, indent=2 )
+    od = collections.OrderedDict(sorted(json_dictionary.items()))
+    f  = os.path.join(  PACKAGE_INFO_DIR(),PACKAGE_FILE() )
+    data = json.dumps( od, indent=2 )
     with open( f, "w+" ) as file:
         file.write( data )
 
 
-def json_get_package( dep_list, package_to_find ):
+def json_get_dep_package( dep_list, package_to_find ):
     if ( len(dep_list) > 0 ):
         try:
             idx = 0
@@ -168,7 +172,7 @@ def json_get_package( dep_list, package_to_find ):
 
             return None, None
         except Exception as e:
-            sys.exit( f"ERROR: Dependency file is corrupt {e}" )
+            sys.exit( f"ERROR: Package file (dependencies) is corrupt {e}" )
     return None, None
 
 def json_create_dep_entry( pkgname, pkgtype, parentdir, date_adopted, ver_sem, ver_branch, ver_id, repo_name, repo_type, repo_origin ):
@@ -177,59 +181,136 @@ def json_create_dep_entry( pkgname, pkgtype, parentdir, date_adopted, ver_sem, v
     dep_dict  = { "pkgname" : pkgname, "pkgtype" : pkgtype, "adoptedDate": date_adopted, "parentDir" : parentdir, "version" : ver_dict, "repo": repo_dict }
     return dep_dict
 
-def json_update_deps_file_with_new_entry( current_deps, new_dep_entry, is_weak_dep=False ):
+def json_update_package_file_with_new_dep_entry( current_deps, new_dep_entry, is_weak_dep=False ):
     if ( is_weak_dep ):
         current_deps['weakDeps'].append( new_dep_entry )
     else:
         current_deps['immediateDeps'].append( new_dep_entry )
-    write_deps_file( current_deps )
+    write_package_file( current_deps )
 
 def json_find_dependency( deps, pkgname ):
     deptype    = 'immediateDeps'
-    pkgobj,idx = json_get_package( deps[deptype], pkgname )
+    pkgobj,idx = json_get_dep_package( deps[deptype], pkgname )
     if ( pkgobj == None ):
         deptype    = 'weakDeps'
-        pkgobj,idx = json_get_package( deps[deptype], pkgname )
+        pkgobj,idx = json_get_dep_package( deps[deptype], pkgname )
         if ( pkgobj == None ):
             return None, None, None
     return pkgobj, deptype, idx
 
+# Returns an empty list if no overlaid dirs
+def json_get_list_adopted_overlay_deps( json_dictionary):
+    olist = []
+    try:
+        deps = json_dictionary['immeidateDeps']
+        for d in deps:
+            if ( d['pkgtype'] == 'overlay' ):
+                olist.append( d )
+    except:
+        pass
 
-def json_get_parentdir( pkgdict ):
-    return '<none>' if pkgdict['parentDir'] == None else pkgdict['parentDir']
+    return olist
 
-def json_get_semver( pkgdict ):
-    return '<none>' if pkgdict['version']['semanticVersion'] == None else pkgdict['version']['semanticVersion']
+def json_get_dep_parentdir( depdict ):
+    return '<none>' if depdict['parentDir'] == None else depdict['parentDir']
 
-def json_get_branch( pkgdict ):
-    return '<none>' if pkgdict['version']['branch'] == None else pkgdict['version']['branch']
+def json_get_dep_semver( depdict ):
+    return '<none>' if depdict['version']['semanticVersion'] == None else depdict['version']['semanticVersion']
 
-def json_get_tag( pkgdict ):
-    return '<none>' if pkgdict['version']['tag'] == None else pkgdict['version']['tag']
+def json_get_dep_branch( depdict ):
+    return '<none>' if depdict['version']['branch'] == None else depdict['version']['branch']
 
-def json_get_repo_name( pkgdict ):
-    return '<none>' if pkgdict['repo']['name'] == None else pkgdict['repo']['name']
+def json_get_dep_tag( depdict ):
+    return '<none>' if depdict['version']['tag'] == None else depdict['version']['tag']
 
-def json_get_repo_type( pkgdict ):
-    return '<none>' if pkgdict['repo']['type'] == None else pkgdict['repo']['type']
+def json_get_dep_repo_name( depdict ):
+    return '<none>' if depdict['repo']['name'] == None else depdict['repo']['name']
 
-def json_get_repo_origin( pkgdict ):
-    return '<none>' if pkgdict['repo']['origin'] == None else pkgdict['repo']['origin']
+def json_get_dep_repo_type( depdict ):
+    return '<none>' if depdict['repo']['type'] == None else depdict['repo']['type']
+
+def json_get_dep_repo_origin( depdict ):
+    return '<none>' if depdict['repo']['origin'] == None else depdict['repo']['origin']
+
+
+def json_get_package_primary_dirs( json_dictionary ):
+    if ( json_dictionary != None and "primaryDirs" in json_dictionary ):
+        return json_dictionary['primaryDirs']
+    else:
+        return None
+
+def json_update_package_file_with_new_primary_dirs( json_dictionary, list_of_dirs ):
+    json_dictionary['primaryDirs'] = list_of_dirs
+    write_package_file( json_dictionary )
+
+
 
 #-----------------------------------------------------------------------------
+# return None if not able to load the file
+def load_dirs_list_file( path=PACKAGE_INFO_DIR(), file=PKG_DIRS_FILE() ):
+    f = os.path.join( path, file )
+    try:
+        with open(f) as f:
+            return f.readlines()
+    except:
+        return None
+
+def save_dirs_list_file( list_of_dirs, path=PACKAGE_INFO_DIR(), file=PKG_DIRS_FILE() ):
+    f = os.path.join( path, file )
+    try:
+        with open(f, 'w') as f:
+           f.write("\n".join(list_of_dirs))
+    except:
+        sys.exit( f"WARNING: Failed to update the {f} with the directory list" )
+
+# return None if not able to load the file
+def load_overlaid_dirs_list_file( adopted_pkg_name ):
+    p = os.path.join( OVERLAY_PKGS_DIR(), adopted_pkg_name )
+    return load_dirs_list_file( path=p )
+
+# returns None if there is no 'ignore file' in the pkg.info dir
+def get_ignore_file( root=os.getcwd() ):
+    f = os.path.join( os.getcwd(), PACKAGE_INFO_DIR(), IGNORE_DIRS_FILE() )
+    if ( os.path.isfile( f ) ):
+        return f
+
+    return None
+
 # Filters the directory list by the 'ignore file', dirs with no files
-def walk_dir_ignored( root, ignore_file ):
-    push_dir( root )
-    ignored = parse_gitignore( ignore_file )
-    pop_dir()
+# If 'ignore_file' does NOT exist - than all dirs are returned
+def walk_dir_filtered_by_ignored( tree_to_walk, ignore_file ):
+    ignored = None
+    if ( ignore_file != None ):
+        try:
+            # Temporarly make a copy of the ignore file in the package root
+            tmpname = os.path.join( os.getcwd(), TEMP_IGNORE_FILE_NAME )
+            shutil.copy( ignore_file, tmpname )
+            ignored = parse_gitignore( tmpname )
+            os.remove( TEMP_IGNORE_FILE_NAME )
+        except:
+            ignored = None
 
     list = []
-    for root, dirs, files in os.walk(root):
+    for root, dirs, files in os.walk(tree_to_walk):
         if ( len(files) > 0 ):
-            if ( ignored( root ) == False ):
-                list.append( root )
+            if ( ignored == None or ignored( root ) == False ):
+                list.append( standardize_dir_sep(root) )
             
     return list        
+
+
+# create list of dirs from adopted overlay dependencies
+def get_adopted_overlaid_dirs_list( list_of_dep_pkgs ):
+    result = []
+    try:
+        for p in list_of_dep_pkgs:
+            d = load_dirs_list_file( p['pkgname'] )
+            if ( d != None ):
+                result.extend( d )
+    except:
+        pass
+
+    return result
 
 #-----------------------------------------------------------------------------
 def parse_pattern( string ):

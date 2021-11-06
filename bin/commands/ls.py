@@ -42,7 +42,7 @@ def run( common_args, cmd_argv ):
         args['<wildcard>'] = '*'
 
     # Get the list of adopted packages
-    deps = utils.load_deps_file()
+    deps = utils.load_package_file()
     if ( deps == None ):
         sys.exit( 'ERROR: No packages have been adopted' )
 
@@ -74,15 +74,15 @@ def run( common_args, cmd_argv ):
     # display the list
     for p in pkgs:
         if ( fnmatch.fnmatch(p['pkgname'], args['<wildcard>']) ):
-            info = f"{p['pkgname']:<16} {p['depType']} {p['pkgtype']:<8}  {p['adoptedDate']}  {utils.json_get_parentdir(p):<16}"
+            info = f"{p['pkgname']:<16} {p['depType']} {p['pkgtype']:<8}  {p['adoptedDate']}  {utils.json_get_dep_parentdir(p):<16}"
         
             # Repo info
             if ( args['-l'] or args['-r'] ):
-                info = info + f" {utils.json_get_repo_name(p):<16} {utils.json_get_repo_type(p):<8} {utils.json_get_repo_origin(p):40}"
+                info = info + f" {utils.json_get_dep_repo_name(p):<16} {utils.json_get_dep_repo_type(p):<8} {utils.json_get_dep_repo_origin(p):40}"
 
             # Version info
             if ( args['-l'] or args['-v'] ):
-                info = info + f" {utils.json_get_semver(p):<8} {utils.json_get_branch(p):<16} {utils.json_get_tag(p)}"
+                info = info + f" {utils.json_get_dep_semver(p):<8} {utils.json_get_dep_branch(p):<16} {utils.json_get_dep_tag(p)}"
 
             # display output
             print( info )  

@@ -16,15 +16,20 @@ def OUTCAST_SCM_ADOPTED_TOOL():
 def OUTCAST_SCM_PRIMARY_TOOL():
     return 'OUTCAST_SCM_PRIMARY_TOOL'
 
-def ADOPTED_PKGS_DIR():
-    return 'pkgs.adopted'
+def OVERLAY_PKGS_DIR():
+    return 'pkgs.overlaid'
 
-def PRIMARY_PKG_DIR():
-    return 'pkgs.info'
+def PACKAGE_INFO_DIR():
+    return 'pkg.info'
 
-def DEPS_FILE():
-    return 'deps.json'
+def PACKAGE_FILE():
+    return 'package.json'
 
+def PKG_DIRS_FILE():
+    return 'pkg-dirs.lst'
+
+def IGNORE_DIRS_FILE():
+    return 'ignore-dirs.lst'
 
 #
 #def NQBP_PRJ_DIR( newval=None ):

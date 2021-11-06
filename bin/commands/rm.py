@@ -22,6 +22,7 @@ Notes:
 import os, sys
 import utils
 from docopt.docopt import docopt
+from my_globals import PACKAGE_FILE
 
 
 #---------------------------------------------------------------------------------------------------------
@@ -35,7 +36,7 @@ def run( common_args, cmd_argv ):
 
     # Look up the details of the package to be removed
     pkg = args['<adoptedpkg>']
-    deps = utils.load_deps_file()
+    deps = utils.load_package_file()
     if ( deps == None ):
         sys.exit( 'ERROR: No packages have been adopted' )
     pkgobj, deptype, pkgidx = utils.json_find_dependency( deps, pkg )
@@ -50,7 +51,7 @@ def run( common_args, cmd_argv ):
     # READONLY Package
     if ( pkgobj['pkgtype'] == 'readonly' ):
         if ( pkgobj['parentDir'] == None ):
-            sys.exit( "ERROR: the deps.json file is corrupt - there is no parent directory for the package" )
+            sys.exit( f"ERROR: the {PACKAGE_FILE()} file is corrupt - there is no parent directory for the package" )
 
         # Remove the package
         cmd = f"evie.py --scm {pkgobj['repo']['type']} umount -p {pkgobj['pkgname']} {branch_opt} {pkgobj['parentDir']} {pkgobj['repo']['name']} {pkgobj['repo']['origin']} {pkgobj['version']['tag']}"
@@ -59,7 +60,7 @@ def run( common_args, cmd_argv ):
         
         # Remove the package from the deps list
         deps[deptype].pop(pkgidx)
-        utils.write_deps_file( deps )
+        utils.write_package_file( deps )
 
         # Display parting message (if there is one)
         utils.display_scm_message( 'umount', 'get-success-msg', common_args['--scm'] )
@@ -67,7 +68,7 @@ def run( common_args, cmd_argv ):
     # FOREIGN Package
     elif ( pkgobj['pkgtype'] == 'foreign' ):
         if ( pkgobj['parentDir'] == None ):
-            sys.exit( "ERROR: the deps.json file is corrupt - there is no parent directory for the package" )
+            sys.exit( f"ERROR: the {PACKAGE_FILE()} file is corrupt - there is no parent directory for the package" )
 
         # Remove the package
         cmd = f"evie.py --scm {pkgobj['repo']['type']} rm -p {pkgobj['pkgname']} {branch_opt} {pkgobj['parentDir']} {pkgobj['repo']['name']} {pkgobj['repo']['origin']} {pkgobj['version']['tag']}"
@@ -76,7 +77,7 @@ def run( common_args, cmd_argv ):
         
         # Remove the package from the deps list
         deps[deptype].pop(pkgidx)
-        utils.write_deps_file( deps )
+        utils.write_package_file( deps )
 
         # Display parting message (if there is one)
         utils.display_scm_message( 'rm', 'get-success-msg', common_args['--scm'] )
@@ -87,5 +88,5 @@ def run( common_args, cmd_argv ):
 
     # Unsupported package type
     else:
-        sys.exit( f"ERROR: Unsupport package type: {pkgobj['pkgtype']}. The deps.json file has been corrupted" )
+        sys.exit( f"ERROR: Unsupport package type: {pkgobj['pkgtype']}. The {PACKAGE_FILE()} file has been corrupted" )
 

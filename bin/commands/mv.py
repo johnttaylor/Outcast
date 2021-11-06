@@ -35,13 +35,13 @@ def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
 
     # Get the list of adopted packages
-    deps = utils.load_deps_file()
+    deps = utils.load_package_file()
     if ( deps == None ):
         sys.exit( 'ERROR: No packages have been adopted' )
 
     # Make sure the package is adopted and the it is 'moveable'
     pkg = args["<pkg>"]
-    deps = utils.load_deps_file()
+    deps = utils.load_package_file()
     if ( deps == None ):
         sys.exit( 'ERROR: No packages have been adopted' )
     pkgobj, deptype, pkgidx = utils.json_find_dependency( deps, pkg )
@@ -70,7 +70,7 @@ def run( common_args, cmd_argv ):
     # Update the package in the deps list
     pkgobj['parentDir'] = args['<dst>']
     deps[deptype].pop(pkgidx)
-    utils.json_update_deps_file_with_new_entry( deps, pkgobj, is_weak_dep = True if deptype=='weakDeps' else False )
-    utils.write_deps_file( deps )
+    utils.json_update_package_file_with_new_dep_entry( deps, pkgobj, is_weak_dep = True if deptype=='weakDeps' else False )
+    utils.write_package_file( deps )
     print( f"Package {src} moved to {dst}" )
 
