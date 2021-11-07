@@ -2,7 +2,8 @@
  
 Adopts the specified Repo/Package package
 ===============================================================================
-usage: orc [common-opts] adopt [options] readonly <dst> <repo> <origin> <id>
+usage: orc [common-opts] adopt [options] 
+       orc [common-opts] adopt [options] readonly <dst> <repo> <origin> <id>
        orc [common-opts] adopt [options] foreign  <dst> <repo> <origin> <id>               
        orc [common-opts] adopt [options] overlay  <repo> <origin> <id>
 
@@ -25,6 +26,7 @@ Options:
                      name
     -b BRANCH        Specifies the source branch in <repo>.  The use/need
                      of this option in dependent on the <repo> SCM type.
+    --clean          Cleans up after a fail adoption of a OVERLAY package.
     -h, --help       Display help for this command
 
 Common Options:
@@ -56,6 +58,12 @@ def run( common_args, cmd_argv ):
     pkg = args['<repo>']
     if ( args['-p'] ):
         pkg = args['-p']
+
+    # CLEAN-UP (for a failed overlay adoption)
+    if ( args['--clean'] ):
+        tmpdst = os.path.join( os.getcwd(), PACKAGE_INFO_DIR(), TEMP_DIR_NAME() )
+        utils.remove_tree( tmpdst, "error", "warn" )
+        sys.exit(0)
 
     # default branch option
     branch_opt = ""
@@ -126,14 +134,27 @@ def run( common_args, cmd_argv ):
         utils.check_results( t, f"ERROR: Failed to make a copy of the repo: {args['<repo>']}", 'copy', 'get-error-msg', common_args['--scm']  )
 
         # Copy the adoptee's package info directory
-        utils.copy_pkg_info_dir( os.path.join( OVERLAY_PKGS_DIR(), pkg, PACKAGE_INFO_DIR() ), os.path.join( tmpdst, pkg, PACKAGE_INFO_DIR() ) )
+        src_pkg      = os.path.join( tmpdst, pkg )
+        dst_pkg      = os.path.join( OVERLAY_PKGS_DIR(), pkg )
+        dst_pkg_info = os.path.join( dst_pkg, PACKAGE_INFO_DIR() )
+        src_pkg_info = os.path.join( src_pkg, PACKAGE_INFO_DIR() )
+        utils.copy_pkg_info_dir( dst_pkg_info, src_pkg_info )
+
+        # Copy the adoptee's extra info directories
+        utils.copy_extra_dirs( dst_pkg, src_pkg )
 
         # Get list of directories to copy/overlay
-        d = utils.get_owned_dirs( os.path.join( tmpdst, pkg, PACKAGE_INFO_DIR()), os.path.join( tmpdst, pkg, OVERLAY_PKGS_DIR()), os.path.join( tmpdst, pkg ) )
-        # do copy
-        # update the adoptee's pkg-dirs.lst file 
-        print(d)
+        dirs = utils.get_owned_dirs( os.path.join( tmpdst, pkg, PACKAGE_INFO_DIR()), os.path.join( tmpdst, pkg, OVERLAY_PKGS_DIR()), os.path.join( tmpdst, pkg ) )
+        utils.save_dirs_list_file( dirs, path=src_pkg_info )
+        for d in dirs:
+            src = os.path.join( src_pkg, d )
+            dst = os.path.join( os.getcwd(), d )
+            utils.copy_files( src, dst )
+
+        # Clean-up
+        utils.remove_tree( tmpdst )
 
         # update the deps.json file
-        #d = utils.json_create_dep_entry( pkg, "overlay", args['<dst>'], dt_string, args['--semver'], args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
-        #utils.json_update_package_file_with_new_dep_entry( deps, d, args['--weak'] )
+        d = utils.json_create_dep_entry( pkg, "overlay", args['<dst>'], dt_string, args['--semver'], args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
+        utils.json_update_package_file_with_new_dep_entry( deps, d, args['--weak'] )
+        print( f"Package - {pkg} - adopted as an OVERLAY package. Remember to add the new files to your SCM" )

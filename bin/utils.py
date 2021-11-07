@@ -107,7 +107,7 @@ def cat_file( fobj, strip_comments=True, strip_blank_lines=True ):
         
 def remove_tree( root, err_msg=None, warn_msg=None ):
     try:
-        shutil.rmtree( root, _handleRemoveReadonly )
+        shutil.rmtree( root, ignore_errors=False, onerror=_handleRemoveReadonly )
     except Exception as exc:
         if ( err_msg != None ):
             sys.exit( f'{err_msg} ({exc})' )
@@ -118,7 +118,12 @@ def remove_tree( root, err_msg=None, warn_msg=None ):
 # This function handles issue with Windows when deleting files marked as readonly
 def _handleRemoveReadonly(func, path, exc):
   excvalue = exc[1]
-  if func in (os.rmdir, os.remove) and excvalue.errno == errno.EACCES:
+  if func in (os.rmdir, os.remove, os.unlink) and excvalue.errno == errno.EACCES:
+      # ensure parent directory is writeable too
+      pardir = os.path.abspath(os.path.join(path, os.path.pardir))
+      if not os.access(pardir, os.W_OK):
+        os.chmod(pardir, stat.S_IRWXU| stat.S_IRWXG| stat.S_IRWXO)
+
       os.chmod(path, stat.S_IRWXU| stat.S_IRWXG| stat.S_IRWXO) # 0777
       func(path)
   else:
@@ -140,6 +145,38 @@ def set_tree_readonly( root, set_as_read_only = True ):
             filename = os.path.join(root, f)
             os.chmod(filename, mode)
     
+
+# Copies only the files in the src-dir to the dst-dir
+def copy_files( srcdir, dstdir ):
+    src_files = os.listdir(srcdir)
+    for file_name in src_files:
+        full_file_name = os.path.join(srcdir, file_name)
+        if os.path.isfile(full_file_name):
+            mkdirs( dstdir )
+            shutil.copy(full_file_name, dstdir)
+
+# Deletes all of the files in a directory AND deletes the directory if it is empty after deleting the files
+def delete_directory_files( dir_to_delete ):
+    src_files = os.listdir(dir_to_delete)
+    for file_name in src_files:
+        full_file_name = os.path.join(dir_to_delete, file_name)
+        if os.path.isfile(full_file_name):
+            os.remove( full_file_name )
+
+    # Delete the dir if it is now empty
+    try:
+        os.rmdir( dir_to_delete )
+    except:
+        pass
+
+# This function returns true the root the primary repository
+def find_root( primary_scm_tool, verobse ):
+    # Note: Running the SCM command creates a nested run_shell scenario - it only works if 'verbose' is turned off (not sure why!!!)
+    cmd = f'evie.py --scm {primary_scm_tool} findroot'
+    t   = run_shell( cmd, False )
+    check_results( t, "ERROR: Failed find the root of the primary/local Repository" )
+    return t[1].strip()
+        
 #-----------------------------------------------------------------------------
 # return None if not able to load the file
 def load_package_file( path=PACKAGE_INFO_DIR(), file=PACKAGE_FILE()):
@@ -161,6 +198,18 @@ def write_package_file( json_dictionary ):
     data = json.dumps( od, indent=2 )
     with open( f, "w+" ) as file:
         file.write( data )
+
+def cat_package_file( indent=2, path=PACKAGE_INFO_DIR(), file=PACKAGE_FILE() ):
+    f = os.path.join(  path, file )
+
+    try:
+        with open(f) as f:
+            json_dict =  json.load( f )
+            od = collections.OrderedDict(sorted(json_dict.items()))
+            print( json.dumps( od, indent=indent ) )
+            return json_dict
+    except:
+        return None
 
 
 def json_get_dep_package( dep_list, package_to_find ):
@@ -190,12 +239,12 @@ def json_update_package_file_with_new_dep_entry( current_deps, new_dep_entry, is
         current_deps['immediateDeps'].append( new_dep_entry )
     write_package_file( current_deps )
 
-def json_find_dependency( deps, pkgname ):
+def json_find_dependency( json_dictionary, pkgname ):
     deptype    = 'immediateDeps'
-    pkgobj,idx = json_get_dep_package( deps[deptype], pkgname )
+    pkgobj,idx = json_get_dep_package( json_dictionary[deptype], pkgname )
     if ( pkgobj == None ):
         deptype    = 'weakDeps'
-        pkgobj,idx = json_get_dep_package( deps[deptype], pkgname )
+        pkgobj,idx = json_get_dep_package( json_dictionary[deptype], pkgname )
         if ( pkgobj == None ):
             return None, None, None
     return pkgobj, deptype, idx
@@ -253,7 +302,12 @@ def load_dirs_list_file( path=PACKAGE_INFO_DIR(), file=PKG_DIRS_FILE() ):
     f = os.path.join( path, file )
     try:
         with open(f) as f:
-            return f.readlines()
+            lines = f.readlines()
+            result = []
+            for l in lines:
+                result.append( l.strip() )
+            return result
+
     except:
         return None
 
@@ -321,7 +375,6 @@ def get_owned_dirs( path_to_package_file=PACKAGE_INFO_DIR(), dir_list_file_root=
     package_json = load_package_file( path_to_package_file);
     overlay_deps = json_get_list_adopted_overlay_deps( package_json )
     odirs        = get_adopted_overlaid_dirs_list( overlay_deps, dir_list_file_root )
-    print("odirs", odirs)
     primarydirs  = json_get_package_primary_dirs(package_json) 
     localdirs    = []
     ignorefile   = get_ignore_file()
@@ -338,6 +391,20 @@ def copy_pkg_info_dir( dstdir, srcdir ):
         sys.exit( f"ERROR: Missing package info directory ({srcdir})" )
     mkdirs( dstdir )
     shutil.copytree( srcdir, dstdir, dirs_exist_ok=True )
+
+def copy_extra_dirs( dstdir, src_package_root ):
+    extra_dirs = get_extra_dirs( src_package_root )
+    for d in extra_dirs:
+        src = os.path.join( src_package_root, d )
+        dst = os.path.join( dstdir, d )
+        shutil.copytree( src, dst )
+
+def get_extra_dirs( src_package_root ):
+    package_path = os.path.join( src_package_root, PACKAGE_INFO_DIR())
+    package_json = load_package_file( path=package_path )
+    if ( 'adoptedExtrasDirs' in package_json ):
+        return package_json['adoptedExtrasDirs']
+    return []
 
 #-----------------------------------------------------------------------------
 def parse_pattern( string ):

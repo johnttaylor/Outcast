@@ -23,6 +23,7 @@ import os, sys
 import utils
 from docopt.docopt import docopt
 from my_globals import PACKAGE_FILE
+from my_globals import OVERLAY_PKGS_DIR
 
 
 #---------------------------------------------------------------------------------------------------------
@@ -84,7 +85,31 @@ def run( common_args, cmd_argv ):
 
     # OVERALY Package
     elif ( pkgobj['pkgtype'] == 'overlay' ):
-        pass
+        dstpkgpath = os.path.join( OVERLAY_PKGS_DIR(), pkg )
+        if ( not os.path.isdir(dstpkgpath) ):
+            sys.exit( f"ERROR: The {pkg} does not exist under the {OVERLAY_PKGS_DIR()}/ directory" )
+
+        # Remove the overlaid directories/files
+        dirs = utils.load_overlaid_dirs_list_file( pkg )
+        for d in dirs:
+            utils.delete_directory_files( d )
+
+        # Remove 'overlaid' directory
+        utils.remove_tree( dstpkgpath )
+
+        # Remove the package from the deps list
+        deps[deptype].pop(pkgidx)
+        utils.write_package_file( deps )
+
+        # Remove the pkgs.overlaid dir if there are no more overlaid packages
+        try:
+            os.rmdir( OVERLAY_PKGS_DIR() )
+        except:
+            pass
+
+        # Display parting message 
+        print(f"Overlay package - {pkg} - removed" )
+
 
     # Unsupported package type
     else:
