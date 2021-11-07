@@ -18,8 +18,8 @@ Common Options:
     
     
 Notes:
-    o If  <adoptedpkg> is not speficied, then the repository's primary 
-      package information is displayed.
+    o If  <adoptedpkg> is not speficied, then the repository's package 
+      information is displayed.
     
 """
 import os, sys
