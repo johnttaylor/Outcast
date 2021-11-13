@@ -74,15 +74,13 @@ def run( common_args, cmd_argv ):
     dt_string = datetime.now().strftime("%Y %b %d %H:%M:%S")
 
     # check for already adopted
-    deps = utils.load_package_file()
-    if ( deps != None ):
-        pkgobj, deptype, pkgidx = utils.json_find_dependency( deps, pkg )
+    json_dict = utils.load_package_file()
+    if ( json_dict != None ):
+        pkgobj, deptype, pkgidx = utils.json_find_dependency( json_dict, pkg )
         if ( pkgobj != None ):
             sys.exit( f'Package {pkg} already has been adopted as {deptype} dependency' );
-    else:
-        deps = { "depsImmediate":[], "depsWeak": []}
         
-    # double check if the package has already been adopted (i.e. there was manual edits to the deps.json file)
+    # double check if the package has already been adopted (i.e. there was manual edits to the package.json file)
     if ( not args['overlay'] ):
         dstpkg = os.path.join( args['<dst>'], pkg)
         if ( os.path.exists( dstpkg ) ):
@@ -97,9 +95,9 @@ def run( common_args, cmd_argv ):
         t   = utils.run_shell( cmd, common_args['-v'] )
         utils.check_results( t, f"ERROR: Failed to make a copy of the repo: {args['<repo>']}", 'copy', 'get-error-msg', common_args['--scm']  )
 
-        # update the deps.json file
+        # update the package.json file
         d = utils.json_create_dep_entry( pkg, "foreign", args['<dst>'], dt_string, args['--semver'], args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
-        utils.json_update_package_file_with_new_dep_entry( deps, d, args['--weak'] )
+        utils.json_update_package_file_with_new_dep_entry( json_dict, d, args['--weak'] )
 
         # Display parting message (if there is one)
         utils.display_scm_message( 'copy', 'get-success-msg', common_args['--scm'] )
@@ -113,9 +111,9 @@ def run( common_args, cmd_argv ):
         t   = utils.run_shell( cmd, common_args['-v'] )
         utils.check_results( t, f"ERROR: Failed to mount the repo: {args['<repo>']}", 'mount', 'get-error-msg', common_args['--scm'] )
 
-        # update the deps.json file
+        # update the package.json file
         d = utils.json_create_dep_entry( pkg, "readonly", args['<dst>'], dt_string, args['--semver'], args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
-        utils.json_update_package_file_with_new_dep_entry( deps, d, args['--weak'] )
+        utils.json_update_package_file_with_new_dep_entry( json_dict, d, args['--weak'] )
 
         # Mark files as readonly
         utils.set_tree_readonly( dstpkg )
@@ -154,7 +152,7 @@ def run( common_args, cmd_argv ):
         # Clean-up
         utils.remove_tree( tmpdst )
 
-        # update the deps.json file
+        # update the package.json file
         d = utils.json_create_dep_entry( pkg, "overlay", args['<dst>'], dt_string, args['--semver'], args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
-        utils.json_update_package_file_with_new_dep_entry( deps, d, args['--weak'] )
+        utils.json_update_package_file_with_new_dep_entry( json_dict, d, args['--weak'] )
         print( f"Package - {pkg} - adopted as an OVERLAY package. Remember to add the new files to your SCM" )

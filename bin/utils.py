@@ -188,8 +188,7 @@ def load_package_file( path=PACKAGE_INFO_DIR(), file=PACKAGE_FILE()):
             return result
 
     except Exception as e:
-        print(e)
-        return None
+        return check_package_file( {} )
 
 def write_package_file( json_dictionary ):
     # make sure the pkgs.info directory exists
@@ -235,19 +234,19 @@ def json_create_dep_entry( pkgname, pkgtype, parentdir, date_adopted, ver_sem, v
     dep_dict  = { "pkgname" : pkgname, "pkgtype" : pkgtype, "adoptedDate": date_adopted, "parentDir" : parentdir, "version" : ver_dict, "repo": repo_dict }
     return dep_dict
 
-def json_update_package_file_with_new_dep_entry( current_deps, new_dep_entry, is_weak_dep=False ):
+def json_update_package_file_with_new_dep_entry( json_dict, new_dep_entry, is_weak_dep=False ):
     if ( is_weak_dep ):
-        current_deps['depsWeak'].append( new_dep_entry )
+        json_dict['dependencies']['weak'].append( new_dep_entry )
     else:
-        current_deps['depsImmediate'].append( new_dep_entry )
-    write_package_file( current_deps )
+        json_dict['dependencies']['immediate'].append( new_dep_entry )
+    write_package_file( json_dict )
 
 def json_find_dependency( json_dictionary, pkgname ):
-    deptype    = 'depsImmediate'
-    pkgobj,idx = json_get_dep_package( json_dictionary[deptype], pkgname )
+    deptype    = 'immediate'
+    pkgobj,idx = json_get_dep_package( json_dictionary['dependencies'][deptype], pkgname )
     if ( pkgobj == None ):
-        deptype    = 'depsWeak'
-        pkgobj,idx = json_get_dep_package( json_dictionary[deptype], pkgname )
+        deptype    = 'weak'
+        pkgobj,idx = json_get_dep_package( json_dictionary['dependencies'][deptype], pkgname )
         if ( pkgobj == None ):
             return None, None, None
     return pkgobj, deptype, idx
@@ -256,7 +255,7 @@ def json_find_dependency( json_dictionary, pkgname ):
 def json_get_list_adopted_overlay_deps( json_dictionary):
     olist = []
     try:
-        deps = json_dictionary['depsImmediate']
+        deps = json_dictionary['immediate']
         for d in deps:
             if ( d['pkgtype'] == 'overlay' ):
                 olist.append( d )
@@ -290,11 +289,20 @@ def json_get_dep_repo_origin( depdict ):
 def json_get_package_primary_dirs( json_dictionary ):
     if ( json_dictionary != None ):
         return json_dictionary['directories']['primary']
-    else:
-        return None
+
+def json_get_package_extra_dirs( json_dictionary ):
+    return json_dictionary['directories']['adoptedExtras']
+
 
 def json_update_package_file_with_new_primary_dirs( json_dictionary, list_of_dirs ):
     json_dictionary['directories']['primary'] = list_of_dirs
+    write_package_file( json_dictionary )
+
+def json_update_package_file_with_new_extra_dirs( json_dictionary, list_of_dirs ):
+    stdlist = []
+    for d in list_of_dirs:
+        stdlist.append( force_unix_dir_sep( d ) )
+    json_dictionary['directories']['adoptedExtras'] = stdlist
     write_package_file( json_dictionary )
 
 
@@ -322,6 +330,13 @@ def json_copy_info( json_dict_in ):
 
 # Performs a basic check of the file contents and/or ensure that a minimal number of key/value pairs exist
 def check_package_file( json_dict_in ):
+    if ( not 'dependencies' in json_dict_in ):
+        json_dict_in['dependencies'] = {}
+    if ( not 'immediate' in json_dict_in['dependencies'] ):
+        json_dict_in['dependencies']['immediate'] = []
+    if ( not 'weak' in json_dict_in['dependencies'] ):
+        json_dict_in['dependencies']['weak'] = []
+
     if ( not 'directories' in json_dict_in ):
         json_dict_in['directories'] = {}
     if ( not 'primary' in json_dict_in['directories'] ):
@@ -451,12 +466,12 @@ def copy_extra_dirs( dstdir, src_package_root ):
     for d in extra_dirs:
         src = os.path.join( src_package_root, d )
         dst = os.path.join( dstdir, d )
-        shutil.copytree( src, dst )
+        shutil.copytree( src, dst, dirs_exist_ok=True )
 
 def get_extra_dirs( src_package_root ):
     package_path = os.path.join( src_package_root, PACKAGE_INFO_DIR())
     package_json = load_package_file( path=package_path )
-    return package_json['directories']['adoptedExtras']
+    return json_get_package_extra_dirs( package_json )
 
 #-----------------------------------------------------------------------------
 def parse_pattern( string ):

@@ -42,20 +42,20 @@ def run( common_args, cmd_argv ):
         args['<wildcard>'] = '*'
 
     # Get the list of adopted packages
-    deps = utils.load_package_file()
-    if ( deps == None ):
+    json_dict = utils.load_package_file()
+    if ( json_dict == None ):
         sys.exit( 'ERROR: No packages have been adopted' )
 
     # Get immeidate deps
     pkgs = []
     if ( not args['-w'] ):
-        for p in deps['depsImmediate']:
+        for p in json_dict['dependencies']['immediate']:
             p['depType'] = 'I'
             pkgs.append( p )
 
     # Get weak deps
     if ( not args['-i'] ):
-        for p in deps['depsWeak']:
+        for p in json_dict['dependencies']['weak']:
             p['depType'] = 'W'
             pkgs.append( p )
 

@@ -27,7 +27,7 @@ from docopt.docopt import docopt
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print("{:<13}{}".format( 'ls', "Moves existing readonly or foreign adopted packages." ))
+    print("{:<13}{}".format( 'mv', "Moves existing readonly or foreign adopted packages." ))
     
 
 #------------------------------------------------------------------------------
@@ -35,16 +35,15 @@ def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
 
     # Get the list of adopted packages
-    deps = utils.load_package_file()
-    if ( deps == None ):
+    json_dict = utils.load_package_file()
+    if ( json_dict == None ):
         sys.exit( 'ERROR: No packages have been adopted' )
 
     # Make sure the package is adopted and the it is 'moveable'
     pkg = args["<pkg>"]
-    deps = utils.load_package_file()
-    if ( deps == None ):
+    if ( json_dict == None ):
         sys.exit( 'ERROR: No packages have been adopted' )
-    pkgobj, deptype, pkgidx = utils.json_find_dependency( deps, pkg )
+    pkgobj, deptype, pkgidx = utils.json_find_dependency( json_dict, pkg )
     if ( pkgobj == None ):
         sys.exit( f"ERROR: Package ({args['<pkg>']}) not adopted." )
     if ( pkgobj['pkgtype'] == 'overlay' ):
@@ -67,10 +66,10 @@ def run( common_args, cmd_argv ):
     except Exception as e:
         sys.exit( f"ERROR: Unable to move the package ({e})" )
 
-    # Update the package in the deps list
+    # Update the package
     pkgobj['parentDir'] = args['<dst>']
-    deps[deptype].pop(pkgidx)
-    utils.json_update_package_file_with_new_dep_entry( deps, pkgobj, is_weak_dep = True if deptype=='depsWeak' else False )
-    utils.write_package_file( deps )
+    json_dict['dependencies'][deptype].pop(pkgidx)
+    utils.json_update_package_file_with_new_dep_entry( json_dict, pkgobj, is_weak_dep = True if deptype=='weak' else False )
+    utils.write_package_file( json_dict )
     print( f"Package {src} moved to {dst}" )
 

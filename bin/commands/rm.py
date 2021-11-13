@@ -37,10 +37,10 @@ def run( common_args, cmd_argv ):
 
     # Look up the details of the package to be removed
     pkg = args['<adoptedpkg>']
-    deps = utils.load_package_file()
-    if ( deps == None ):
+    json_dict = utils.load_package_file()
+    if ( json_dict == None ):
         sys.exit( 'ERROR: No packages have been adopted' )
-    pkgobj, deptype, pkgidx = utils.json_find_dependency( deps, pkg )
+    pkgobj, deptype, pkgidx = utils.json_find_dependency( json_dict, pkg )
     if ( pkgobj == None ):
         sys.exit( f'Cannot find the package - {pkg} - in the list of adopted packages' );
 
@@ -60,8 +60,8 @@ def run( common_args, cmd_argv ):
         utils.check_results( t, f"ERROR: Failed to umount the repo: {pkgobj['repo']['name']}, 'umount', 'get-error-msg', common_args['--scm']" )
         
         # Remove the package from the deps list
-        deps[deptype].pop(pkgidx)
-        utils.write_package_file( deps )
+        json_dict['dependencies'][deptype].pop(pkgidx)
+        utils.write_package_file( json_dict )
 
         # Display parting message (if there is one)
         utils.display_scm_message( 'umount', 'get-success-msg', common_args['--scm'] )
@@ -77,8 +77,8 @@ def run( common_args, cmd_argv ):
         utils.check_results( t, f"ERROR: Failed to remove the package: {pkgobj['repo']['name']}, 'rm', 'get-error-msg', common_args['--scm']" )
         
         # Remove the package from the deps list
-        deps[deptype].pop(pkgidx)
-        utils.write_package_file( deps )
+        json_dict['dependencies'][deptype].pop(pkgidx)
+        utils.write_package_file( json_dict )
 
         # Display parting message (if there is one)
         utils.display_scm_message( 'rm', 'get-success-msg', common_args['--scm'] )
@@ -98,8 +98,8 @@ def run( common_args, cmd_argv ):
         utils.remove_tree( dstpkgpath )
 
         # Remove the package from the deps list
-        deps[deptype].pop(pkgidx)
-        utils.write_package_file( deps )
+        json_dict['dependencies'][deptype].pop(pkgidx)
+        utils.write_package_file( json_dict )
 
         # Remove the pkgs.overlaid dir if there are no more overlaid packages
         try:

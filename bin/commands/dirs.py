@@ -4,18 +4,32 @@ Manages the package's 'Owned' dirs
 ===============================================================================
 usage: orc [common-opts] dirs [-s|-o]
        orc [common-opts] dirs [options] ls
+       orc [common-opts] dirs [options] xls
        orc [common-opts] dirs [options] set <primary>...
        orc [common-opts] dirs [options] rm  <primary>...
+       orc [common-opts] dirs [options] xset <adoptedExtra>...
+       orc [common-opts] dirs [options] xrm  <adoptedExtra>...
 
 Arguments:
     ls                  Calculates the package's owned directories
+    xls                 Displays the list of 'extra' (when being adopted)
+                        directories
     set                 Sets (in the package.json file) top-level 'primary' 
                         directories that will be overlaid when the package is 
                         adopted (as an overlay pacakge).
     rm                  Removes (from the package.json file) top-level 'primary'
                         dirtectories that will be 'overlaid' when the package
                         is adopted (as an overlay pacakge).
+    xset                Sets (in the package.json file) 'extra' directories 
+                        that will be copied as part of the adopted package's
+                        information.
+    xrm                 Removes (from the package.json file) 'extra'
+                        dirtectories that will be copied as part of the adopted 
+                        package's information.
     <primary>           One or more top-level 'primary' directories 
+    <adoptedExtra>      One or more directories that 'extra' adopted directories.
+                        The directory name/path is relative to the package's
+                        root directory.
     
 Options:
     -u                  Update the 'pkg-dirs.lst' file with the 'ls' results
@@ -30,9 +44,9 @@ Common Options:
     
     
 Examples:
-    dirs ls
-    dirs set src tests
-    dirs rm tests
+    orc dirs ls
+    orc dirs set src tests
+    orc dirs rm tests
     
 """
 import os, sys
@@ -66,7 +80,7 @@ def run( common_args, cmd_argv ):
     # Set directories
     if ( args['set'] ):
         newdirs = args['<primary>']
-        check_valid_primary_dirs( newdirs )
+        check_dirs( newdirs )
         package_json = utils.load_package_file();
         pdirs = utils.json_get_package_primary_dirs(package_json) 
         if ( pdirs == None ):
@@ -107,6 +121,28 @@ def run( common_args, cmd_argv ):
         show_primary_dirs()
         sys.exit(0)
 
+    # Set 'extra' directories
+    if ( args['xset'] ):
+        newdirs = args['<adoptedExtra>']
+        check_dirs( newdirs )
+        package_json = utils.load_package_file();
+        pdirs = utils.json_get_package_extra_dirs(package_json) 
+        if ( pdirs == None ):
+            utils.json_update_package_file_with_new_extra_dirs( package_json, newdirs )
+        else:
+            # Filter out would-be-duplicates
+            for d in newdirs:
+                if ( not d in pdirs ):
+                    pdirs.append( d )
+
+            # Sort the list and update the file
+            pdirs.sort()
+            utils.json_update_package_file_with_new_extra_dirs( package_json, pdirs )
+
+        # Show update list
+        show_extra_dirs()
+        sys.exit(0)
+
     # derive directories
     if ( args['ls'] ):
         owndirs = utils.get_owned_dirs()
@@ -119,6 +155,14 @@ def run( common_args, cmd_argv ):
 
         sys.exit(0)
 
+    # List extra directories
+    if ( args['xls'] ):
+        package_json = utils.load_package_file();
+        pdirs = utils.json_get_package_extra_dirs(package_json) 
+        for d in pdirs:
+            print(d)
+        sys.exit(0)
+
 #
 def show_primary_dirs():
     package_json = utils.load_package_file();
@@ -129,9 +173,18 @@ def show_primary_dirs():
         for d in pdirs:
             print( d )
 
+def show_extra_dirs():
+    package_json = utils.load_package_file();
+    pdirs = utils.json_get_package_extra_dirs(package_json) 
+    if ( pdirs == None ):
+        print( "No adopted 'extra' directories are currently set for the package" )
+    else:
+        for d in pdirs:
+            print( d )
+
 #
-def check_valid_primary_dirs( dirlist ):
+def check_dirs( dirlist ):
     for d in dirlist:
         path = os.path.join( os.getcwd(), d )
         if ( not os.path.isdir( d ) ):
-            sys.exit( f"ERROR: Directory {d}{os.sep} does not exists or is not a top-level directory" )
+            sys.exit( f"ERROR: Directory {d}{os.sep} does not exists" )
