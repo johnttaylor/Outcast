@@ -80,7 +80,7 @@ def run( common_args, cmd_argv ):
         if ( pkgobj != None ):
             sys.exit( f'Package {pkg} already has been adopted as {deptype} dependency' );
     else:
-        deps = { "immediateDeps":[], "weakDeps": []}
+        deps = { "depsImmediate":[], "depsWeak": []}
         
     # double check if the package has already been adopted (i.e. there was manual edits to the deps.json file)
     if ( not args['overlay'] ):

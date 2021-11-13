@@ -70,7 +70,7 @@ def run( common_args, cmd_argv ):
     # Update the package in the deps list
     pkgobj['parentDir'] = args['<dst>']
     deps[deptype].pop(pkgidx)
-    utils.json_update_package_file_with_new_dep_entry( deps, pkgobj, is_weak_dep = True if deptype=='weakDeps' else False )
+    utils.json_update_package_file_with_new_dep_entry( deps, pkgobj, is_weak_dep = True if deptype=='depsWeak' else False )
     utils.write_package_file( deps )
     print( f"Package {src} moved to {dst}" )
 

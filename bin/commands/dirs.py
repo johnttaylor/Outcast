@@ -4,8 +4,8 @@ Manages the package's 'Owned' dirs
 ===============================================================================
 usage: orc [common-opts] dirs [-s|-o]
        orc [common-opts] dirs [options] ls
-       orc [common-opts] dirs [options] set <primarydirs>...
-       orc [common-opts] dirs [options] rm  <primarydirs>...
+       orc [common-opts] dirs [options] set <primary>...
+       orc [common-opts] dirs [options] rm  <primary>...
 
 Arguments:
     ls                  Calculates the package's owned directories
@@ -15,7 +15,7 @@ Arguments:
     rm                  Removes (from the package.json file) top-level 'primary'
                         dirtectories that will be 'overlaid' when the package
                         is adopted (as an overlay pacakge).
-    <primarydirs>       One or more top-level 'primary' directories 
+    <primary>           One or more top-level 'primary' directories 
     
 Options:
     -u                  Update the 'pkg-dirs.lst' file with the 'ls' results
@@ -65,7 +65,7 @@ def run( common_args, cmd_argv ):
 
     # Set directories
     if ( args['set'] ):
-        newdirs = args['<primarydirs>']
+        newdirs = args['<primary>']
         check_valid_primary_dirs( newdirs )
         package_json = utils.load_package_file();
         pdirs = utils.json_get_package_primary_dirs(package_json) 
@@ -87,7 +87,7 @@ def run( common_args, cmd_argv ):
 
     # Remove directories
     if ( args['rm'] ):
-        rmdirs = args['<primarydirs>']
+        rmdirs = args['<primary>']
         package_json = utils.load_package_file();
         pdirs = utils.json_get_package_primary_dirs(package_json) 
         if ( pdirs == None ):

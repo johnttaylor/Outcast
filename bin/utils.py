@@ -184,8 +184,11 @@ def load_package_file( path=PACKAGE_INFO_DIR(), file=PACKAGE_FILE()):
 
     try:
         with open(f) as f:
-            return json.load( f )
-    except:
+            result = check_package_file( json.load( f ) )
+            return result
+
+    except Exception as e:
+        print(e)
         return None
 
 def write_package_file( json_dictionary ):
@@ -234,16 +237,16 @@ def json_create_dep_entry( pkgname, pkgtype, parentdir, date_adopted, ver_sem, v
 
 def json_update_package_file_with_new_dep_entry( current_deps, new_dep_entry, is_weak_dep=False ):
     if ( is_weak_dep ):
-        current_deps['weakDeps'].append( new_dep_entry )
+        current_deps['depsWeak'].append( new_dep_entry )
     else:
-        current_deps['immediateDeps'].append( new_dep_entry )
+        current_deps['depsImmediate'].append( new_dep_entry )
     write_package_file( current_deps )
 
 def json_find_dependency( json_dictionary, pkgname ):
-    deptype    = 'immediateDeps'
+    deptype    = 'depsImmediate'
     pkgobj,idx = json_get_dep_package( json_dictionary[deptype], pkgname )
     if ( pkgobj == None ):
-        deptype    = 'weakDeps'
+        deptype    = 'depsWeak'
         pkgobj,idx = json_get_dep_package( json_dictionary[deptype], pkgname )
         if ( pkgobj == None ):
             return None, None, None
@@ -253,7 +256,7 @@ def json_find_dependency( json_dictionary, pkgname ):
 def json_get_list_adopted_overlay_deps( json_dictionary):
     olist = []
     try:
-        deps = json_dictionary['immediateDeps']
+        deps = json_dictionary['depsImmediate']
         for d in deps:
             if ( d['pkgtype'] == 'overlay' ):
                 olist.append( d )
@@ -285,16 +288,67 @@ def json_get_dep_repo_origin( depdict ):
 
 
 def json_get_package_primary_dirs( json_dictionary ):
-    if ( json_dictionary != None and "primaryDirs" in json_dictionary ):
-        return json_dictionary['primaryDirs']
+    if ( json_dictionary != None ):
+        return json_dictionary['directories']['primary']
     else:
         return None
 
 def json_update_package_file_with_new_primary_dirs( json_dictionary, list_of_dirs ):
-    json_dictionary['primaryDirs'] = list_of_dirs
+    json_dictionary['directories']['primary'] = list_of_dirs
     write_package_file( json_dictionary )
 
 
+def json_update_package_file_info( json_dictionary, desc =None, owner=None, email=None, url=None, reponame=None, repotype=None, repoorigin=None ):
+    json_dictionary['info']['desc']           = desc
+    json_dictionary['info']['owner']          = owner
+    json_dictionary['info']['email']          = email
+    json_dictionary['info']['url']            = url
+    json_dictionary['info']['repo']['name']   = reponame
+    json_dictionary['info']['repo']['type']   = repotype
+    json_dictionary['info']['repo']['origin'] = repoorigin
+
+def json_copy_info( json_dict_in ):
+    dict_out = { 'info':{} }
+    dict_out['info']['desc']           = json_dict_in['info']['desc']
+    dict_out['info']['owner']          = json_dict_in['info']['owner']
+    dict_out['info']['email']          = json_dict_in['info']['email']
+    dict_out['info']['url']            = json_dict_in['info']['url']
+    dict_out['info']['repo']           = {}
+    dict_out['info']['repo']['name']   = json_dict_in['info']['repo']['name']
+    dict_out['info']['repo']['type']   = json_dict_in['info']['repo']['type']
+    dict_out['info']['repo']['origin'] = json_dict_in['info']['repo']['origin']
+
+    return dict_out
+
+# Performs a basic check of the file contents and/or ensure that a minimal number of key/value pairs exist
+def check_package_file( json_dict_in ):
+    if ( not 'directories' in json_dict_in ):
+        json_dict_in['directories'] = {}
+    if ( not 'primary' in json_dict_in['directories'] ):
+        json_dict_in['directories']['primary'] = None
+    if ( not 'adoptedExtras' in json_dict_in['directories'] ):
+        json_dict_in['directories']['adoptedExtras'] = None
+
+    if ( not 'info' in json_dict_in ):
+        json_dict_in['info'] = {}
+    if ( not 'desc' in json_dict_in['info'] ):
+        json_dict_in['info']['desc'] = None
+    if ( not 'owner' in json_dict_in['info'] ):
+        json_dict_in['info']['owner'] = None
+    if ( not 'email' in json_dict_in['info'] ):
+        json_dict_in['info']['email'] = None
+    if ( not 'url' in json_dict_in['info'] ):
+        json_dict_in['info']['url'] = None
+    if ( not 'repo' in json_dict_in['info'] ):
+        json_dict_in['info']['repo'] = {}
+    if ( not 'name' in json_dict_in['info']['repo'] ):
+        json_dict_in['info']['repo']['name'] = None
+    if ( not 'type' in json_dict_in['info']['repo'] ):
+        json_dict_in['info']['repo']['type'] = None
+    if ( not 'origin' in json_dict_in['info']['repo'] ):
+        json_dict_in['info']['repo']['origin'] = None
+
+    return json_dict_in
 
 #-----------------------------------------------------------------------------
 # return None if not able to load the file
@@ -375,10 +429,10 @@ def get_owned_dirs( path_to_package_file=PACKAGE_INFO_DIR(), dir_list_file_root=
     package_json = load_package_file( path_to_package_file);
     overlay_deps = json_get_list_adopted_overlay_deps( package_json )
     odirs        = get_adopted_overlaid_dirs_list( overlay_deps, dir_list_file_root )
-    primarydirs  = json_get_package_primary_dirs(package_json) 
+    dirsPrimary  = json_get_package_primary_dirs(package_json) 
     localdirs    = []
     ignorefile   = get_ignore_file()
-    for d in primarydirs:
+    for d in dirsPrimary:
         l = walk_dir_filtered_by_ignored( d, ignorefile, pkgroot ) 
         localdirs.extend( l )
     
@@ -402,9 +456,7 @@ def copy_extra_dirs( dstdir, src_package_root ):
 def get_extra_dirs( src_package_root ):
     package_path = os.path.join( src_package_root, PACKAGE_INFO_DIR())
     package_json = load_package_file( path=package_path )
-    if ( 'adoptedExtrasDirs' in package_json ):
-        return package_json['adoptedExtrasDirs']
-    return []
+    return package_json['directories']['adoptedExtras']
 
 #-----------------------------------------------------------------------------
 def parse_pattern( string ):
@@ -973,5 +1025,7 @@ def render_dot_file_as_pic( pictype, oname ):
             print( r0 + ' ' + r1 )
             exit( "ERROR: Failed rendering the .DOT file (ensure that the GraphVis 'bin/' directory is in your path)" )
         
+
+
 
 

@@ -49,13 +49,13 @@ def run( common_args, cmd_argv ):
     # Get immeidate deps
     pkgs = []
     if ( not args['-w'] ):
-        for p in deps['immediateDeps']:
+        for p in deps['depsImmediate']:
             p['depType'] = 'I'
             pkgs.append( p )
 
     # Get weak deps
     if ( not args['-i'] ):
-        for p in deps['weakDeps']:
+        for p in deps['depsWeak']:
             p['depType'] = 'W'
             pkgs.append( p )
 
