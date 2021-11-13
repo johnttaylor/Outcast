@@ -291,6 +291,11 @@ def json_get_package_primary_dirs( json_dictionary ):
         return json_dictionary['directories']['primary']
 
 def json_get_package_extra_dirs( json_dictionary ):
+    l = []
+    for d in json_dictionary['directories']['adoptedExtras']:
+        l.append( standardize_dir_sep(d) )
+    return l
+   
     return json_dictionary['directories']['adoptedExtras']
 
 

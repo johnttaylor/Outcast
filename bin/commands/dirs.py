@@ -121,6 +121,18 @@ def run( common_args, cmd_argv ):
         show_primary_dirs()
         sys.exit(0)
 
+    # derive directories
+    if ( args['ls'] ):
+        owndirs = utils.get_owned_dirs()
+        for d in owndirs:
+            print(d)
+
+        # Update the directory list file
+        if ( args['-u'] ):
+            utils.save_dirs_list_file( owndirs )
+
+        sys.exit(0)
+
     # Set 'extra' directories
     if ( args['xset'] ):
         newdirs = args['<adoptedExtra>']
@@ -143,16 +155,26 @@ def run( common_args, cmd_argv ):
         show_extra_dirs()
         sys.exit(0)
 
-    # derive directories
-    if ( args['ls'] ):
-        owndirs = utils.get_owned_dirs()
-        for d in owndirs:
-            print(d)
+    # Remove directories
+    if ( args['xrm'] ):
+        rmdirs = args['<adoptedExtra>']
+        package_json = utils.load_package_file();
+        pdirs = utils.json_get_package_extra_dirs(package_json) 
+        if ( pdirs == None ):
+            pass
+        else:
+            # Delete dirs
+            newlist = []
+            for d in pdirs:
+                if ( not d in rmdirs ):
+                    newlist.append( d )
 
-        # Update the directory list file
-        if ( args['-u'] ):
-            utils.save_dirs_list_file( owndirs )
+            # Sort the list and update the file
+            newlist.sort()
+            utils.json_update_package_file_with_new_extra_dirs( package_json, newlist )
 
+        # Show update list
+        show_extra_dirs()
         sys.exit(0)
 
     # List extra directories
