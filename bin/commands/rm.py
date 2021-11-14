@@ -38,8 +38,6 @@ def run( common_args, cmd_argv ):
     # Look up the details of the package to be removed
     pkg = args['<adoptedpkg>']
     json_dict = utils.load_package_file()
-    if ( json_dict == None ):
-        sys.exit( 'ERROR: No packages have been adopted' )
     pkgobj, deptype, pkgidx = utils.json_find_dependency( json_dict, pkg )
     if ( pkgobj == None ):
         sys.exit( f'Cannot find the package - {pkg} - in the list of adopted packages' );

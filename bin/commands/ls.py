@@ -43,8 +43,6 @@ def run( common_args, cmd_argv ):
 
     # Get the list of adopted packages
     json_dict = utils.load_package_file()
-    if ( json_dict == None ):
-        sys.exit( 'ERROR: No packages have been adopted' )
 
     # Get immeidate deps
     pkgs = []

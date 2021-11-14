@@ -1,11 +1,12 @@
 """Collection of helper functions"""
 
 
-import sys, os, errno, fnmatch, subprocess, time, copy
+import sys, os, errno, fnmatch, subprocess, time, calendar, copy
 import errno, stat, shutil
 import json
 import collections
 from gitignore_parser import parse_gitignore
+from collections import deque
 #import platform, tarfile
 #from collections import deque
 
@@ -333,8 +334,68 @@ def json_copy_info( json_dict_in ):
 
     return dict_out
 
+# create version entry.  If NO date is provided than the current time is used
+def json_create_version_entry( comment, semver, date=None ):
+    now = int(time.time())
+    t   = time.gmtime(now)
+    if ( date != None ):
+        t   = time.strptime( date )
+        now = calendar.timegm( t )
+    entry  = { "comment" : comment, "version" : semver, "date" : time.asctime(t), "timestamp": now }
+    return entry
+
+# update the 'current' published version
+def json_update_current_version( json_dict, ver_entry, save_pkg=True ):
+    json_dict['publish']['current'] = ver_entry
+    if ( save_pkg ):
+        write_package_file( json_dict )
+
+
+# Create a new 'current' and adds the old-current to the history array
+def json_add_new_version( json_dict, ver_entry, save_pkg=True ):
+    prev = json_dict['publish']['current']
+    hist = json_dict['publish']['history']
+    if ( prev != None ):
+        hist.insert(0, prev)
+    json_update_current_version( json_dict, ver_entry, save_pkg )
+
+# edits an existing history entry
+def json_update_history_version( json_dict, idx, comment, semver, save_pkg=True  ):
+    # validate the index
+    idx = int(idx)
+    if ( idx >= len(json_dict['publish']['history']) or idx <  0 ):
+        sys.exit(f"ERROR: Index value {idx} is out of range." )
+
+    # Use the existing timestamp - but with new comments/ver
+    e = json_dict['publish']['history'][idx]
+    updated = json_create_version_entry( comment, semver, e['date'] )
+    json_dict['publish']['history'][idx] = updated
+
+    if ( save_pkg ):
+        write_package_file( json_dict )
+
+# Returns the Publish dictionary
+def json_get_published( json_dict ):
+    return( json_dict['publish'] )
+
+# Returns the current published version
+def json_get_current_version( json_dict ):
+    return json_dict['publish']['current']
+
+# Returns the published history
+def json_get_version_history( json_dict ):
+    return json_dict['publish']['history']
+
+
 # Performs a basic check of the file contents and/or ensure that a minimal number of key/value pairs exist
 def check_package_file( json_dict_in ):
+    if ( not 'publish' in json_dict_in ):
+        json_dict_in['publish'] = {}
+    if ( not 'current' in json_dict_in['publish'] ):
+        json_dict_in['publish']['current'] = None
+    if ( not 'history' in json_dict_in['publish'] ):
+        json_dict_in['publish']['history'] = []
+
     if ( not 'dependencies' in json_dict_in ):
         json_dict_in['dependencies'] = {}
     if ( not 'immediate' in json_dict_in['dependencies'] ):

@@ -55,8 +55,6 @@ def run( common_args, cmd_argv ):
 
     # Load the package file
     json_dict = utils.load_package_file()
-    if ( json_dict == None ):
-        json_dict = {}
 
     # Setting all fields
     if ( args['<rorigin>'] ):

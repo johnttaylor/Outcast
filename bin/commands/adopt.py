@@ -75,10 +75,9 @@ def run( common_args, cmd_argv ):
 
     # check for already adopted
     json_dict = utils.load_package_file()
-    if ( json_dict != None ):
-        pkgobj, deptype, pkgidx = utils.json_find_dependency( json_dict, pkg )
-        if ( pkgobj != None ):
-            sys.exit( f'Package {pkg} already has been adopted as {deptype} dependency' );
+    pkgobj, deptype, pkgidx = utils.json_find_dependency( json_dict, pkg )
+    if ( pkgobj != None ):
+        sys.exit( f'Package {pkg} already has been adopted as {deptype} dependency' );
         
     # double check if the package has already been adopted (i.e. there was manual edits to the package.json file)
     if ( not args['overlay'] ):

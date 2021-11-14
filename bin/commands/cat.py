@@ -47,8 +47,6 @@ def run( common_args, cmd_argv ):
     else:
         # Check if the adopted package is actually adopted
         json_dict = utils.load_package_file()
-        if ( json_dict == None ):
-            sys.exit( "ERROR: There are no adopted packages" )
         pkgobj, deptype, pkgidx = utils.json_find_dependency( json_dict, args['<adoptedpkg>'] )
         if ( pkgobj == None ):
             sys.exit( f"ERROR: The package - {args['<adoptedpkg>']} is NOT an adopted package" )
