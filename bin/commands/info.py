@@ -2,8 +2,7 @@
  
 Sets/Updates the Package description and basic information fields
 ===============================================================================
-usage: orc [common-opts] info <desc> <owner> <email> <url>
-       orc [common-opts] info <desc> <owner> <email> <url> <rname> <rtype> <rorigin>
+usage: orc [common-opts] info <desc> <owner> <email> <url> <rname> <rtype> <rorigin>
        orc [common-opts] info [options]
 
 Arguments:
@@ -13,15 +12,15 @@ Arguments:
     <url>               URL of home page for the package
     <rname>             Repository name
     <rtype>             Repository type (e.g. 'git')
-    <rorigin>           Reposiotyr origina (e.g. https://github.com/johnttaylor)
+    <rorigin>           Repository origin (e.g. https://github.com/johnttaylor)
     
-Options:
-    --desc    DESC      Update the description field
-    --owner   NAME      Update the owner field
-    --email   ADDR      Update the owner email field
-    --url     PATH      Update the package's URL field
-    --rname   NAME      Update the repository name ield
-    --rtype   TYPE      Update the repository type field
+options:
+    --desc DESC         Update the description field
+    --owner OWNR        Update the owner field
+    --email ADDR        Update the owner email field
+    --url PATH          Update the package's URL field
+    --rname NAME        Update the repository name ield
+    --rtype TYPE        Update the repository type field
     --rorigin ORG       Update the repository origin field
     -h, --help          Display help for this command
 
@@ -30,10 +29,6 @@ Common Options:
     
 Notes:
     o For fields that contain spaces - use qouble quotes.
-
-Examples:
-    orc info "My Package" "John Doe" johndoe@fakeemail.com www.mypackage.com
-    orc info --owner "john smith" --email johnsmith@fakeemail.com
     
 """
 import os, sys, json
@@ -52,55 +47,46 @@ def display_summary():
 #------------------------------------------------------------------------------
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
-
+    
     # Load the package file
     json_dict = utils.load_package_file()
 
     # Setting all fields
-    if ( args['<rorigin>'] ):
+    if ( args['<desc>'] ):
         utils.json_update_package_file_info( json_dict, args['<desc>'], args['<owner>'], args['<email>'], args['<url>'], args['<rname>'], args['<rtype>'], args['<rorigin>'] )
 
-    # Setting basic fields
-    elif ( args['<desc>'] ):
-        utils.json_update_package_file_info( json_dict, args['<desc>'], args['<owner>'], args['<email>'], args['<url>'] )
-
     # Update the description
-    if ( args['--desc'] ):
+    if ( args['--desc'] != None):
         utils.json_update_package_file_info( json_dict, desc= args['--desc']  )
         pass
 
     # Update the owner
-    if ( args['--owner'] ):
+    if ( args['--owner'] != None ):
         utils.json_update_package_file_info( json_dict, owner=args['--owner'] )
         pass
 
     # Update the email
-    if ( args['--email'] ):
+    if ( args['--email'] != None ):
         utils.json_update_package_file_info( json_dict, email=args['--email'] )
         pass
 
     # Update the url
-    if ( args['--url'] ):
-        utils.json_update_package_file_info( json_dict, url=args['--url']  )
-        pass
-
-    # Update the url
-    if ( args['--url'] ):
+    if ( args['--url'] != None ):
         utils.json_update_package_file_info( json_dict, url=args['--url']  )
         pass
 
     # Update the repo name
-    if ( args['--url'] ):
+    if ( args['--rname'] != None ):
         utils.json_update_package_file_info( json_dict, rname=args['--rname']  )
         pass
 
     # Update the repo type
-    if ( args['--url'] ):
+    if ( args['--rtype'] != None ):
         utils.json_update_package_file_info( json_dict, rtype=args['--rtype']  )
         pass
 
     # Update the repo origin
-    if ( args['--url'] ):
+    if ( args['--rorigin'] != None ):
         utils.json_update_package_file_info( json_dict, rorigin=args['--rorigin']  )
         pass
 

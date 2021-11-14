@@ -15,6 +15,7 @@ Options:
                     NOT updated.
     --edithist N    Updates the 'N' entry in the History array.  N is zero
                     based index. The date/time fields are NOT updated.
+    -w              Suppress warning about missing files
     -h, --help      Display help for this command
 
 Common Options:
@@ -33,6 +34,10 @@ Notes:
 import os, json
 import utils
 from docopt.docopt import docopt
+from my_globals import PACKAGE_INFO_DIR
+from my_globals import PKG_DIRS_FILE
+from my_globals import IGNORE_DIRS_FILE
+
 
 
 #---------------------------------------------------------------------------------------------------------
@@ -65,4 +70,15 @@ def run( common_args, cmd_argv ):
     # display publish info
     p = utils.json_get_published( json_dict )
     print( json.dumps(p, indent=2) )
+
+    # Display warnings
+    if ( not args['-w'] ):
+        f = os.path.join(PACKAGE_INFO_DIR(), PKG_DIRS_FILE() )
+        if ( not os.path.isfile( f )):
+            print( f"Warning: NO {f} file has been created for the package.  See the 'orc dirs' command")
+        f = os.path.join(PACKAGE_INFO_DIR(), IGNORE_DIRS_FILE() )
+        if ( not os.path.isfile( f )):
+            print( f"Warning: NO {f} file has been created for the package. Create using a text editor.")
+            print( f"         The file has same semantics as a .gitignore file.")
+
     

@@ -53,6 +53,7 @@ import os, sys
 import utils
 from docopt.docopt import docopt
 from my_globals import PKG_DIRS_FILE
+from my_globals import PACKAGE_ROOT
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
@@ -62,7 +63,7 @@ def display_summary():
 #------------------------------------------------------------------------------
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
-
+    
     # Show existing dirs file
     if ( args['-s'] ):
         dirs = utils.load_dirs_list_file()
@@ -80,7 +81,7 @@ def run( common_args, cmd_argv ):
     # Set directories
     if ( args['set'] ):
         newdirs = args['<primary>']
-        check_dirs( newdirs )
+        newdirs = check_dirs( newdirs )
         package_json = utils.load_package_file();
         pdirs = utils.json_get_package_primary_dirs(package_json) 
         if ( pdirs == None ):
@@ -101,7 +102,7 @@ def run( common_args, cmd_argv ):
 
     # Remove directories
     if ( args['rm'] ):
-        rmdirs = args['<primary>']
+        rmdirs = standardize_input_dirs( args['<primary>'] )
         package_json = utils.load_package_file();
         pdirs = utils.json_get_package_primary_dirs(package_json) 
         if ( pdirs == None ):
@@ -123,7 +124,7 @@ def run( common_args, cmd_argv ):
 
     # derive directories
     if ( args['ls'] ):
-        owndirs = utils.get_owned_dirs()
+        owndirs = utils.get_owned_dirs( PACKAGE_ROOT() )
         for d in owndirs:
             print(d)
 
@@ -136,7 +137,7 @@ def run( common_args, cmd_argv ):
     # Set 'extra' directories
     if ( args['xset'] ):
         newdirs = args['<adoptedExtra>']
-        check_dirs( newdirs )
+        newdirs = check_dirs( newdirs )
         package_json = utils.load_package_file();
         pdirs = utils.json_get_package_extra_dirs(package_json) 
         if ( pdirs == None ):
@@ -157,7 +158,7 @@ def run( common_args, cmd_argv ):
 
     # Remove directories
     if ( args['xrm'] ):
-        rmdirs = args['<adoptedExtra>']
+        rmdirs = standardize_input_dirs( args['<adoptedExtra>'] )
         package_json = utils.load_package_file();
         pdirs = utils.json_get_package_extra_dirs(package_json) 
         if ( pdirs == None ):
@@ -204,9 +205,18 @@ def show_extra_dirs():
         for d in pdirs:
             print( d )
 
+def standardize_input_dirs( list_of_dirs ):
+    stdlist = []
+    for d in list_of_dirs:
+        stdlist.append( utils.force_unix_dir_sep( d ) )
+    return stdlist
 #
 def check_dirs( dirlist ):
+    stdlist = []
     for d in dirlist:
-        path = os.path.join( os.getcwd(), d )
+        path = os.path.join( PACKAGE_ROOT, d )
+        stdlist.append( utils.force_unix_dir_sep( d ) )
         if ( not os.path.isdir( d ) ):
             sys.exit( f"ERROR: Directory {d}{os.sep} does not exists" )
+
+    return stdlist

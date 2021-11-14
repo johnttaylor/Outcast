@@ -89,9 +89,12 @@ def run( common_args, cmd_argv ):
 
         # Remove the overlaid directories/files
         dirs = utils.load_overlaid_dirs_list_file( pkg )
-        for d in dirs:
-            utils.delete_directory_files( d )
-
+        try:
+            for d in dirs:
+                utils.delete_directory_files( d )
+        except:
+            sys.exit("ERROR: Failed to remove overlaid directories" )
+            
         # Remove 'overlaid' directory
         utils.remove_tree( dstpkgpath )
 

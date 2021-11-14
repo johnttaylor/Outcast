@@ -1,6 +1,7 @@
 """ Global variables """
 
-    
+_package_root = ''
+
 #
 def ORC_VERSION():
     return "v2.0.1-alpha"
@@ -33,6 +34,12 @@ def IGNORE_DIRS_FILE():
 
 def TEMP_DIR_NAME():
     return '__temp_delete_me__'
+
+def PACKAGE_ROOT(set=None):
+    global _package_root
+    if ( set != None ):
+        _package_root = set
+    return _package_root
 
 #
 #def NQBP_PRJ_DIR( newval=None ):

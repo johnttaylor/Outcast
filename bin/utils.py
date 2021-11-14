@@ -16,6 +16,7 @@ from my_globals import PKG_DIRS_FILE
 from my_globals import IGNORE_DIRS_FILE
 from my_globals import PACKAGE_FILE
 from my_globals import OVERLAY_PKGS_DIR
+from my_globals import PACKAGE_ROOT
 
 
 # Module globals
@@ -158,7 +159,7 @@ def copy_files( srcdir, dstdir ):
 
 # Deletes all of the files in a directory AND deletes the directory if it is empty after deleting the files
 def delete_directory_files( dir_to_delete ):
-    src_files = os.listdir(dir_to_delete)
+    src_files = os.listdir( standardize_dir_sep( dir_to_delete) )
     for file_name in src_files:
         full_file_name = os.path.join(dir_to_delete, file_name)
         if os.path.isfile(full_file_name):
@@ -256,7 +257,11 @@ def json_find_dependency( json_dictionary, pkgname ):
 def json_get_list_adopted_overlay_deps( json_dictionary):
     olist = []
     try:
-        deps = json_dictionary['immediate']
+        deps = json_dictionary['dependencies']['immediate']
+        for d in deps:
+            if ( d['pkgtype'] == 'overlay' ):
+                olist.append( d )
+        deps = json_dictionary['dependencies']['weak']
         for d in deps:
             if ( d['pkgtype'] == 'overlay' ):
                 olist.append( d )
@@ -293,8 +298,11 @@ def json_get_package_primary_dirs( json_dictionary ):
 
 def json_get_package_extra_dirs( json_dictionary ):
     l = []
-    for d in json_dictionary['directories']['adoptedExtras']:
-        l.append( standardize_dir_sep(d) )
+    try:
+        for d in json_dictionary['directories']['adoptedExtras']:
+            l.append( standardize_dir_sep(d) )
+    except:
+        pass
     return l
    
     return json_dictionary['directories']['adoptedExtras']
@@ -312,14 +320,21 @@ def json_update_package_file_with_new_extra_dirs( json_dictionary, list_of_dirs 
     write_package_file( json_dictionary )
 
 
-def json_update_package_file_info( json_dictionary, desc =None, owner=None, email=None, url=None, reponame=None, repotype=None, repoorigin=None ):
-    json_dictionary['info']['desc']           = desc
-    json_dictionary['info']['owner']          = owner
-    json_dictionary['info']['email']          = email
-    json_dictionary['info']['url']            = url
-    json_dictionary['info']['repo']['name']   = reponame
-    json_dictionary['info']['repo']['type']   = repotype
-    json_dictionary['info']['repo']['origin'] = repoorigin
+def json_update_package_file_info( json_dictionary, desc =None, owner=None, email=None, url=None, rname=None, rtype=None, rorigin=None ):
+    if ( desc != None ):
+        json_dictionary['info']['desc']           = desc
+    if ( owner != None ):
+        json_dictionary['info']['owner']          = owner
+    if ( email != None ):
+        json_dictionary['info']['email']          = email
+    if ( url != None ):
+        json_dictionary['info']['url']            = url
+    if ( rname != None ):
+        json_dictionary['info']['repo']['name']   = rname
+    if ( rtype != None ):
+        json_dictionary['info']['repo']['type']   = rtype
+    if ( rorigin != None ):
+        json_dictionary['info']['repo']['origin'] = rorigin
 
 def json_copy_info( json_dict_in ):
     dict_out = { 'info':{} }
@@ -440,7 +455,7 @@ def load_dirs_list_file( path=PACKAGE_INFO_DIR(), file=PKG_DIRS_FILE() ):
             lines = f.readlines()
             result = []
             for l in lines:
-                result.append( l.strip() )
+                result.append( standardize_dir_sep(l.strip()) )
             return result
 
     except:
@@ -450,7 +465,8 @@ def save_dirs_list_file( list_of_dirs, path=PACKAGE_INFO_DIR(), file=PKG_DIRS_FI
     f = os.path.join( path, file )
     try:
         with open(f, 'w') as f:
-           f.write("\n".join(list_of_dirs))
+           files = "\n".join(list_of_dirs)
+           f.write(force_unix_dir_sep( files) )
     except:
         sys.exit( f"WARNING: Failed to update the {f} with the directory list" )
 
@@ -460,8 +476,8 @@ def load_overlaid_dirs_list_file( adopted_pkg_name, dir_list_file_root=OVERLAY_P
     return load_dirs_list_file( path=p )
 
 # returns None if there is no 'ignore file' in the pkg.info dir
-def get_ignore_file( root=os.getcwd() ):
-    f = os.path.join( os.getcwd(), PACKAGE_INFO_DIR(), IGNORE_DIRS_FILE() )
+def get_ignore_file( root ):
+    f = os.path.join( root, PACKAGE_INFO_DIR(), IGNORE_DIRS_FILE() )
     if ( os.path.isfile( f ) ):
         return f
 
@@ -469,8 +485,9 @@ def get_ignore_file( root=os.getcwd() ):
 
 # Filters the directory list by the 'ignore file', dirs with no files
 # If 'ignore_file' does NOT exist - than all dirs are returned
-def walk_dir_filtered_by_ignored( tree_to_walk, ignore_file, pkgroot=os.getcwd() ):
+def walk_dir_filtered_by_ignored( tree_to_walk, ignore_file, pkgroot ):
     push_dir(pkgroot)
+
     ignored = None
     if ( ignore_file != None ):
         try:
@@ -501,18 +518,22 @@ def get_adopted_overlaid_dirs_list( list_of_dep_pkgs, dir_list_file_root=OVERLAY
             if ( d != None ):
                 result.extend( d )
     except Exception as e:
-        print(f'{e}')
+        #print(f'{e}')
+        pass
 
     return result
 
 # Gets list of a packages owned directories
-def get_owned_dirs( path_to_package_file=PACKAGE_INFO_DIR(), dir_list_file_root=OVERLAY_PKGS_DIR(), pkgroot=os.getcwd() ):
+def get_owned_dirs( pkgroot, path_to_package_file=PACKAGE_INFO_DIR(), dir_list_file_root=OVERLAY_PKGS_DIR() ):
     package_json = load_package_file( path_to_package_file);
     overlay_deps = json_get_list_adopted_overlay_deps( package_json )
     odirs        = get_adopted_overlaid_dirs_list( overlay_deps, dir_list_file_root )
     dirsPrimary  = json_get_package_primary_dirs(package_json) 
     localdirs    = []
-    ignorefile   = get_ignore_file()
+    ignorefile   = get_ignore_file(pkgroot)
+    if ( dirsPrimary == None or len(dirsPrimary) == 0 ):
+        sys.exit( "ERROR: NO 'primary' directories have been specified for the package" )
+
     for d in dirsPrimary:
         l = walk_dir_filtered_by_ignored( d, ignorefile, pkgroot ) 
         localdirs.extend( l )
@@ -539,6 +560,15 @@ def get_extra_dirs( src_package_root ):
     package_json = load_package_file( path=package_path )
     return json_get_package_extra_dirs( package_json )
 
+#-----------------------------------------------------------------------------
+def get_adopted_semver( src_pkg_info, default_return_value ):
+    package_json = load_package_file( path=src_pkg_info )
+    current      = json_get_current_version( package_json )
+    try:
+        return current['version']
+    except:
+        return default_return_value
+    
 #-----------------------------------------------------------------------------
 def parse_pattern( string ):
     # default result values

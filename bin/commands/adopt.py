@@ -21,7 +21,10 @@ Options:
                      is not progated when determining transitive dependencies.
     --semver VER     Specifies the semantic version info for the package
                      being adopted. This information is not required, but
-                     recommended if it is available.
+                     recommended if it is available. NOTE: If the package being
+                     adopted has an Outcast package.json file - then the adopt
+                     command will attempt to use the adoptee's published
+                     semantic vesion info.
     -p PKGNAME       Specifies the Package name if different from the <repo> 
                      name
     -b BRANCH        Specifies the source branch in <repo>.  The use/need
@@ -44,6 +47,11 @@ from datetime import datetime, date, time, timezone
 from my_globals import OVERLAY_PKGS_DIR
 from my_globals import PACKAGE_INFO_DIR
 from my_globals import TEMP_DIR_NAME
+from my_globals import PACKAGE_FILE
+from my_globals import PKG_DIRS_FILE
+from my_globals import IGNORE_DIRS_FILE
+from my_globals import PACKAGE_ROOT
+
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
@@ -61,7 +69,7 @@ def run( common_args, cmd_argv ):
 
     # CLEAN-UP (for a failed overlay adoption)
     if ( args['--clean'] ):
-        tmpdst = os.path.join( os.getcwd(), PACKAGE_INFO_DIR(), TEMP_DIR_NAME() )
+        tmpdst = os.path.join( PACKAGE_ROOT(), PACKAGE_INFO_DIR(), TEMP_DIR_NAME() )
         utils.remove_tree( tmpdst, "error", "warn" )
         sys.exit(0)
 
@@ -95,7 +103,9 @@ def run( common_args, cmd_argv ):
         utils.check_results( t, f"ERROR: Failed to make a copy of the repo: {args['<repo>']}", 'copy', 'get-error-msg', common_args['--scm']  )
 
         # update the package.json file
-        d = utils.json_create_dep_entry( pkg, "foreign", args['<dst>'], dt_string, args['--semver'], args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
+        dst_pkg_info    = os.path.join( args['<dst>'], pkg, PACKAGE_INFO_DIR() )
+        incoming_semver = utils.get_adopted_semver( dst_pkg_info, args['--semver'] )
+        d = utils.json_create_dep_entry( pkg, "foreign", args['<dst>'], dt_string, incoming_semver, args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
         utils.json_update_package_file_with_new_dep_entry( json_dict, d, args['--weak'] )
 
         # Display parting message (if there is one)
@@ -111,7 +121,9 @@ def run( common_args, cmd_argv ):
         utils.check_results( t, f"ERROR: Failed to mount the repo: {args['<repo>']}", 'mount', 'get-error-msg', common_args['--scm'] )
 
         # update the package.json file
-        d = utils.json_create_dep_entry( pkg, "readonly", args['<dst>'], dt_string, args['--semver'], args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
+        dst_pkg_info    = os.path.join( args['<dst>'], pkg, PACKAGE_INFO_DIR() )
+        incoming_semver = utils.get_adopted_semver( dst_pkg_info, args['--semver'] )
+        d = utils.json_create_dep_entry( pkg, "readonly", args['<dst>'], dt_string, incoming_semver, args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
         utils.json_update_package_file_with_new_dep_entry( json_dict, d, args['--weak'] )
 
         # Mark files as readonly
@@ -130,28 +142,40 @@ def run( common_args, cmd_argv ):
         t   = utils.run_shell( cmd, common_args['-v'] )
         utils.check_results( t, f"ERROR: Failed to make a copy of the repo: {args['<repo>']}", 'copy', 'get-error-msg', common_args['--scm']  )
 
-        # Copy the adoptee's package info directory
+        # Fail if missing outcast info
         src_pkg      = os.path.join( tmpdst, pkg )
         dst_pkg      = os.path.join( OVERLAY_PKGS_DIR(), pkg )
         dst_pkg_info = os.path.join( dst_pkg, PACKAGE_INFO_DIR() )
         src_pkg_info = os.path.join( src_pkg, PACKAGE_INFO_DIR() )
+        if ( not os.path.isfile( os.path.join(src_pkg_info, PACKAGE_FILE() ) ) ):
+            utils.remove_tree(tmpdst)
+            sys.exit( f"ERROR: Package - {pkg} - does NOT have {PACKAGE_FILE()} file")
+        if ( not os.path.isfile( os.path.join(src_pkg_info, PKG_DIRS_FILE() ) )):
+            utils.remove_tree(tmpdst)
+            sys.exit( f"ERROR: Package - {pkg} - does NOT have {PKG_DIRS_FILE()} file")
+        if ( not os.path.isfile( os.path.join(src_pkg_info, IGNORE_DIRS_FILE() ) )):
+            utils.remove_tree(tmpdst)
+            sys.exit( f"ERROR: Package - {pkg} - does NOT have {IGNORE_DIRS_FILE()} file")
+
+        # Copy the adoptee's package info directory
         utils.copy_pkg_info_dir( dst_pkg_info, src_pkg_info )
 
         # Copy the adoptee's extra info directories
         utils.copy_extra_dirs( dst_pkg, src_pkg )
 
         # Get list of directories to copy/overlay
-        dirs = utils.get_owned_dirs( os.path.join( tmpdst, pkg, PACKAGE_INFO_DIR()), os.path.join( tmpdst, pkg, OVERLAY_PKGS_DIR()), os.path.join( tmpdst, pkg ) )
+        dirs = utils.get_owned_dirs( os.path.join( tmpdst, pkg ), os.path.join( tmpdst, pkg, PACKAGE_INFO_DIR()), os.path.join( tmpdst, pkg, OVERLAY_PKGS_DIR()) )
         utils.save_dirs_list_file( dirs, path=src_pkg_info )
         for d in dirs:
             src = os.path.join( src_pkg, d )
-            dst = os.path.join( os.getcwd(), d )
+            dst = os.path.join( PACKAGE_ROOT(), d )
             utils.copy_files( src, dst )
 
         # Clean-up
         utils.remove_tree( tmpdst )
 
         # update the package.json file
-        d = utils.json_create_dep_entry( pkg, "overlay", args['<dst>'], dt_string, args['--semver'], args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
+        incoming_semver = utils.get_adopted_semver( dst_pkg_info, args['--semver'] )
+        d = utils.json_create_dep_entry( pkg, "overlay", args['<dst>'], dt_string, incoming_semver, args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
         utils.json_update_package_file_with_new_dep_entry( json_dict, d, args['--weak'] )
         print( f"Package - {pkg} - adopted as an OVERLAY package. Remember to add the new files to your SCM" )

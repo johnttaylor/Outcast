@@ -29,6 +29,7 @@ from docopt.docopt import docopt
 from my_globals import ORC_VERSION
 from my_globals import OUTCAST_SCM_ADOPTED_TOOL
 from my_globals import OUTCAST_SCM_PRIMARY_TOOL
+from my_globals import PACKAGE_ROOT
 import utils
 
 
@@ -111,6 +112,7 @@ if __name__ == '__main__':
         # Set the current working directory to the root directory
         repo_root = utils.find_root( args['--primary-scm'], args['-v'] )
         utils.push_dir( repo_root )
+        PACKAGE_ROOT( repo_root )
 
         # run the command
         load_command( args['<command>'] ).run( args, [args['<command>']] + args['<args>'] )
