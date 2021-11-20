@@ -82,6 +82,40 @@ def display_scm_message( cmd, msg, scm ):
 
   
 #-----------------------------------------------------------------------------
+def run_shell( cmd, verbose_flag=False, on_err_msg=None ):
+    if ( verbose_flag ):
+        print_verbose(cmd)
+        p = subprocess.Popen( cmd, shell=True )
+    else:
+        p = subprocess.Popen( cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
+
+    r  = p.communicate()
+    r0 = '' if r[0] == None else r[0].decode()
+    r1 = '' if r[1] == None else r[1].decode()
+    if ( p.returncode != 0 and on_err_msg != None ):
+        exit(on_err_msg)
+    return (p.returncode, f"{r0} {r1}" )
+
+def is_error( t ):
+    if ( t[0] != 0 ):
+        return True;
+
+    return False
+
+def check_results( t, err_msg, scm_cmd=None, scm_msg=None, scm=None ):
+    if ( t[0] != 0 ):
+        if ( t[1] != None and t[1] != 'None None' ):
+            print(t[1])
+        if ( scm_cmd == None ):
+            sys.exit( err_msg )
+        else:
+            print( err_msg )
+            display_scm_message( scm_cmd, scm_msg, scm )
+            sys.exit(1)
+
+
+
+#-----------------------------------------------------------------------------
 def mkdirs( dirpath ):
     
     # Attempt to create the workspace directory    
@@ -192,6 +226,17 @@ def load_package_file( path=PACKAGE_INFO_DIR(), file=PACKAGE_FILE()):
     except Exception as e:
         return check_package_file( {} )
 
+def load_dependent_package_file( pkgobj, file=PACKAGE_FILE() ):
+    # OVERLAY package
+    if ( pkgobj['pkgtype'] == 'overlay' ):
+        return load_package_file( os.path.join( OVERLAY_PKGS_DIR(), pkgobj['pkgname'], PACKAGE_INFO_DIR() ) )
+
+    # Readonly/Foreign Packages
+    else:
+        if ( pkgobj['parentDir'] == None ):
+            sys.exit( f"ERROR: the {PACKAGE_FILE()} file is corrupt. There is no parent directory for the package: {pkgobj['pkgname']}" )
+        return load_package_file( os.path.join(  pkgobj['parentDir'], pkgobj['pkgname'], PACKAGE_INFO_DIR() ) )
+
 def write_package_file( json_dictionary ):
     # make sure the pkgs.info directory exists
     if ( not os.path.isdir( PACKAGE_INFO_DIR() ) ):
@@ -252,6 +297,23 @@ def json_find_dependency( json_dictionary, pkgname ):
         if ( pkgobj == None ):
             return None, None, None
     return pkgobj, deptype, idx
+
+# Returns list of dictionary 'dep' entries (a 'depType' key pair set to I|W is added to the dep dictionary instances)
+def get_dependency_list( json_dict, include_immediate=True, include_weak=True ):
+   # Get immeidate deps
+    pkgs = []
+    if ( include_immediate):
+        for p in json_dict['dependencies']['immediate']:
+            p['depType'] = 'I'
+            pkgs.append( p )
+
+    # Get weak deps
+    if ( include_weak ):
+        for p in json_dict['dependencies']['weak']:
+            p['depType'] = 'W'
+            pkgs.append( p )
+
+    return pkgs
 
 # Returns an empty list if no overlaid dirs
 def json_get_list_adopted_overlay_deps( json_dictionary):
@@ -853,40 +915,6 @@ def remove_from_list( item, l ):
     if ( item in l ):
         l.remove(item)
         
-#-----------------------------------------------------------------------------
-def run_shell( cmd, verbose_flag=False, on_err_msg=None ):
-    if ( verbose_flag ):
-        print_verbose(cmd)
-        p = subprocess.Popen( cmd, shell=True )
-    else:
-        p = subprocess.Popen( cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
-
-    r  = p.communicate()
-    r0 = '' if r[0] == None else r[0].decode()
-    r1 = '' if r[1] == None else r[1].decode()
-    if ( p.returncode != 0 and on_err_msg != None ):
-        exit(on_err_msg)
-    return (p.returncode, f"{r0} {r1}" )
-
-def is_error( t ):
-    if ( t[0] != 0 ):
-        return True;
-
-    return False
-
-def check_results( t, err_msg, scm_cmd=None, scm_msg=None, scm=None ):
-    if ( t[0] != 0 ):
-        if ( t[1] != None and t[1] != 'None None' ):
-            print(t[1])
-        if ( scm_cmd == None ):
-            sys.exit( err_msg )
-        else:
-            print( err_msg )
-            display_scm_message( scm_cmd, scm_msg, scm )
-            sys.exit(1)
-
-
-
 #-----------------------------------------------------------------------------
 def parse_vernum( string ):
     pre = None

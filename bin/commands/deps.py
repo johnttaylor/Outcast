@@ -1,13 +1,22 @@
 """
  
-Displays and Checks package dependencies
+Checks and manages a package dependencies
 ===============================================================================
-usage: orc [common-opts] deps [options] 
+usage: orc [common-opts] deps [options] check
+       orc [common-opts] deps [options] show <adoptedpkg>
+       orc [common-opts] deps [options] mv <pkg> 
 
 Arguments:
-    
-    <change-type>
+    check               Checks for any missing dependencies
+    show                Displays the transitive dependencies incurred via
+                        the specified adopted package
+    mv                  Moves an existing package dependency from immeidate
+                        to weak and vice-versus
+    <adoptedpkg>        Name of a adopted package
+    <pkg>               Name of package to move
+
 Options:
+    --noweak            Skip checking weak dependencies
     -h, --help          Display help for this command
 
 Common Options:
@@ -23,7 +32,7 @@ from docopt.docopt import docopt
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print("{:<13}{}".format( 'deps', 'Displays and Checks package dependencies' ))
+    print("{:<13}{}".format( 'deps', 'Checks and manages a package dependencies' ))
     
 
 #------------------------------------------------------------------------------

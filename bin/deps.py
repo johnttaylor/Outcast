@@ -494,19 +494,27 @@ def read_info( cfg, filename, top_fname ):
     
         
 #------------------------------------------------------------------------------
-def _build_actual( node, children_data, all_entries, list_local, path_to_uverse, trail, cache, weak_deps ):
-    override_pkgs = _extract_pkgnames( list_local )
+def _find_pkg_in_dep_list( pkgname, list_of_entries ):
+    for d in list_of_entries:
+        if ( d['pkgname'] == pkgname ):
+            return d
+    return None
+
+#def _build_actual( node, children_data, all_entries, list_local, path_to_uverse, trail, cache, weak_deps ):
+# child data is a dictionary 'dep' instance
+
+# For my package - load deps
+#   for each get dep -->get the dep's list of dependencies
+#       all pkgs in this list -->needs to be adopted pkg of the parent
+
+def _build_actual( node, children_data, all_entries, trail, weak_deps ):
     node.add_children_data( children_data )
     for cnode in node.get_children():
-        p,b,v = cdata = cnode.get_data()
-
-        # Skip over local-overrides
-        if ( p in override_pkgs ):
-            cnode.set_data( (p, LOCAL_MARKER, '') )
-            continue
+        #p,b,v = child_dict = cnode.get_data()
+        cdict = cnode.get_data()
 
         # Trap missing transitive dependency (and properly handle the weak-cyclic condition)
-        entry = _find_pkg_in_list( p, all_entries )
+        entry = _find_pkg_in_dep_list( cdict['pkgname'], all_entries )
         if ( entry == None ):
             if ( not _test_for_weak_cyclic( ("",p,b,v), trail, weak_deps ) ):
                 print(("ERROR: Missing a transitive dependency: {}".format(encode_dep(cdata,use_quotes=False)) ))
@@ -543,12 +551,6 @@ def _build_actual( node, children_data, all_entries, list_local, path_to_uverse,
 
     
     
-def _find_pkg_in_list( pkg, pkglist ):
-    for e in pkglist:
-        p,b,v = e
-        if ( pkg.lower() == p.lower() ):
-            return e
-    return None
 
 def read_top_file( cpath, fname, trail, cache ):
     if ( not fname in cache ):

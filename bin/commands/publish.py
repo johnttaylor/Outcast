@@ -73,12 +73,17 @@ def run( common_args, cmd_argv ):
 
     # Display warnings
     if ( not args['-w'] ):
+        warning = False
         f = os.path.join(PACKAGE_INFO_DIR(), PKG_DIRS_FILE() )
         if ( not os.path.isfile( f )):
             print( f"Warning: NO {f} file has been created for the package.  See the 'orc dirs' command")
+            warning = True
         f = os.path.join(PACKAGE_INFO_DIR(), IGNORE_DIRS_FILE() )
         if ( not os.path.isfile( f )):
             print( f"Warning: NO {f} file has been created for the package. Create using a text editor.")
             print( f"         The file has same semantics as a .gitignore file.")
-
+            warning = True
+        if ( warning ):
+            print( f"The above warning(s) can be ignored if the package is NOT intended to be" )
+            print( f"to be adopted as an 'overlay' package." )
     

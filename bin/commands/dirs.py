@@ -214,7 +214,7 @@ def standardize_input_dirs( list_of_dirs ):
 def check_dirs( dirlist ):
     stdlist = []
     for d in dirlist:
-        path = os.path.join( PACKAGE_ROOT, d )
+        path = os.path.join( PACKAGE_ROOT(), d )
         stdlist.append( utils.force_unix_dir_sep( d ) )
         if ( not os.path.isdir( d ) ):
             sys.exit( f"ERROR: Directory {d}{os.sep} does not exists" )

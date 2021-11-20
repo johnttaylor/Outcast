@@ -44,18 +44,8 @@ def run( common_args, cmd_argv ):
     # Get the list of adopted packages
     json_dict = utils.load_package_file()
 
-    # Get immeidate deps
-    pkgs = []
-    if ( not args['-w'] ):
-        for p in json_dict['dependencies']['immediate']:
-            p['depType'] = 'I'
-            pkgs.append( p )
-
-    # Get weak deps
-    if ( not args['-i'] ):
-        for p in json_dict['dependencies']['weak']:
-            p['depType'] = 'W'
-            pkgs.append( p )
+    # Get Dependencies
+    pkgs = utils.get_dependency_list( json_dict, include_immediate=not args['-w'], include_weak=not args['-i'] )
 
     # Sort the list
     pkgs = sorted( pkgs, key = lambda i: i['pkgname'] )
