@@ -33,6 +33,7 @@ Options:
                      name
     -b BRANCH        Specifies the source branch in <repo>.  The use/need
                      of this option in dependent on the <repo> SCM type.
+    --nowarn         Ignores warning
     -h, --help       Display help for this command
 
 Common Options:
@@ -42,11 +43,10 @@ Common Options:
 Notes:
 
 """
-import os, sys
+import os, sys, time, json
 import utils
 import uuid
 from docopt.docopt import docopt
-from datetime import datetime, date, time, timezone
 from my_globals import OVERLAY_PKGS_DIR
 from my_globals import PACKAGE_INFO_DIR
 from my_globals import TEMP_DIR_NAME
@@ -82,7 +82,7 @@ def run( common_args, cmd_argv ):
         branch_opt = '-b ' + args['-b']
 
     # Get the current time
-    dt_string = datetime.now().strftime("%Y %b %d %H:%M:%S")
+    dt_string = time.asctime(time.gmtime())
 
     # check for already adopted
     json_dict = utils.load_package_file()
@@ -109,8 +109,18 @@ def run( common_args, cmd_argv ):
         dst_pkg_info    = os.path.join( args['<dst>'], pkg, PACKAGE_INFO_DIR() )
         incoming_semver = utils.get_adopted_semver( dst_pkg_info, args['--semver'] )
         d = utils.json_create_dep_entry( pkg, "foreign", args['<dst>'], dt_string, incoming_semver, args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
-        utils.json_update_package_file_with_new_dep_entry( json_dict, d, args['--weak'] )
 
+        # Check for cyclical deps
+        if ( check_cyclical_deps( json_dict, d, args) == False ):
+            # Remove the package
+            cmd = f"evie.py --scm {d['repo']['type']} rm -p {d['pkgname']} {branch_opt} {d['parentDir']} {d['repo']['name']} {d['repo']['origin']} {d['version']['tag']}"
+            t   = utils.run_shell( cmd, common_args['-v'] )
+            utils.check_results( t, f"ERROR: Failed to remove the package: {d['repo']['name']}, 'rm', 'get-error-msg', common_args['--scm']" )
+            sys.exit("Please check/reconcile your SCM/Repo state because the adoption was 'reverted'" )
+
+        # Save changes
+        utils.json_update_package_file_with_new_dep_entry( json_dict, d, args['--weak'] )
+        
         # Display parting message (if there is one)
         utils.display_scm_message( 'copy', 'get-success-msg', common_args['--scm'] )
 
@@ -127,6 +137,16 @@ def run( common_args, cmd_argv ):
         dst_pkg_info    = os.path.join( args['<dst>'], pkg, PACKAGE_INFO_DIR() )
         incoming_semver = utils.get_adopted_semver( dst_pkg_info, args['--semver'] )
         d = utils.json_create_dep_entry( pkg, "readonly", args['<dst>'], dt_string, incoming_semver, args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
+
+        # Check for cyclical deps
+        if ( check_cyclical_deps( json_dict, d, args) == False ):
+            # Remove the package
+            cmd = f"evie.py --scm {d['repo']['type']} umount -p {d['pkgname']} {branch_opt} {d['parentDir']} {d['repo']['name']} {d['repo']['origin']} {d['version']['tag']}"
+            t   = utils.run_shell( cmd, common_args['-v'] )
+            utils.check_results( t, f"ERROR: Failed to umount the repo: {d['repo']['name']}, 'umount', 'get-error-msg', common_args['--scm']" )
+            sys.exit("Please check/reconcile your SCM/Repo state because the adoption was 'reverted'" )
+
+        # Save changes
         utils.json_update_package_file_with_new_dep_entry( json_dict, d, args['--weak'] )
 
         # Mark files as readonly
@@ -182,3 +202,27 @@ def run( common_args, cmd_argv ):
         d = utils.json_create_dep_entry( pkg, "overlay", args['<dst>'], dt_string, incoming_semver, args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
         utils.json_update_package_file_with_new_dep_entry( json_dict, d, args['--weak'] )
         print( f"Package - {pkg} - adopted as an OVERLAY package. Remember to add the new files to your SCM" )
+
+
+def check_cyclical_deps( json_dict, dep_pkg, args):
+    # Enforce NO cyclical  deps
+    cyc_strong, cyc_weak = utils.check_cyclical_deps( json_dict['info']['pkgname'], dep_pkg, suppress_warnings=args['--nowarn'])
+    if ( len(cyc_strong) > 0 ):
+        print( f"ERROR: One or more cyclical dependencies would be created with the adoption of: {dep_pkg['pkgname']}" )
+        print_dep_list(cyc_strong)
+        return False
+
+    if ( len(cyc_weak) > 0 and args['--nowarn'] == False ):
+        print( f"Warning: One or more cyclical WEAK dependencies would be created with the adoption of: {dep_pkg['pkgname']}" )
+        print_dep_list(cyc_strong)
+        inp = input( "Do you wish to continue? (Y/n)" )
+        if ( not 'y' in input.lower() ):
+            return False
+
+    return True
+
+        
+def print_dep_list( deplist ):
+    for d in deplist:
+        print( json.dumps(d, indent=2) )
+

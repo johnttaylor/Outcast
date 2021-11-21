@@ -382,7 +382,9 @@ def json_update_package_file_with_new_extra_dirs( json_dictionary, list_of_dirs 
     write_package_file( json_dictionary )
 
 
-def json_update_package_file_info( json_dictionary, desc =None, owner=None, email=None, url=None, rname=None, rtype=None, rorigin=None ):
+def json_update_package_file_info( json_dictionary, pkgname = None, desc =None, owner=None, email=None, url=None, rname=None, rtype=None, rorigin=None ):
+    if ( pkgname != None ):
+        json_dictionary['info']['pkgname']        = pkgname
     if ( desc != None ):
         json_dictionary['info']['desc']           = desc
     if ( owner != None ):
@@ -400,6 +402,7 @@ def json_update_package_file_info( json_dictionary, desc =None, owner=None, emai
 
 def json_copy_info( json_dict_in ):
     dict_out = { 'info':{} }
+    dict_out['info']['pkgname']        = json_dict_in['info']['pkgname']
     dict_out['info']['desc']           = json_dict_in['info']['desc']
     dict_out['info']['owner']          = json_dict_in['info']['owner']
     dict_out['info']['email']          = json_dict_in['info']['email']
@@ -489,6 +492,8 @@ def check_package_file( json_dict_in ):
 
     if ( not 'info' in json_dict_in ):
         json_dict_in['info'] = {}
+    if ( not 'pkgname' in json_dict_in['info'] ):
+        json_dict_in['info']['pkgname'] = None
     if ( not 'desc' in json_dict_in['info'] ):
         json_dict_in['info']['desc'] = None
     if ( not 'owner' in json_dict_in['info'] ):
@@ -631,6 +636,33 @@ def get_adopted_semver( src_pkg_info, default_return_value ):
     except:
         return default_return_value
     
+#-----------------------------------------------------------------------------
+# Returns a tuple: (<strongList>, <weakList>), lists will be empty if no cyclical deps
+def check_cyclical_deps( mypkg_name, pkgobj, suppress_warnings=False, file=PACKAGE_FILE() ):
+    cyc_strong = []
+    cyc_weak = []
+
+    # Get Dependencies info
+    dep_dict = load_dependent_package_file( pkgobj, file )
+    if ( dep_dict == None and suppress_warnings == False ):
+        print( f"Warning: Not able to check for Cyclical dependencs because the {pkgobj['pkgname']} does NOT have package.json file" )
+        return (cyc_strong, cyc_weak)
+
+    # Check for strong cyclical deps
+    dep_deps = get_dependency_list( dep_dict, include_immediate=True, include_weak=False )
+    for d in dep_deps:
+        if ( d['pkgname'] == mypkg_name ):
+            cyc_strong.append( d )
+
+    # Check for weak cyclical deps
+    dep_deps = get_dependency_list( dep_dict, include_immediate=False, include_weak=True )
+    for d in dep_deps:
+        if ( d['pkgname'] == mypkg_name ):
+            cyc_weak.append( d )
+
+    return(cyc_strong, cyc_weak)
+
+
 #-----------------------------------------------------------------------------
 def parse_pattern( string ):
     # default result values

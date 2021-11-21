@@ -50,7 +50,7 @@ def run( common_args, cmd_argv ):
     # Sort the list
     pkgs = sorted( pkgs, key = lambda i: i['pkgname'] )
     if ( not args['-x'] ):
-        header  = "PkgName          D PkType    AdoptedDate           ParentDir        "
+        header  = "PkgName          D PkType    AdoptedDate               ParentDir        "
         rheader = "RepoName         RepoType RepoOrigin                               "
         vheader = "SemVer   Branch           Tag"
         if ( args['-l'] or args['-r'] ):

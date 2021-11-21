@@ -2,10 +2,11 @@
  
 Sets/Updates the Package description and basic information fields
 ===============================================================================
-usage: orc [common-opts] info <desc> <owner> <email> <url> <rname> <rtype> <rorigin>
+usage: orc [common-opts] info <pkgname> <desc> <owner> <email> <url> <rname> <rtype> <rorigin>
        orc [common-opts] info [options]
 
 Arguments:
+    <pkgname>           Name of the Package
     <desc>              Brief description of the package. 
     <owner>             Name of principle contact/owner of the package
     <email>             Email address for the <owner>
@@ -15,6 +16,7 @@ Arguments:
     <rorigin>           Repository origin (e.g. https://github.com/johnttaylor)
     
 options:
+    --pkgname NAME      Update the package name field
     --desc DESC         Update the description field
     --owner OWNR        Update the owner field
     --email ADDR        Update the owner email field
@@ -53,7 +55,12 @@ def run( common_args, cmd_argv ):
 
     # Setting all fields
     if ( args['<desc>'] ):
-        utils.json_update_package_file_info( json_dict, args['<desc>'], args['<owner>'], args['<email>'], args['<url>'], args['<rname>'], args['<rtype>'], args['<rorigin>'] )
+        utils.json_update_package_file_info( json_dict, args['<pkgname>'], args['<desc>'], args['<owner>'], args['<email>'], args['<url>'], args['<rname>'], args['<rtype>'], args['<rorigin>'] )
+
+    # Update the packname
+    if ( args['--pkgname'] != None):
+        utils.json_update_package_file_info( json_dict, pkgname= args['--pkgname']  )
+        pass
 
     # Update the description
     if ( args['--desc'] != None):
