@@ -2,12 +2,16 @@
  
 Adopts the specified Repo/Package package
 ===============================================================================
-usage: orc [common-opts] adopt [options] 
-       orc [common-opts] adopt [options] readonly <dst> <repo> <origin> <id>
+usage: orc [common-opts] adopt [options] readonly <dst> <repo> <origin> <id>
        orc [common-opts] adopt [options] foreign  <dst> <repo> <origin> <id>               
        orc [common-opts] adopt [options] overlay  <repo> <origin> <id>
+       orc [common-opts] adopt [options] clean 
 
 Arguments:
+    readonly         Adopts the specified package as a readonly package
+    foreign          Adopts the specified package as a foreign package
+    overlay          Adopts the specified package as a overlay package
+    clean            Cleans up after a fail adoption of a OVERLAY package.
     <dst>            Parent directory for where the adopted package is placed. 
                      The directory is specified as a relative path to the root
                      of primary repository.    
@@ -17,7 +21,7 @@ Arguments:
     
 Options:
     --weak           Adopt the package as 'weak' dependencies.  The default is
-                     to adopt as an 'immediate' dependency. A 'weak' dependency 
+                     to adopt as an 'strong' dependency. A 'weak' dependency 
                      is not progated when determining transitive dependencies.
     --semver VER     Specifies the semantic version info for the package
                      being adopted. This information is not required, but
@@ -29,7 +33,6 @@ Options:
                      name
     -b BRANCH        Specifies the source branch in <repo>.  The use/need
                      of this option in dependent on the <repo> SCM type.
-    --clean          Cleans up after a fail adoption of a OVERLAY package.
     -h, --help       Display help for this command
 
 Common Options:
@@ -68,7 +71,7 @@ def run( common_args, cmd_argv ):
         pkg = args['-p']
 
     # CLEAN-UP (for a failed overlay adoption)
-    if ( args['--clean'] ):
+    if ( args['clean'] ):
         tmpdst = os.path.join( PACKAGE_ROOT(), PACKAGE_INFO_DIR(), TEMP_DIR_NAME() )
         utils.remove_tree( tmpdst, "error", "warn" )
         sys.exit(0)

@@ -18,7 +18,7 @@ def validate_dependencies( pkginfo, list_deps, list_weak, list_trans, list_local
     t         = (pkginfo['name'], pkginfo['branch'], pkginfo['version'])
     trail     = []
     all       = []
-    immediate = []
+    strong = []
     root      = utils.Node( t )
     all.extend( list_deps )
     all.extend( list_weak )

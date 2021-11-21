@@ -14,7 +14,7 @@ Options:
     -r                  Display repo info
     -l                  Displays all details (i.e. -vr)
     -w                  Display only weak dependencies
-    -i                  Display only immediate dependencies
+    -s                  Display only strong dependencies
     -x                  Suppress column headers
     -h, --help          Display help for this command
 
@@ -45,7 +45,7 @@ def run( common_args, cmd_argv ):
     json_dict = utils.load_package_file()
 
     # Get Dependencies
-    pkgs = utils.get_dependency_list( json_dict, include_immediate=not args['-w'], include_weak=not args['-i'] )
+    pkgs = utils.get_dependency_list( json_dict, include_immediate=not args['-w'], include_weak=not args['-s'] )
 
     # Sort the list
     pkgs = sorted( pkgs, key = lambda i: i['pkgname'] )

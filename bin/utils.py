@@ -285,11 +285,11 @@ def json_update_package_file_with_new_dep_entry( json_dict, new_dep_entry, is_we
     if ( is_weak_dep ):
         json_dict['dependencies']['weak'].append( new_dep_entry )
     else:
-        json_dict['dependencies']['immediate'].append( new_dep_entry )
+        json_dict['dependencies']['strong'].append( new_dep_entry )
     write_package_file( json_dict )
 
 def json_find_dependency( json_dictionary, pkgname ):
-    deptype    = 'immediate'
+    deptype    = 'strong'
     pkgobj,idx = json_get_dep_package( json_dictionary['dependencies'][deptype], pkgname )
     if ( pkgobj == None ):
         deptype    = 'weak'
@@ -298,13 +298,13 @@ def json_find_dependency( json_dictionary, pkgname ):
             return None, None, None
     return pkgobj, deptype, idx
 
-# Returns list of dictionary 'dep' entries (a 'depType' key pair set to I|W is added to the dep dictionary instances)
+# Returns list of dictionary 'dep' entries (a 'depType' key pair set to S|W is added to the dep dictionary instances)
 def get_dependency_list( json_dict, include_immediate=True, include_weak=True ):
    # Get immeidate deps
     pkgs = []
     if ( include_immediate):
-        for p in json_dict['dependencies']['immediate']:
-            p['depType'] = 'I'
+        for p in json_dict['dependencies']['strong']:
+            p['depType'] = 'S'
             pkgs.append( p )
 
     # Get weak deps
@@ -319,7 +319,7 @@ def get_dependency_list( json_dict, include_immediate=True, include_weak=True ):
 def json_get_list_adopted_overlay_deps( json_dictionary):
     olist = []
     try:
-        deps = json_dictionary['dependencies']['immediate']
+        deps = json_dictionary['dependencies']['strong']
         for d in deps:
             if ( d['pkgtype'] == 'overlay' ):
                 olist.append( d )
@@ -475,8 +475,8 @@ def check_package_file( json_dict_in ):
 
     if ( not 'dependencies' in json_dict_in ):
         json_dict_in['dependencies'] = {}
-    if ( not 'immediate' in json_dict_in['dependencies'] ):
-        json_dict_in['dependencies']['immediate'] = []
+    if ( not 'strong' in json_dict_in['dependencies'] ):
+        json_dict_in['dependencies']['strong'] = []
     if ( not 'weak' in json_dict_in['dependencies'] ):
         json_dict_in['dependencies']['weak'] = []
 
