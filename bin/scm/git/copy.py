@@ -37,19 +37,13 @@ def run( common_args, cmd_argv ):
 
         # Create a clone of the repo
         # NOTE: I hate cloning the entire repo - but I have not found a way to get JUST a snapshot by a remote-ref
-        cmd = f'git clone -n {args["<origin>"]}/{args["<repo>"]}.git {pkg}'
+        cmd = f'git clone --branch {args["<id>"]} --depth=1 {args["<origin>"]}/{args["<repo>"]}.git {pkg}'
         utils.push_dir( dst )
         t = utils.run_shell( cmd, common_args['-v'] )
         utils.pop_dir()    
         if ( utils.is_error(t) ):   # Clean-up dst dir if there was failure
             utils.remove_tree( dst ) 
-        utils.check_results( t, "ERROR: Failed the retreive/clone the specified package/repository." )
-
-        # Checkout the desire tag/branch/remote-ref
-        cmd = f'git checkout {args["<id>"]}'
-        utils.push_dir( os.path.join( dst, pkg ) )
-        t = utils.run_shell( cmd, common_args['-v'] )
-        utils.pop_dir()    
+        utils.check_results( t, f"ERROR: Failed the retreive/clone the specified package/repository. Note: the <id> ({args['<id>']}) MUST be a git TAG." )
 
         # Remove the .git directoy since this is a non-tracked copy
         gitdir = os.path.join( dst, pkg, ".git" )

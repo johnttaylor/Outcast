@@ -35,6 +35,9 @@ def display_summary():
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
 
+    # Verbose option for subcommand
+    vopt = ' -v ' if common_args['-v'] else ''
+
     # Look up the details of the package to be removed
     pkg = args['<adoptedpkg>']
     json_dict = utils.load_package_file()
@@ -53,7 +56,7 @@ def run( common_args, cmd_argv ):
             sys.exit( f"ERROR: the {PACKAGE_FILE()} file is corrupt - there is no parent directory for the package" )
 
         # Remove the package
-        cmd = f"evie.py --scm {pkgobj['repo']['type']} umount -p {pkgobj['pkgname']} {branch_opt} {pkgobj['parentDir']} {pkgobj['repo']['name']} {pkgobj['repo']['origin']} {pkgobj['version']['tag']}"
+        cmd = f"evie.py {vopt} --scm {pkgobj['repo']['type']} umount -p {pkgobj['pkgname']} {branch_opt} {pkgobj['parentDir']} {pkgobj['repo']['name']} {pkgobj['repo']['origin']} {pkgobj['version']['tag']}"
         t   = utils.run_shell( cmd, common_args['-v'] )
         utils.check_results( t, f"ERROR: Failed to umount the repo: {pkgobj['repo']['name']}, 'umount', 'get-error-msg', common_args['--scm']" )
         
@@ -70,7 +73,7 @@ def run( common_args, cmd_argv ):
             sys.exit( f"ERROR: the {PACKAGE_FILE()} file is corrupt - there is no parent directory for the package" )
 
         # Remove the package
-        cmd = f"evie.py --scm {pkgobj['repo']['type']} rm -p {pkgobj['pkgname']} {branch_opt} {pkgobj['parentDir']} {pkgobj['repo']['name']} {pkgobj['repo']['origin']} {pkgobj['version']['tag']}"
+        cmd = f"evie.py {vopt} --scm {pkgobj['repo']['type']} rm -p {pkgobj['pkgname']} {branch_opt} {pkgobj['parentDir']} {pkgobj['repo']['name']} {pkgobj['repo']['origin']} {pkgobj['version']['tag']}"
         t   = utils.run_shell( cmd, common_args['-v'] )
         utils.check_results( t, f"ERROR: Failed to remove the package: {pkgobj['repo']['name']}, 'rm', 'get-error-msg', common_args['--scm']" )
         

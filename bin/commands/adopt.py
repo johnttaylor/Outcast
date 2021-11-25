@@ -33,7 +33,7 @@ Options:
                      name
     -b BRANCH        Specifies the source branch in <repo>.  The use/need
                      of this option in dependent on the <repo> SCM type.
-    --nowarn         Ignores warning
+    --nowarn         Ignores warnings
     -h, --help       Display help for this command
 
 Common Options:
@@ -64,6 +64,9 @@ def display_summary():
 #------------------------------------------------------------------------------
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
+
+    # Verbose option for subcommand
+    vopt = ' -v ' if common_args['-v'] else ''
 
     # Default Package name
     pkg = args['<repo>']
@@ -101,22 +104,29 @@ def run( common_args, cmd_argv ):
     # 
     if ( args['foreign'] ):
         # Copy the FO package
-        cmd = f"evie.py --scm {common_args['--scm']} copy -p {pkg} {branch_opt} {args['<dst>']} {args['<repo>']} {args['<origin>']} {args['<id>']}"
+        cmd = f"evie.py {vopt} --scm {common_args['--scm']} copy -p {pkg} {branch_opt} {args['<dst>']} {args['<repo>']} {args['<origin>']} {args['<id>']}"
         t   = utils.run_shell( cmd, common_args['-v'] )
         utils.check_results( t, f"ERROR: Failed to make a copy of the repo: {args['<repo>']}", 'copy', 'get-error-msg', common_args['--scm']  )
 
         # update the package.json file
         dst_pkg_info    = os.path.join( args['<dst>'], pkg, PACKAGE_INFO_DIR() )
-        incoming_semver = utils.get_adopted_semver( dst_pkg_info, args['--semver'] )
+        incoming_semver = utils.get_adopted_semver( dst_pkg_info, args['--semver'], pkg, not args['--nowarn'] )
         d = utils.json_create_dep_entry( pkg, "foreign", args['<dst>'], dt_string, incoming_semver, args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
 
-        # Check for cyclical deps
-        if ( check_cyclical_deps( json_dict, d, args) == False ):
-            # Remove the package
-            cmd = f"evie.py --scm {d['repo']['type']} rm -p {d['pkgname']} {branch_opt} {d['parentDir']} {d['repo']['name']} {d['repo']['origin']} {d['version']['tag']}"
-            t   = utils.run_shell( cmd, common_args['-v'] )
-            utils.check_results( t, f"ERROR: Failed to remove the package: {d['repo']['name']}, 'rm', 'get-error-msg', common_args['--scm']" )
-            sys.exit("Please check/reconcile your SCM/Repo state because the adoption was 'reverted'" )
+        # Verify there is package file for package being adopted
+        if ( check_for_package_file( d, args ) ):
+
+            # Check for cyclical deps
+            if ( check_cyclical_deps( json_dict, d, args) == False ):
+                # Remove the package
+                cmd = f"evie.py {vopt} --scm {d['repo']['type']} rm -p {d['pkgname']} {branch_opt} {d['parentDir']} {d['repo']['name']} {d['repo']['origin']} {d['version']['tag']}"
+                t   = utils.run_shell( cmd, common_args['-v'] )
+                utils.check_results( t, f"ERROR: Failed to remove the package: {d['repo']['name']}, 'rm', 'get-error-msg', common_args['--scm']" )
+            
+                # Display parting message (if there is one)
+                print("Adoption was 'reverted'")
+                utils.display_scm_message( 'rm', 'get-success-msg', common_args['--scm'] )
+                sys.exit(1)
 
         # Save changes
         utils.json_update_package_file_with_new_dep_entry( json_dict, d, args['--weak'] )
@@ -129,22 +139,30 @@ def run( common_args, cmd_argv ):
     # 
     elif ( args['readonly'] ):
         # Mount the RO package
-        cmd = f"evie.py --scm {common_args['--scm']} mount -p {pkg} {branch_opt} {args['<dst>']} {args['<repo>']} {args['<origin>']} {args['<id>']}"
+        cmd = f"evie.py {vopt} --scm {common_args['--scm']} mount -p {pkg} {branch_opt} {args['<dst>']} {args['<repo>']} {args['<origin>']} {args['<id>']}"
         t   = utils.run_shell( cmd, common_args['-v'] )
         utils.check_results( t, f"ERROR: Failed to mount the repo: {args['<repo>']}", 'mount', 'get-error-msg', common_args['--scm'] )
 
         # update the package.json file
         dst_pkg_info    = os.path.join( args['<dst>'], pkg, PACKAGE_INFO_DIR() )
-        incoming_semver = utils.get_adopted_semver( dst_pkg_info, args['--semver'] )
+        incoming_semver = utils.get_adopted_semver( dst_pkg_info, args['--semver'], pkg, not args['--nowarn'] )
         d = utils.json_create_dep_entry( pkg, "readonly", args['<dst>'], dt_string, incoming_semver, args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
 
-        # Check for cyclical deps
-        if ( check_cyclical_deps( json_dict, d, args) == False ):
-            # Remove the package
-            cmd = f"evie.py --scm {d['repo']['type']} umount -p {d['pkgname']} {branch_opt} {d['parentDir']} {d['repo']['name']} {d['repo']['origin']} {d['version']['tag']}"
-            t   = utils.run_shell( cmd, common_args['-v'] )
-            utils.check_results( t, f"ERROR: Failed to umount the repo: {d['repo']['name']}, 'umount', 'get-error-msg', common_args['--scm']" )
-            sys.exit("Please check/reconcile your SCM/Repo state because the adoption was 'reverted'" )
+        # Verify there is package file for package being adopted
+        if ( check_for_package_file( d, args ) ):
+
+            # Check for cyclical deps
+            if ( check_cyclical_deps( json_dict, d, args) == False ):
+                # Remove the package
+                cmd = f"evie.py {vopt} --scm {d['repo']['type']} umount -p {d['pkgname']} {branch_opt} {d['parentDir']} {d['repo']['name']} {d['repo']['origin']} {d['version']['tag']}"
+                t   = utils.run_shell( cmd, common_args['-v'] )
+                utils.check_results( t, f"ERROR: Failed to umount the repo: {d['repo']['name']}, 'umount', 'get-error-msg', common_args['--scm']" )
+
+                # Display parting message (if there is one)
+                print("Adoption was 'reverted'")
+                utils.display_scm_message( 'umount', 'get-success-msg', common_args['--scm'] )
+                sys.exit(1)
+
 
         # Save changes
         utils.json_update_package_file_with_new_dep_entry( json_dict, d, args['--weak'] )
@@ -161,7 +179,7 @@ def run( common_args, cmd_argv ):
     else:
         # Get a temporary copy of the OV package
         tmpdst = os.path.join( PACKAGE_INFO_DIR(), TEMP_DIR_NAME() )
-        cmd = f"evie.py --scm {common_args['--scm']} copy --force -p {pkg} {branch_opt} {tmpdst} {args['<repo>']} {args['<origin>']} {args['<id>']}"
+        cmd = f"evie.py {vopt} --scm {common_args['--scm']} copy --force -p {pkg} {branch_opt} {tmpdst} {args['<repo>']} {args['<origin>']} {args['<id>']}"
         t   = utils.run_shell( cmd, common_args['-v'] )
         utils.check_results( t, f"ERROR: Failed to make a copy of the repo: {args['<repo>']}", 'copy', 'get-error-msg', common_args['--scm']  )
 
@@ -183,23 +201,32 @@ def run( common_args, cmd_argv ):
         # Copy the adoptee's package info directory
         utils.copy_pkg_info_dir( dst_pkg_info, src_pkg_info )
 
+        # Create the dependentcy entry for the adopted package
+        incoming_semver = utils.get_adopted_semver( dst_pkg_info, args['--semver'], pkg, not args['--nowarn'] )
+        d = utils.json_create_dep_entry( pkg, "overlay", args['<dst>'], dt_string, incoming_semver, args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
+
+        # Check for cyclical deps
+        if ( check_cyclical_deps( json_dict, d, args) == False ):
+            # Remove the the package from the overlaid directory
+            utils.remove_tree( dst_pkg )
+            sys.exit("Adoption was 'reverted'")
+
+
         # Copy the adoptee's extra info directories
         utils.copy_extra_dirs( dst_pkg, src_pkg )
 
         # Get list of directories to copy/overlay
         dirs = utils.get_owned_dirs( os.path.join( tmpdst, pkg ), os.path.join( tmpdst, pkg, PACKAGE_INFO_DIR()), os.path.join( tmpdst, pkg, OVERLAY_PKGS_DIR()) )
         utils.save_dirs_list_file( dirs, path=src_pkg_info )
-        for d in dirs:
-            src = os.path.join( src_pkg, d )
-            dst = os.path.join( PACKAGE_ROOT(), d )
+        for dir in dirs:
+            src = os.path.join( src_pkg, dir )
+            dst = os.path.join( PACKAGE_ROOT(), dir )
             utils.copy_files( src, dst )
 
         # Clean-up
         utils.remove_tree( tmpdst )
-
-        # update the package.json file
-        incoming_semver = utils.get_adopted_semver( dst_pkg_info, args['--semver'] )
-        d = utils.json_create_dep_entry( pkg, "overlay", args['<dst>'], dt_string, incoming_semver, args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
+        
+        # Save changes
         utils.json_update_package_file_with_new_dep_entry( json_dict, d, args['--weak'] )
         print( f"Package - {pkg} - adopted as an OVERLAY package. Remember to add the new files to your SCM" )
 
@@ -214,14 +241,20 @@ def check_cyclical_deps( json_dict, dep_pkg, args):
 
     if ( len(cyc_weak) > 0 and args['--nowarn'] == False ):
         print( f"Warning: One or more cyclical WEAK dependencies would be created with the adoption of: {dep_pkg['pkgname']}" )
-        print_dep_list(cyc_strong)
+        print_dep_list(cyc_weak)
         inp = input( "Do you wish to continue? (Y/n)" )
-        if ( not 'y' in input.lower() ):
+        if ( not 'y' in inp.lower() ):
             return False
 
     return True
 
-        
+def check_for_package_file( dep_pkg, args ):
+    # Get Dependencies info
+    if ( None == utils.load_dependent_package_file( dep_pkg ) and not args['--nowar'] ):
+        print( f"Warning: Package = {dep_pkg['pkgname']} does NOT have {PACKAGE_FILE()} file.  Cannot verify dependencies" )
+        return False
+    return True
+
 def print_dep_list( deplist ):
     for d in deplist:
         print( json.dumps(d, indent=2) )

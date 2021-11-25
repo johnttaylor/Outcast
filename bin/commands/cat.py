@@ -59,7 +59,7 @@ def run( common_args, cmd_argv ):
         else:
             if ( pkgobj['parentDir'] == None ):
                 sys.exit( f"ERROR: the {PACKAGE_FILE()} file is corrupt. There is no parent directory for the package: {args['<adoptedpkg>']}" )
-            json_dict = utils.cat_package_file( path=os.path.join( pkgobj['parentDir'], args['<adoptedpkg>'], PACKAGE_INFO_DIR() ) )
+            json_dict = utils.cat_package_file( int(args['--indent']), path=os.path.join( pkgobj['parentDir'], args['<adoptedpkg>'], PACKAGE_INFO_DIR() ) )
             if ( json_dict == None ):
                 sys.exit( f"ERROR: No package information is available for the Readonly/Foreign package: {args['<adoptedpkg>']}" )
 

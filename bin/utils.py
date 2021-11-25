@@ -166,8 +166,8 @@ def _handleRemoveReadonly(func, path, exc):
       raise   
   
 # This function returns true the root the primary repository
-def find_root( primary_scm_tool, verobse ):
-    # Note: Running the SCM command creates a nested run_shell scenario - it only works if 'verbose' is turned off (not sure why!!!)
+def find_root( primary_scm_tool, verbose ):
+    # Note: Running the SCM command creates a nested run_shell scenario - it only works if 'verbose' is turned off (because the 'verbose' output gets mixed in when the git command's output)
     cmd = f'evie.py --scm {primary_scm_tool} findroot'
     t   = run_shell( cmd, False )
     check_results( t, "ERROR: Failed find the root of the primary/local Repository" )
@@ -205,14 +205,6 @@ def delete_directory_files( dir_to_delete ):
     except:
         pass
 
-# This function returns true the root the primary repository
-def find_root( primary_scm_tool, verobse ):
-    # Note: Running the SCM command creates a nested run_shell scenario - it only works if 'verbose' is turned off (not sure why!!!)
-    cmd = f'evie.py --scm {primary_scm_tool} findroot'
-    t   = run_shell( cmd, False )
-    check_results( t, "ERROR: Failed find the root of the primary/local Repository" )
-    return t[1].strip()
-        
 #-----------------------------------------------------------------------------
 # return None if not able to load the file
 def load_package_file( path=PACKAGE_INFO_DIR(), file=PACKAGE_FILE()):
@@ -257,8 +249,8 @@ def cat_package_file( indent=2, path=PACKAGE_INFO_DIR(), file=PACKAGE_FILE() ):
             od = collections.OrderedDict(sorted(json_dict.items()))
             print( json.dumps( od, indent=indent ) )
             return json_dict
-    except:
-        return None
+    except Exception as e:
+        sys.exit( f"ERROR: Corrupt package file - {f} ({e})" )
 
 
 def json_get_dep_package( dep_list, package_to_find ):
@@ -628,13 +620,17 @@ def get_extra_dirs( src_package_root ):
     return json_get_package_extra_dirs( package_json )
 
 #-----------------------------------------------------------------------------
-def get_adopted_semver( src_pkg_info, default_return_value ):
+def get_adopted_semver( src_pkg_info, default_return_value, pkgname, warn_nover ):
     package_json = load_package_file( path=src_pkg_info )
     current      = json_get_current_version( package_json )
+    result       = default_return_value
     try:
-        return current['version']
+        result = current['version']
     except:
-        return default_return_value
+        pass
+
+    if ( result == None and warn_nover ):
+        print( f"Warning: No semantic version was specified/available for the adoptee package: {pkgname}" )
     
 #-----------------------------------------------------------------------------
 # Returns a tuple: (<strongList>, <weakList>), lists will be empty if no cyclical deps
@@ -661,6 +657,67 @@ def check_cyclical_deps( mypkg_name, pkgobj, suppress_warnings=False, file=PACKA
             cyc_weak.append( d )
 
     return(cyc_strong, cyc_weak)
+
+
+#-----------------------------------------------------------------------------
+def build_vernum( m, n, p, pre=None ):
+    ver = "{}.{}.{}".format(m,n,p)
+    if ( pre != None and pre != ''):
+        ver = "{}-{}".format(ver,pre)
+       
+    return ver
+
+def parse_vernum( string ):
+    pre = None
+    t   = string.split('.')
+    if ( len(t) < 3 or len(t) > 3 ):
+        exit( "ERROR: Malformed version number: [{}].".format( string ) )
+        
+    # Parse pre-release (if it exists)
+    t2 = t[2].split('-')
+    if ( len(t2) == 2 ):
+        pre  = t2[1]
+        t[2] = t2[0]
+    elif ( len(t2) > 2 ):
+        exit( "ERROR: Malformed version number (prerelease id): [{}]".format( string ) )
+    
+    
+    return (t[0], t[1], t[2], pre)
+    
+
+def is_semver_compatible( older, newer ):
+
+    older_major, older_minor, older_patch, older_pre = parse_vernum( older )
+    newer_major, newer_minor, newer_patch, newer_pre = parse_vernum( newer )
+    
+    # Compare: Major
+    if ( older_major != newer_major ):
+        return False
+    
+    # Compare: Minor
+    if ( older_minor > newer_minor ):
+        return False
+    
+    # Compare: Patch
+    if ( (older_minor == newer_minor) and (older_patch > newer_patch) ):
+        return False
+
+    # Compare: Pre-release fields
+    if ( (older_minor == newer_minor) and (older_patch == newer_patch) ):
+        
+        # Pre-release ALWAYS has less precendence than a 'normal' release
+        if ( newer_pre != None ):
+            if ( older_pre == None ):
+                return false
+ 
+            # TODO: Currently only support simple 'string compare' for the prerelease field
+            if ( older_pre > newer_pre ):
+                return False
+      
+    # If I get here - the versions are compatible
+    return True
+
+
 
 
 #-----------------------------------------------------------------------------
@@ -947,36 +1004,6 @@ def remove_from_list( item, l ):
     if ( item in l ):
         l.remove(item)
         
-#-----------------------------------------------------------------------------
-def parse_vernum( string ):
-    pre = None
-    t   = string.split('.')
-    if ( len(t) < 3 or len(t) > 3 ):
-        exit( "ERROR: Malformed version number: [{}].".format( string ) )
-        
-    # Parse pre-release (if it exists)
-    t2 = t[2].split('-')
-    if ( len(t2) == 2 ):
-        pre  = t2[1]
-        t[2] = t2[0]
-    elif ( len(t2) > 2 ):
-        exit( "ERROR: Malformed version number (prerelease id): [{}]".format( string ) )
-    
-    
-    return (t[0], t[1], t[2], pre)
-    
-def parse_package_name( string ):
-    # Returns a tuple: (pkg, branch, (maj.min.pat[-pre]), original_string )
-    pkg, branch, ver = string.split('-',2) 
-    return (pkg, branch, ver, string )
-
-def build_vernum( m, n, p, pre=None ):
-    ver = "{}.{}.{}".format(m,n,p)
-    if ( pre != None and pre != ''):
-        ver = "{}-{}".format(ver,pre)
-       
-    return ver
-
 def numerically_compare_versions( ver1, ver2 ): # Returns -1, 0, 1 when ver1<ver2, ver1==ver2, ver1>ver2 respectively
     ver1_major, ver1_minor, ver1_patch, ver1_pre = parse_vernum( ver1 )
     ver2_major, ver2_minor, ver2_patch, ver2_pre = parse_vernum( ver2 )
