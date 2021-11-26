@@ -233,7 +233,7 @@ def run( common_args, cmd_argv ):
 
 def check_cyclical_deps( json_dict, dep_pkg, args):
     # Enforce NO cyclical  deps
-    cyc_strong, cyc_weak = utils.check_cyclical_deps( json_dict['info']['pkgname'], dep_pkg, suppress_warnings=args['--nowarn'])
+    cyc_strong, cyc_weak = utils.check_cyclical_deps( utils.json_get_package_name(json_dict), dep_pkg, suppress_warnings=args['--nowarn'])
     if ( len(cyc_strong) > 0 ):
         print( f"ERROR: One or more cyclical dependencies would be created with the adoption of: {dep_pkg['pkgname']}" )
         print_dep_list(cyc_strong)

@@ -207,15 +207,17 @@ def delete_directory_files( dir_to_delete ):
 
 #-----------------------------------------------------------------------------
 # return None if not able to load the file
-def load_package_file( path=PACKAGE_INFO_DIR(), file=PACKAGE_FILE()):
+def load_package_file( path=PACKAGE_INFO_DIR(), file=PACKAGE_FILE(), does_file_exist=None):
     f = os.path.join(  path, file )
 
     try:
         with open(f) as f:
             result = check_package_file( json.load( f ) )
+            does_file_exist = True
             return result
 
     except Exception as e:
+        does_file_exist = True
         return check_package_file( {} )
 
 def load_dependent_package_file( pkgobj, file=PACKAGE_FILE() ):
@@ -294,7 +296,7 @@ def json_find_dependency( json_dictionary, pkgname ):
 def get_dependency_list( json_dict, include_immediate=True, include_weak=True ):
    # Get immeidate deps
     pkgs = []
-    if ( include_immediate):
+    if ( include_immediate ):
         for p in json_dict['dependencies']['strong']:
             p['depType'] = 'S'
             pkgs.append( p )
@@ -454,10 +456,17 @@ def json_get_published( json_dict ):
 def json_get_current_version( json_dict ):
     return json_dict['publish']['current']
 
+# Returns the current published version
+def json_get_current_semver( json_dict ):
+    return json_dict['publish']['current']['version']
+
 # Returns the published history
 def json_get_version_history( json_dict ):
     return json_dict['publish']['history']
 
+# returns the package's name
+def json_get_package_name( json_dict ):
+    return json_dict['info']['pkgname']
 
 # Performs a basic check of the file contents and/or ensure that a minimal number of key/value pairs exist
 def check_package_file( json_dict_in ):
@@ -626,12 +635,14 @@ def get_adopted_semver( src_pkg_info, default_return_value, pkgname, warn_nover 
     result       = default_return_value
     try:
         result = current['version']
-    except:
+    except Exception as e:
         pass
 
     if ( result == None and warn_nover ):
         print( f"Warning: No semantic version was specified/available for the adoptee package: {pkgname}" )
     
+    return result
+
 #-----------------------------------------------------------------------------
 # Returns a tuple: (<strongList>, <weakList>), lists will be empty if no cyclical deps
 def check_cyclical_deps( mypkg_name, pkgobj, suppress_warnings=False, file=PACKAGE_FILE() ):
@@ -716,6 +727,89 @@ def is_semver_compatible( older, newer ):
       
     # If I get here - the versions are compatible
     return True
+
+#-----------------------------------------------------------------------------
+class Node(object):
+    def __init__(self, data ):
+        self.data     = data
+        self.nodenum  = 0
+        self.parent   = None
+        self.children = []
+
+    def __repr__(self, level=0):
+        ret = "{} {}-{}\n".format( "  "*level, self.get_pkgname(), self.get_semver() )
+        for child in self.children:
+            ret += child.__repr__(level+1)
+        return ret
+    
+    def add_child_node( self, obj ):
+        self.children.append( obj )
+        obj.parent = self
+        
+    def remove_child_node( self, obj ):
+        self.children.remove(obj)
+        obj.parent = None
+            
+    def remove_all_children_nodes( self ):
+        for c in self.children:
+            c.parent = None
+        self.children = []
+        
+    def add_child_data( self, data ):
+        c = Node(data)
+        self.add_child_node( c )
+        
+    def add_children_nodes( self, list ):
+        for o in list:
+            self.add_child_node( o )
+            
+    def add_children_data( self, list ):
+        for d in list:
+            self.add_child_data( d )
+            
+    def get_children( self ):
+        return self.children    
+        
+    def get_data( self ):
+        return self.data
+            
+    def set_data( self, newdata ):
+        self.data = newdata
+        
+    def set_nodenum( self, num ):
+        self.nodenum = num
+        
+    def get_nodenum( self ):
+        return self.nodenum
+        
+    def get_pkgname( self ):
+        return json_get_package_name( self.data )
+
+    def get_semver( self ):
+        return json_get_current_semver( self.data )
+    
+    def set_node_number_by_height( self, num ):
+        queue = deque()
+        queue.append( self )
+        while( len(queue) > 0 ):
+            node         = queue.popleft()
+            node.nodenum = num
+            num         += 1
+            for c in node.children:
+                queue.append(c)
+    
+    def clone_sub_tree_from( self, src ):
+        self.data     = copy.deepcopy(src.data)
+        self.nodenum  = 0
+        self.children = []
+        self._clone_children_from( src )
+        
+            
+    def _clone_children_from( self, src ):
+        for x in src.children:
+            newnode = Node(None)
+            self.add_child_node( newnode )
+            newnode.clone_sub_tree_from( x )
 
 
 
@@ -886,84 +980,6 @@ def walk_clean_empty_dirs( path ):
             if ( ex.errno == errno.ENOTEMPTY ):
                 pass
 
-#-----------------------------------------------------------------------------
-class Node(object):
-    def __init__(self, data ):
-        self.data     = data
-        self.nodenum  = 0
-        self.parent   = None
-        self.children = []
-
-    def __repr__(self, level=0):
-        ret = "{} {}\n".format( "  "*level, repr(self.data) )
-        for child in self.children:
-            ret += child.__repr__(level+1)
-        return ret
-    
-       
-    def add_child_node( self, obj ):
-        self.children.append( obj )
-        obj.parent = self
-        
-    def remove_child_node( self, obj ):
-        self.children.remove(obj)
-        obj.parent = None
-            
-    def remove_all_children_nodes( self ):
-        for c in self.children:
-            c.parent = None
-        self.children = []
-        
-    def add_child_data( self, data ):
-        c = Node(data)
-        self.add_child_node( c )
-        
-    def add_children_nodes( self, list ):
-        for o in list:
-            self.add_child_node( o )
-            
-    def add_children_data( self, list ):
-        for d in list:
-            self.add_child_data( d )
-            
-    def get_children( self ):
-        return self.children    
-        
-    def get_data( self ):
-        return self.data
-            
-    def set_data( self, newdata ):
-        self.data = newdata
-        
-    def set_nodenum( self, num ):
-        self.nodenum = num
-        
-    def get_nodenum( self ):
-        return self.nodenum
-        
-
-    def set_node_number_by_height( self, num ):
-        queue = deque()
-        queue.append( self )
-        while( len(queue) > 0 ):
-            node         = queue.popleft()
-            node.nodenum = num
-            num         += 1
-            for c in node.children:
-                queue.append(c)
-    
-    def clone_sub_tree_from( self, src ):
-        self.data     = copy.deepcopy(src.data)
-        self.nodenum  = 0
-        self.children = []
-        self._clone_children_from( src )
-        
-            
-    def _clone_children_from( self, src ):
-        for x in src.children:
-            newnode = Node(None)
-            self.add_child_node( newnode )
-            newnode.clone_sub_tree_from( x )
         
 def flatten_tree_to_list( root_node, list_to_append_to ):
     for cnode in root_node.get_children():
