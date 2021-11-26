@@ -16,7 +16,8 @@ Arguments:
     <pkg>               Name of package to move
 
 Options:
-    --noweak            Skip checking weak dependencies
+    --noweak            Skip processing/checking weak dependencies
+    --nostrong          Skip processing/checking strong dependencies
     -h, --help          Display help for this command
 
 Common Options:
@@ -38,8 +39,10 @@ def display_summary():
 #------------------------------------------------------------------------------
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
-    exit_code = 0;
 
+    # Housekeeping
+    exit_code = 0;
+    
     # Load my package info
     json_dict = utils.load_package_file()
 
@@ -48,9 +51,34 @@ def run( common_args, cmd_argv ):
         print( f"Checking dependencies for package: {utils.json_get_package_name(json_dict)}" )
 
         # Build dependency tree. 
-        tree = utils.Node( json_dict )
-        build_tree( tree, json_dict )
-        print( tree )
+        root = utils.Node( (json_dict, "ROOT") )
+        build_tree( root, json_dict, not args['--nostrong'], not args['--noweak'] )
+        print( root )
+
+        # Get generation lists
+        children = root.get_children()
+        grand_children = []
+        for c in children:
+            grand_children.extend( c.get_children() )
+
+        # Missing deps
+        if ( not args['--noweak'] ):
+            missing = check_missing( root, children, grand_children, 'W' )
+            print( len(missing) )
+            print( missing )
+
+        if ( not args['--noweak'] ):
+            missing = check_missing( root, children, grand_children, 'S' )
+            print( len(missing) )
+            print( missing )
+
+def check_missing( tree, child_list, grand_child_list, dep_type ):
+    missing = []
+    for gc in grand_child_list:
+        if ( gc.get_dep_type() == dep_type ):
+            if ( not is_in_list(gc, child_list ) ):
+                missing.append( gc.get_path_to_me() )
+    return missing                
 
         # Compatible check: for weak and strong
         # for each child
@@ -171,9 +199,9 @@ def run( common_args, cmd_argv ):
 
 def is_in_list( needle, haystack ):
     for s in haystack:
-        if ( s['pkgname'] == needle['pkgname'] ):
-            return (needle, s )
-    return ( None, None )
+        if ( s.get_pkgname() == needle.get_pkgname() ):
+            return True
+    return False
 
     
 def cat_child_pacakge( pkgname ):
@@ -184,18 +212,23 @@ def cat_child_pacakge( pkgname ):
         print(t[1])
 
 
-def build_tree( node, json_dict ):
-    children = utils.get_dependency_list( json_dict )
-    if ( len(children) > 0 ):
+def build_tree( node, json_dict, include_strong=True, include_weak=True ):
+    if ( json_dict != None ):
+        children = utils.get_dependency_list( json_dict )
         for c in children:
-            dep_dict = utils.load_dependent_package_file( c )
-            if ( utils.json_get_package_name(dep_dict) != None ):
-                node.add_child_data( dep_dict ) 
+            if ( (c['depType'] == 'S' and include_strong) or (c['depType'] == 'W' and include_weak) ):
+                dep_dict = utils.load_dependent_package_file( c )
+                if ( utils.json_get_package_name(dep_dict) == None ):
+                    dep_dict = None
+                cnode = node.add_child_data( (dep_dict, c['depType'], c) ) 
+                build_tree( cnode, dep_dict, include_strong, include_weak )
+                    
 
-    for cnode in node.get_children():
-        grand_children = utils.get_dependency_list( cnode.get_data() )
-        if ( len(grand_children) > 0 ):
-            for gc in grand_children:
-                dep_dict = utils.load_dependent_package_file( gc )
-                if ( utils.json_get_package_name(dep_dict) != None ):
-                    cnode.add_child_data( dep_dict ) 
+    #for cnode in node.get_children():
+    #    build_tree( cnode, cnode.get_data()[0], include_strong, include_weak )
+    #    #grand_children = utils.get_dependency_list( cnode.get_data() )
+    #    #if ( len(grand_children) > 0 ):
+    #    #    for gc in grand_children:
+    #    #        dep_dict = utils.load_dependent_package_file( gc )
+    #    #        if ( utils.json_get_package_name(dep_dict) != None ):
+    #    #            cnode.add_child_data( dep_dict ) 

@@ -526,7 +526,8 @@ def load_dirs_list_file( path=PACKAGE_INFO_DIR(), file=PKG_DIRS_FILE() ):
                 result.append( standardize_dir_sep(l.strip()) )
             return result
 
-    except:
+    except Exception as e:
+        print( e )
         return None
 
 def save_dirs_list_file( list_of_dirs, path=PACKAGE_INFO_DIR(), file=PKG_DIRS_FILE() ):
@@ -586,10 +587,15 @@ def get_adopted_overlaid_dirs_list( list_of_dep_pkgs, dir_list_file_root=OVERLAY
             if ( d != None ):
                 result.extend( d )
     except Exception as e:
-        #print(f'{e}')
         pass
 
     return result
+
+# gets a list of directories owned by a package being adopted
+def get_adoptee_owned_dirs(  path_to_package_file=PACKAGE_INFO_DIR(), dir_list_file_root=OVERLAY_PKGS_DIR()  ):
+    package_json = load_package_file( path_to_package_file);
+    dirs         = load_overlaid_dirs_list_file( json_get_package_name(package_json), dir_list_file_root )
+    return dirs
 
 # Gets list of a packages owned directories
 def get_owned_dirs( pkgroot, path_to_package_file=PACKAGE_INFO_DIR(), dir_list_file_root=OVERLAY_PKGS_DIR() ):
@@ -737,7 +743,7 @@ class Node(object):
         self.children = []
 
     def __repr__(self, level=0):
-        ret = "{} {}-{}\n".format( "  "*level, self.get_pkgname(), self.get_semver() )
+        ret = "{}{}-{} ({})\n".format( "  "*level, self.get_pkgname(), self.get_semver(), self.get_dep_type() )
         for child in self.children:
             ret += child.__repr__(level+1)
         return ret
@@ -758,6 +764,7 @@ class Node(object):
     def add_child_data( self, data ):
         c = Node(data)
         self.add_child_node( c )
+        return c
         
     def add_children_nodes( self, list ):
         for o in list:
@@ -782,12 +789,24 @@ class Node(object):
     def get_nodenum( self ):
         return self.nodenum
         
+    def get_dep_type( self ):
+        return self.data[1]
+
     def get_pkgname( self ):
-        return json_get_package_name( self.data )
+        return json_get_package_name( self.data[0] ) if self.data[0] != None else self.data[2]['pkgname']
 
     def get_semver( self ):
-        return json_get_current_semver( self.data )
+        return json_get_current_semver( self.data[0] ) if self.data[0] != None else self.data[2]['version']['semanticVersion']
     
+    def get_path_to_me( self ):
+        path = deque()
+        path.append( self )
+        parent = self.parent 
+        while( parent != None ):
+            path.appendleft( parent )
+            parent = parent.parent
+        return path
+
     def set_node_number_by_height( self, num ):
         queue = deque()
         queue.append( self )

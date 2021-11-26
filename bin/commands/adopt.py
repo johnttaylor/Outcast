@@ -201,7 +201,7 @@ def run( common_args, cmd_argv ):
         # Copy the adoptee's package info directory
         utils.copy_pkg_info_dir( dst_pkg_info, src_pkg_info )
 
-        # Create the dependentcy entry for the adopted package
+        # Create the dependency entry for the adopted package
         incoming_semver = utils.get_adopted_semver( dst_pkg_info, args['--semver'], pkg, not args['--nowarn'] )
         d = utils.json_create_dep_entry( pkg, "overlay", args['<dst>'], dt_string, incoming_semver, args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
 
@@ -216,8 +216,7 @@ def run( common_args, cmd_argv ):
         utils.copy_extra_dirs( dst_pkg, src_pkg )
 
         # Get list of directories to copy/overlay
-        dirs = utils.get_owned_dirs( os.path.join( tmpdst, pkg ), os.path.join( tmpdst, pkg, PACKAGE_INFO_DIR()), os.path.join( tmpdst, pkg, OVERLAY_PKGS_DIR()) )
-        utils.save_dirs_list_file( dirs, path=src_pkg_info )
+        dirs = utils.get_adoptee_owned_dirs( os.path.join( tmpdst, pkg, PACKAGE_INFO_DIR()), tmpdst )
         for dir in dirs:
             src = os.path.join( src_pkg, dir )
             dst = os.path.join( PACKAGE_ROOT(), dir )
