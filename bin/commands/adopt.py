@@ -217,10 +217,11 @@ def run( common_args, cmd_argv ):
 
         # Get list of directories to copy/overlay
         dirs = utils.get_adoptee_owned_dirs( os.path.join( tmpdst, pkg, PACKAGE_INFO_DIR()), tmpdst )
-        for dir in dirs:
-            src = os.path.join( src_pkg, dir )
-            dst = os.path.join( PACKAGE_ROOT(), dir )
-            utils.copy_files( src, dst )
+        if ( dirs != None ):
+            for dir in dirs:
+                src = os.path.join( src_pkg, dir )
+                dst = os.path.join( PACKAGE_ROOT(), dir )
+                utils.copy_files( src, dst )
 
         # Clean-up
         utils.remove_tree( tmpdst )

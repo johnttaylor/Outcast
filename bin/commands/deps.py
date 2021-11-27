@@ -2,18 +2,19 @@
  
 Checks and manages a package dependencies
 ===============================================================================
-usage: orc [common-opts] deps [options] check
-       orc [common-opts] deps [options] show <adoptedpkg>
-       orc [common-opts] deps [options] mv <pkg> 
+usage: orc [common-opts] deps [options]
+       orc [common-opts] deps [options] check
+       orc [common-opts] deps [options] ls [<adoptedpkg>]
+       orc [common-opts] deps [options] mv <adoptedpkg> 
 
 Arguments:
     check               Checks for any missing or cyclical dependencies
-    show                Displays the transitive dependencies incurred via
-                        the specified adopted package
-    mv                  Moves an existing package dependency from immeidate
+    ls                  Displays the dependencies incurred by the specified 
+                        adopted package. If no adoptedpkg is specified then the
+                        dependency tree for the current package is displayed.
+    mv                  Moves an adopted package dependency from immeidate
                         to weak and vice-versus
     <adoptedpkg>        Name of a adopted package
-    <pkg>               Name of package to move
 
 Options:
     --noweak            Skip processing/checking weak dependencies
@@ -46,155 +47,88 @@ def run( common_args, cmd_argv ):
     # Load my package info
     json_dict = utils.load_package_file()
 
-    # CHECK dependencies
+    # Build dependency tree. 
+    root = utils.Node( (json_dict, "ROOT") )
+    build_tree( root, json_dict )
+
+    # Get generation lists
+    children = root.get_children().copy()
+    grand_children = []
+    for c in children:
+        grand_children.extend( c.get_children() )
+
+    # SHOW dependencies
+    if ( args['ls'] or ( not args['ls'] and not args['check'] and not args['mv'] ) ):
+        if ( not args['<adoptedpkg>'] ):
+            print( root )
+            sys.exit( 0 )
+
+        # Filter the tree for a specific adopted package
+        for c in children:
+            if ( c.get_pkgname() != args['<adoptedpkg>'] ):
+                root.remove_child_node( c )
+        print( root )
+        sys.exit( 0 )
+
+    # MOVE a dependency
+    if ( args['mv'] ):
+        # Look up the details of the package to be moved
+        pkgobj, deptype, pkgidx = utils.json_find_dependency( json_dict, args['<adoptedpkg>']  )
+        if ( pkgobj == None ):
+            sys.exit( f"Cannot find the package - {args['<adoptedpkg>'] } - in the list of adopted packages" );
+       
+        # Remove then add the package from the deps list
+        now_is_weak = True if deptype == 'strong' else False
+        json_dict['dependencies'][deptype].pop(pkgidx)
+        utils.json_update_package_file_with_new_dep_entry( json_dict, pkgobj, now_is_weak )
+        print( f"Package - {args['<adoptedpkg>']} is now a {'weak' if now_is_weak else 'strong'} dependency " )
+        sys.exit( 0 )
+
+        # CHECK dependencies
     if ( args['check'] ):
         print( f"Checking dependencies for package: {utils.json_get_package_name(json_dict)}" )
 
-        # Build dependency tree. 
-        root = utils.Node( (json_dict, "ROOT") )
-        build_tree( root, json_dict, not args['--nostrong'], not args['--noweak'] )
-        print( root )
 
-        # Get generation lists
-        children = root.get_children()
-        grand_children = []
-        for c in children:
-            grand_children.extend( c.get_children() )
+        # Perform checks
+        missing_list   = check_missing( root, children, grand_children )
+        noncompat_list = check_compatibility( root, children, grand_children ) 
+        cyclical_list  = check_cylical( missing_list, root.get_pkgname() )
 
+        # Cyclical deps
+        if ( not args['--noweak'] ):
+            cyclical = filter_for_weak_dependency( cyclical_list )
+            print_cyclical_list( cyclical, "Warning", "weak" )
+
+        if ( not args['--nostrong'] ):
+            cyclical = filter_for_strong_dependency( cyclical_list )
+            print_cyclical_list( cyclical, "ERROR", "strong" )
+            if ( len(cyclical) > 0 ):
+                exit_code = 1
+        
         # Missing deps
         if ( not args['--noweak'] ):
-            missing = check_missing( root, children, grand_children, 'W' )
-            print( len(missing) )
-            print( missing )
+            missing = filter_for_weak_dependency( missing_list )
+            print_missing_list( missing, "Warning", "weak" )
 
+        if ( not args['--nostrong'] ):
+            missing = filter_for_strong_dependency( missing_list )
+            print_missing_list( missing, "ERROR", "strong" )
+            if ( len(missing) > 0 ):
+                exit_code = 1
+
+        # Compatible check
         if ( not args['--noweak'] ):
-            missing = check_missing( root, children, grand_children, 'S' )
-            print( len(missing) )
-            print( missing )
+            noncompat = filter_for_weak_dependency( noncompat_list )
+            print_noncompat_list( noncompat, "Warning", "weak", children )
 
-def check_missing( tree, child_list, grand_child_list, dep_type ):
-    missing = []
-    for gc in grand_child_list:
-        if ( gc.get_dep_type() == dep_type ):
-            if ( not is_in_list(gc, child_list ) ):
-                missing.append( gc.get_path_to_me() )
-    return missing                
+        if ( not args['--nostrong'] ):
+            noncompat = filter_for_strong_dependency( noncompat_list )
+            print_noncompat_list( noncompat, "ERROR", "strong", children )
+            if ( len(noncompat) > 0 ):
+                exit_code = 1
 
-        # Compatible check: for weak and strong
-        # for each child
-        #   is found in granchildren (iterate over all grandchildren)
-        #       is child compatible with grandchild?
-        #           -->error -->show dep tree to grandchild
-
-        # missing check: for weak and strong
-        # for each grandchild:
-        #   is not found in children
-        #       -->error -->show dep tree to granchild
-
-        #childern = utils.get_dependency_list( json_dict )
-        #for c in childern:
-        #    dep_dict = utils.load_dependent_package_file( c )
-        #    root.add_child_data( dep_dict ) 
-        #for cnode in node.get_children():
-        #    dep_dict = utils.load_dependent_package_file( c )
-
-        #    cdict = cnode.get_data()
-
-        #grand_childern              = []
-        #missing_weak_list           = []
-        #missing_strong_list         = []
-        #not_compatible_weak_list    = []
-        #not_compatibleg_strong_list = []
-        
-        ## Get transitive dependencies
-        #for dd in childern:
-        #    dep_dict = utils.load_dependent_package_file( dd )
-        #    dep_list = utils.get_dependency_list( dep_dict )
-        #    grand_childern.extend( dep_list )
-            
-        #    # Check for cyclical deps
-        #    for d in dep_list:
-        #        if ( d['pkgname'] == json_dict['info']['pkgname'] ):
-        #            if ( d['depType'] == 'S' ):
-        #                print( f"ERROR: Cyclical weak dependency. Transitive Package - {dd['pkgname']} - depends on: {json_dict['info']['pkgname']}" )
-        #                if ( common_args['-v'] ):
-        #                    cat_child_pacakge( dd['pkgname'] )
-        #                exit_code = 1
-        #            if ( d['depType'] == 'W' ):
-        #                print( f"Warning: Cyclical strong dependency. Transitive Package - {dd['pkgname']} - depends on: {json_dict['info']['pkgname']}" )
-        #                if ( common_args['-v'] ):
-        #                    cat_child_pacakge( dd['pkgname'] )
-
-        #        # Is the granchild account for in the childern list?
-        #        gc, c = is_in_list( d, childern )
-        #        if ( gc != None ):
-        #            # Now check for compatiblity
-        #            gc_ver = utils.json_get_dep_semver( gc )
-        #            c_ver  = utils.json_get_dep_semver( c )
-        #            if ( not utils.is_semver_compatible( gc_ver, c_ver ) ):
-        #                if ( c['depType'] == 'W' ):
-        #                    not_compatible_weak_list.append( (gc, c, gc_ver, c_ver) )
-        #                else:
-        #                    if (  gc['depType'] == 'W' ):
-        #                        not_compatible_weak_list.append( (gc, c, gc_ver, c_ver) )
-        #                    else:
-        #                        not_compatibleg_strong_list.append( (gc, c, gc_ver, c_ver) )
-        #                        exit_code = 1
-
-        #        # MISGING dependency
-        #        else:
-        #            if ( dd['depType'] == 'W' ):
-        #                missing_weak_list.append( (dd,d) )
-        #            else:
-        #                if (  d['depType'] == 'W' ):
-        #                    missing_weak_list.append( (dd,d) )
-        #                else:
-        #                    missing_strong_list.append( (dd,d) )
-        #                    exit_code = 1
-
-                    
-        ## Display missing lists
-        #if ( len(missing_weak_list) > 0 ):
-        #    for dd,d in missing_weak_list:
-        #        print(f"Warning: Missing weak dependency. Transitive Package - {dd['pkgname']} - depends on: {d['pkgname']}")
-        #        if ( common_args['-v'] ):
-        #            cat_child_pacakge( dd['pkgname'] )
-        #            print()
-        #if ( len(missing_strong_list) > 0 ):
-        #    for dd,d in missing_strong_list:
-        #        print(f"ERROR: Missing strong dependency. Transitive Package - {dd['pkgname']} - depends on: {d['pkgname']}")
-        #        if ( common_args['-v'] ):
-        #            cat_child_pacakge( dd['pkgname'] )
-        #            print()
-
-        ## Display incompatible lists
-        #if ( len(not_compatible_weak_list) > 0 ):
-        #    for (gc,c,gc_ver,c_ver) in not_compatible_weak_list:
-        #        print(f"Warning: Non-compatible weak dependency. Transitive Package - {c['pkgname']} - depends on: {gc['pkgname']}, version: {gc_ver}. HAVE version: {c_ver}") 
-        #        if ( common_args['-v'] ):
-        #            print( "NEED:" )
-        #            cat_child_pacakge( gc['pkgname'] )
-        #            print()
-        #            print( "HAVE:" )
-        #            cat_child_pacakge( c['pkgname'] )
-        #            print()
-        #if ( len(not_compatibleg_strong_list) > 0 ):
-        #    for (gc,c,gc_ver,c_ver) in not_compatibleg_strong_list:
-        #        print(f"ERROR: Non-compatible strong dependency. Transitive Package - {c['pkgname']} - depends on: {gc['pkgname']}, version: {gc_ver}. HAVE version: {c_ver}") 
-        #        if ( common_args['-v'] ):
-        #            print( "NEED:" )
-        #            cat_child_pacakge( gc['pkgname'] )
-        #            print()
-        #            print( "HAVE:" )
-        #            cat_child_pacakge( c['pkgname'] )
-        #            print()
-
-        #if ( exit_code != 0 ):
-        #    sys.exit( exit_code )
-
-        #print("All dependencies checks completed.")
-        #sys.exit( 0 )
-
+        print("All dependency checks completed." )
+        sys.exit( exit_code )
 
 
 def is_in_list( needle, haystack ):
@@ -212,23 +146,101 @@ def cat_child_pacakge( pkgname ):
         print(t[1])
 
 
-def build_tree( node, json_dict, include_strong=True, include_weak=True ):
+def build_tree( node, json_dict ):
     if ( json_dict != None ):
         children = utils.get_dependency_list( json_dict )
         for c in children:
-            if ( (c['depType'] == 'S' and include_strong) or (c['depType'] == 'W' and include_weak) ):
-                dep_dict = utils.load_dependent_package_file( c )
-                if ( utils.json_get_package_name(dep_dict) == None ):
-                    dep_dict = None
-                cnode = node.add_child_data( (dep_dict, c['depType'], c) ) 
-                build_tree( cnode, dep_dict, include_strong, include_weak )
+            dep_dict = utils.load_dependent_package_file( c )
+            if ( utils.json_get_package_name(dep_dict) == None ):
+                dep_dict = None
+            cnode = node.add_child_data( (dep_dict, c['depType'], c) ) 
+            build_tree( cnode, dep_dict )
                     
 
-    #for cnode in node.get_children():
-    #    build_tree( cnode, cnode.get_data()[0], include_strong, include_weak )
-    #    #grand_children = utils.get_dependency_list( cnode.get_data() )
-    #    #if ( len(grand_children) > 0 ):
-    #    #    for gc in grand_children:
-    #    #        dep_dict = utils.load_dependent_package_file( gc )
-    #    #        if ( utils.json_get_package_name(dep_dict) != None ):
-    #    #            cnode.add_child_data( dep_dict ) 
+def print_missing_list( list, deptype_prefix,  deptype_label ):
+    for p in list:
+        print( f"{deptype_prefix}: Missing {deptype_label} dependency: {p[-1].get_pkgname()}" )
+        print( "  PATH to dependent package:" )
+        print_path( p )
+        print()
+
+def print_path( path, level=0 ):
+    if ( len(path) > 0 and level <len(path) ):
+        node = path[level]
+        print( "{}{}-{} ({})".format( "  "*(level+2), node.get_pkgname(), node.get_semver(), node.get_dep_type() ) )
+        print_path( path, level+1 )
+
+def check_missing( tree, child_list, grand_child_list ):
+    missing = []
+    for gc in grand_child_list:
+        if ( not is_in_list(gc, child_list ) ):
+            missing.append( gc.get_path_to_me() )
+    return missing                
+
+def print_noncompat_list( list, deptype_prefix,  deptype_label, children ):
+    for p in list:
+        print( f"{deptype_prefix}: NON-Compatible {deptype_label} dependency: {p[-1].get_pkgname()}-{p[-1].get_semver()}" )
+        have = get_child( p[-1].get_pkgname(), children )
+        print( f"  HAVE: {have.get_pkgname()}-{have.get_semver()}" )
+        print( "  PATH to dependent package:" )
+        print_path( p )
+        print()
+
+
+def print_cyclical_list( list, deptype_prefix,  deptype_label ):
+    for p in list:
+        print( f"{deptype_prefix}: Cyclical {deptype_label} dependency: {p[-1].get_pkgname()}" )
+        print( "  PATH to dependent package:" )
+        print_path( p )
+        print()
+
+def get_child( pkgname, children ):
+    for c in children:
+        if ( pkgname == c.get_pkgname() ):
+            return c
+    return None
+
+def check_compatibility( tree, child_list, grand_child_list ):
+    noncompat = []
+    for c in child_list:
+        for gc in grand_child_list:
+            if ( c.get_pkgname() == gc.get_pkgname() ):
+                if ( not utils.is_semver_compatible( gc.get_semver(), c.get_semver() ) ):
+                    noncompat.append( gc.get_path_to_me() )
+
+    return noncompat
+    
+def check_cylical( missing_list, pkgname ):
+    cyclical = []
+    for path in missing_list:
+        if ( path[-1].get_pkgname() == pkgname ):
+            cyclical.append( path )
+            missing_list.remove( path )
+
+    return cyclical
+
+def filter_for_weak_dependency( list_of_paths ):
+    filtered = []
+    if ( list_of_paths != None ):
+        for path in list_of_paths:
+            for n in path:
+                if ( n.get_dep_type() == 'W' ):
+                    filtered.append( path )
+                    break
+
+    return filtered
+
+def filter_for_strong_dependency( list_of_paths ):
+    filtered = []
+    if ( list_of_paths != None ):
+        for path in list_of_paths:
+            weak_found = False
+            for n in path:
+                if ( n.get_dep_type() == 'W' ):
+                    weak_found = True
+                    break
+            if ( not weak_found ):
+                filtered.append( path )
+
+    return filtered
+
