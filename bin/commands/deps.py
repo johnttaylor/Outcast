@@ -57,19 +57,6 @@ def run( common_args, cmd_argv ):
     for c in children:
         grand_children.extend( c.get_children() )
 
-    # SHOW dependencies
-    if ( args['ls'] or ( not args['ls'] and not args['check'] and not args['mv'] ) ):
-        if ( not args['<adoptedpkg>'] ):
-            print( root )
-            sys.exit( 0 )
-
-        # Filter the tree for a specific adopted package
-        for c in children:
-            if ( c.get_pkgname() != args['<adoptedpkg>'] ):
-                root.remove_child_node( c )
-        print( root )
-        sys.exit( 0 )
-
     # MOVE a dependency
     if ( args['mv'] ):
         # Look up the details of the package to be moved
@@ -84,10 +71,9 @@ def run( common_args, cmd_argv ):
         print( f"Package - {args['<adoptedpkg>']} is now a {'weak' if now_is_weak else 'strong'} dependency " )
         sys.exit( 0 )
 
-        # CHECK dependencies
+    # CHECK dependencies
     if ( args['check'] ):
         print( f"Checking dependencies for package: {utils.json_get_package_name(json_dict)}" )
-
 
         # Perform checks
         missing_list   = check_missing( root, children, grand_children )
@@ -131,6 +117,19 @@ def run( common_args, cmd_argv ):
         sys.exit( exit_code )
 
 
+    # SHOW dependencies
+    if ( not args['<adoptedpkg>'] ):
+        print( root )
+        sys.exit( 0 )
+
+    # Filter the tree for a specific adopted package
+    for c in children:
+        if ( c.get_pkgname() != args['<adoptedpkg>'] ):
+            root.remove_child_node( c )
+    print( root )
+    sys.exit( 0 )
+
+
 def is_in_list( needle, haystack ):
     for s in haystack:
         if ( s.get_pkgname() == needle.get_pkgname() ):
@@ -138,14 +137,6 @@ def is_in_list( needle, haystack ):
     return False
 
     
-def cat_child_pacakge( pkgname ):
-    cmd = f"orc.py cat {pkgname}"
-    t   = utils.run_shell( cmd  )
-    utils.check_results( t, "" )
-    if ( not utils.is_error( t ) ):
-        print(t[1])
-
-
 def build_tree( node, json_dict ):
     if ( json_dict != None ):
         children = utils.get_dependency_list( json_dict )
