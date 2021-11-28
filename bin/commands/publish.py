@@ -63,7 +63,7 @@ help_text = \
      package (or on change of the package's adopted-extra directories ).
 
  [5] If the package is intended to be adopted as an 'overlay' package, edit
-     (or create) the package's 'ignore-dirs.lst' file.  Populdate the file as
+     (or create) the package's 'ignore-dirs.lst' file.  Populate the file as
      needed.
      NOTE: this step only needs to be performed ONCE during the life of the 
      package (or on change of the package's ignore directories ).
@@ -78,7 +78,7 @@ help_text = \
   9  Complete the pull request process and merge the PR into its parent
      branch.
 
-[10] If the parent branch is not a 'release' branch, then propage the merged
+[10] If the parent branch is not a 'release' branch, then propagate  the merged
      changes to the 'release' branch
 
  11  Create a Tag/label - with the same semantic version information from 

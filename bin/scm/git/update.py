@@ -29,12 +29,11 @@ Notes:
 import os
 import utils
 from docopt.docopt import docopt
+import scm.update
 
-
-#---------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 def display_summary():
-    print("{:<13}{}".format( 'mount', "Updates a previously mounted SCM Repository" ))
-    
+    scm.update.display_summary()
 
 #------------------------------------------------------------------------------
 def run( common_args, cmd_argv ):

@@ -1,6 +1,6 @@
 # Short help
 def display_summary():
-    print("{:<13}{}".format( 'mount', "Updates a previously mounted SCM Repository" ))
+    print("{:<13}{}".format( 'update', "Updates a previously mounted SCM Repository" ))
     
 # DOCOPT command line definition
 USAGE = """
