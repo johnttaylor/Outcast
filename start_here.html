@@ -183,6 +183,8 @@ Error message and password prompt
 
 <li>$:/_toggle-view-button</li>
 
+<li>$:/config/RelinkOnRename</li>
+
 <li>$:/config/ViewToolbarButtons/Visibility/$:/core/ui/Buttons/clone</li>
 
 <li>$:/config/ViewToolbarButtons/Visibility/$:/core/ui/Buttons/close-others</li>
@@ -215,13 +217,23 @@ Error message and password prompt
 
 <li>$:/state/showeditpreview</li>
 
+<li>$:/state/sidebar</li>
+
+<li>$:/state/tab--1498284803</li>
+
 <li>$:/state/tab--1963855381</li>
 
 <li>$:/state/tab--2112689675</li>
 
+<li>$:/state/tab--868624678</li>
+
 <li>$:/state/tab--959111941</li>
 
 <li>$:/state/tab-1749438307</li>
+
+<li>$:/state/tab/moresidebar-401116514</li>
+
+<li>$:/state/tab/sidebar--1835078512</li>
 
 <li>$:/state/toc/Contents-Branching--242358753</li>
 
@@ -229,7 +241,25 @@ Error message and password prompt
 
 <li>$:/state/toc/Contents-Glossary--1025088837</li>
 
+<li>$:/state/toc/Contents-Glossary--242358753</li>
+
+<li>$:/state/toc/Contents-Other--242358753</li>
+
+<li>$:/state/toc/Contents-Overview--242358753</li>
+
+<li>$:/state/toc/Contents-Proof-of-Concept--242358753</li>
+
+<li>$:/state/toc/Contents-References--242358753</li>
+
+<li>$:/state/toc/Contents-Tools--242358753</li>
+
+<li>$:/state/toc/Contents/Overview-Proof-of-Concept--242358753</li>
+
+<li>$:/state/toc/Contents/Proof-of-Concept-Tools--242358753</li>
+
 <li>$:/StoryList</li>
+
+<li>$:/temp/advancedsearch</li>
 
 <li>$:/temp/info-plugin</li>
 
@@ -253,33 +283,25 @@ Error message and password prompt
 
 <li>Acknowledgements</li>
 
-<li>Basic Workflow</li>
-
-<li>Branch Log</li>
-
-<li>Branch Weight Algorithm</li>
-
-<li>Branching</li>
-
-<li>Branching Example</li>
-
-<li>Branching Rules</li>
+<li>Adopted Package</li>
 
 <li>Breaking Change</li>
 
+<li>code reuse in place</li>
+
 <li>Coding Standards</li>
 
-<li>Compiler Scripts</li>
+<li>copy-n-paste reuse</li>
 
 <li>Creating a new Package</li>
 
-<li>Creating a Visual Studio Solution for a Package</li>
-
-<li>Directories &amp; Files</li>
+<li>Detailed MCP relationships</li>
 
 <li>Environment Variables</li>
 
-<li>Export Headers File</li>
+<li>Example package.json file</li>
+
+<li>Foreign Package</li>
 
 <li>Glossary</li>
 
@@ -291,15 +313,11 @@ Error message and password prompt
 
 <li>Licensing</li>
 
-<li>Managing Dependencies</li>
-
-<li>Naming Conventions</li>
+<li>Mono-Consuming-Poly Repo (MCP)</li>
 
 <li>OO Articles</li>
 
-<li>Other</li>
-
-<li>outcast/ directory</li>
+<li>OverlayPackage</li>
 
 <li>Overview</li>
 
@@ -307,37 +325,29 @@ Error message and password prompt
 
 <li>Package Granularity</li>
 
-<li>Package Specification File</li>
+<li>Package Volatility</li>
 
-<li>Package Universe</li>
+<li>Primary Package</li>
 
-<li>Package Vault</li>
-
-<li>Packages Directory</li>
-
-<li>Permission to make symbolic links</li>
+<li>Project History</li>
 
 <li>Proof-of-Concept</li>
 
-<li>Publish Workflow</li>
+<li>Publish a Package</li>
+
+<li>Readonly Package</li>
 
 <li>References</li>
 
 <li>SDLC and Methodology</li>
 
-<li>Source Code Organization</li>
-
 <li>Tools</li>
-
-<li>Top Directory</li>
 
 <li>TopButtons</li>
 
-<li>Types Of Files</li>
+<li>What is Eden?</li>
 
-<li>Workspace Directory</li>
-
-<li>WUV Relationships</li>
+<li>Why Outcast 2.0?</li>
 
 </ul>
 </p>
@@ -553,7 +563,7 @@ body .dirtree li:last-child {
 }
 </pre>
 </div>
-<div created="20140607071109226" creator="TonGerner" leftmenu-width="230px" modified="20150320044947490" modifier="TonGerner" story-left="230px" story-width="1100px" tags="leftmenu $:/tags/Stylesheet" title="$:/_stylesheet/leftmenu-show" top-leftmenu="50px" type="text/vnd.tiddlywiki">
+<div created="20140607071109226" creator="TonGerner" leftmenu-width="230px" modified="20211010173804748" modifier="TonGerner" story-left="230px" story-width="1100px" tags="leftmenu $:/tags/Stylesheet" title="$:/_stylesheet/leftmenu-show" top-leftmenu="50px" type="text/vnd.tiddlywiki">
 <pre>/* STORY-RIVER */
 .tc-story-river {
      left: {{!!story-left}};
@@ -674,6 +684,9 @@ html .solidborders td {  border: 1px solid black; }</pre>
 &lt;/$button&gt;
 &lt;/$reveal&gt;
 </pre>
+</div>
+<div created="20211128152334901" modified="20211128152334901" title="$:/config/RelinkOnRename">
+<pre>yes</pre>
 </div>
 <div modified="20141012050435461" title="$:/config/ViewToolbarButtons/Visibility/$:/core/ui/Buttons/clone">
 <pre>show</pre>
@@ -9425,11 +9438,20 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div created="20180707152310119" modified="20180707152310119" title="$:/state/showeditpreview">
 <pre>yes</pre>
 </div>
+<div created="20211010173702548" modified="20211010173804748" title="$:/state/sidebar">
+<pre>no</pre>
+</div>
+<div created="20211128173401048" modified="20211128173401048" title="$:/state/tab--1498284803">
+<pre>$:/core/ui/AdvancedSearch/Standard</pre>
+</div>
 <div created="20180707152021229" modified="20180707152022463" title="$:/state/tab--1963855381">
 <pre>$:/core/ui/ControlPanel/Palette</pre>
 </div>
 <div created="20180707151843996" modified="20180707152027759" title="$:/state/tab--2112689675">
 <pre>$:/core/ui/ControlPanel/Basics</pre>
+</div>
+<div created="20211010173743568" modified="20211010173744799" title="$:/state/tab--868624678">
+<pre>$:/core/ui/MoreSideBar/Plugins/Languages</pre>
 </div>
 <div created="20180707151852238" modified="20180707151855753" title="$:/state/tab--959111941">
 <pre>$:/core/ui/ControlPanel/Stylesheets</pre>
@@ -9437,17 +9459,50 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div created="20180707151857053" modified="20180707152024556" title="$:/state/tab-1749438307">
 <pre>$:/core/ui/ControlPanel/Info</pre>
 </div>
-<div created="20210705204424573" modified="20210705204424573" title="$:/state/toc/Contents-Branching--242358753">
-<pre>open</pre>
+<div created="20211010173729565" modified="20211010173740905" title="$:/state/tab/moresidebar-401116514">
+<pre>$:/core/ui/MoreSideBar/Plugins</pre>
 </div>
-<div created="20180714153847444" modified="20180714153847444" title="$:/state/toc/Contents-Directories &amp; Files--242358753">
+<div created="20211010173713118" modified="20211010173723719" title="$:/state/tab/sidebar--1835078512">
+<pre>$:/core/ui/SideBar/More</pre>
+</div>
+<div created="20210705204424573" modified="20211009212407303" title="$:/state/toc/Contents-Branching--242358753">
+<pre>close</pre>
+</div>
+<div created="20180714153847444" modified="20211127204833822" title="$:/state/toc/Contents-Directories &amp; Files--242358753">
 <pre>open</pre>
 </div>
 <div created="20180713005402899" modified="20180713005402899" title="$:/state/toc/Contents-Glossary--1025088837">
 <pre>open</pre>
 </div>
-<div list="[[Branch Log]] [[Branch Weight Algorithm]] [[Branching Rules]] [[Branching Example]] [[outcast/ directory]] [[Source Code Organization]] [[Workspace Directory]] [[Directories &amp; Files]] Overview" title="$:/StoryList">
+<div created="20211127202317857" modified="20211128174049793" title="$:/state/toc/Contents-Glossary--242358753">
+<pre>open</pre>
+</div>
+<div created="20211127205405612" modified="20211127205405612" title="$:/state/toc/Contents-Other--242358753">
+<pre>open</pre>
+</div>
+<div created="20211010132020521" modified="20211128173944810" title="$:/state/toc/Contents-Overview--242358753">
+<pre>open</pre>
+</div>
+<div created="20211011193515091" modified="20211128170635239" title="$:/state/toc/Contents-Proof-of-Concept--242358753">
+<pre>open</pre>
+</div>
+<div created="20211011193520835" modified="20211128150231061" title="$:/state/toc/Contents-References--242358753">
+<pre>close</pre>
+</div>
+<div created="20211011193523237" modified="20211128150052926" title="$:/state/toc/Contents-Tools--242358753">
+<pre>open</pre>
+</div>
+<div created="20211010192419705" modified="20211010192424460" title="$:/state/toc/Contents/Overview-Proof-of-Concept--242358753">
+<pre>close</pre>
+</div>
+<div created="20211128150209680" modified="20211128150209680" title="$:/state/toc/Contents/Proof-of-Concept-Tools--242358753">
+<pre>open</pre>
+</div>
+<div list="Tools Overview" title="$:/StoryList">
 <pre></pre>
+</div>
+<div created="20211128173334203" modified="20211128173358036" title="$:/temp/advancedsearch">
+<pre>Package</pre>
 </div>
 <div plugin-type="info" title="$:/temp/info-plugin" type="application/json">
 <pre>{
@@ -9462,7 +9517,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
         },
         &quot;$:/info/url/full&quot;: {
             &quot;title&quot;: &quot;$:/info/url/full&quot;,
-            &quot;text&quot;: &quot;file:///C:/_workspaces/Outcast/start_here.html&quot;
+            &quot;text&quot;: &quot;file:///C:/_workspaces/Outcast/start_here-2.0.html&quot;
         },
         &quot;$:/info/url/host&quot;: {
             &quot;title&quot;: &quot;$:/info/url/host&quot;,
@@ -9482,7 +9537,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
         },
         &quot;$:/info/url/pathname&quot;: {
             &quot;title&quot;: &quot;$:/info/url/pathname&quot;,
-            &quot;text&quot;: &quot;/C:/_workspaces/Outcast/start_here.html&quot;
+            &quot;text&quot;: &quot;/C:/_workspaces/Outcast/start_here-2.0.html&quot;
         },
         &quot;$:/info/url/search&quot;: {
             &quot;title&quot;: &quot;$:/info/url/search&quot;,
@@ -9494,11 +9549,11 @@ html .solidborders td {  border: 1px solid black; }</pre>
         },
         &quot;$:/info/browser/screen/width&quot;: {
             &quot;title&quot;: &quot;$:/info/browser/screen/width&quot;,
-            &quot;text&quot;: &quot;1920&quot;
+            &quot;text&quot;: &quot;2048&quot;
         },
         &quot;$:/info/browser/screen/height&quot;: {
             &quot;title&quot;: &quot;$:/info/browser/screen/height&quot;,
-            &quot;text&quot;: &quot;1080&quot;
+            &quot;text&quot;: &quot;1152&quot;
         }
     }
 }</pre>
@@ -9640,405 +9695,210 @@ html .solidborders td {  border: 1px solid black; }</pre>
 |John Taylor |john.t.taylor@gmail.com|principal author |
 </pre>
 </div>
-<div created="20150226031550108" modified="20150305043451865" tags="Proof-of-Concept workflow" title="Basic Workflow">
-<pre>!!The following workflow assumes the following:
+<div created="20211128171223847" modified="20211128171613298" tags="Glossary" title="Adopted Package">
+<pre>A adopted package is a clone/copy/fork from a different SCM repository that is copied into the Primary Package's SCM repository.  There are three types of adopted packages:
 
-* The the Outcast tools have been [[installed|Installing]] on the developer's PC and the command path has been updated to include the Outcast `bin/` directory.
-* The [[Native Outcast Universe|Package Universe]] and [[Package Directory|Package Directory]] are setup and the required Outcast environment variables have been sent to reference said locations.
-* Source code within individual packages is organized per the requirements for a [[workspace directory|Workspace Directory]], i.e. root level directories include: `top/`, `src/`, `tests/`, etc. 
- 
-!!Basic Workflow steps....
+* [[Foreign|Foreign Package]]
+* [[Readonly|Readonly Package]]
+* [[Overlay|OverlayPackage]]
 
-# The developer creates a workspace directory.  A developer can have an unlimited number of workspaces.  It is recommended to have a workspace per //project// if a developer works on many different projects concurrently.  The developer can skip to step 3 if he is using an existing workspace.  
-
-# After creating a workspace directory, the developer needs to run the `orc mkwrk` command in the newly created directory to finish the //initialization// of the workspace.  This step only needs to be done once for the lifetime of the workspace.
-
-# In a workspace there is a concept of __local__ and __external__ Packages.  A local Package is Package that is pulled directly from the organization's SCM repository.  A external Package is a previously released/published Package that is pull from a [[Outcast Vault||Package Vault]]. Essentially local Packages contain the source code that is being edited and external Packages contains dependent source code this is only consumed - not modified.
-## Pull/Fetch/Sync one or more local packages from the organization's SCM repository.  This step is ''not'' done using the Outcast tools.
-##* At any given time there can be multiple local Packages in workspace - however only one is the //active// local Package.  The //active// local Package is the Package your are building/compiling project(s) for.
-
-# Use the `orc getdeps` command to load and mount (as external) all dependent Packages required for the __//active//__ local Package.
-## If additionally (to the //active// Package) local Packages are being using, run the `orc mount` command to configure the workspace to reference/link-to these additional local Packages (instead of external mappings). 
-##* The developer can use the following commands to view, and modify the workspace's Package mappings: `orc ls`, `orc mount`, and `orc umount`.  
-
-# Edit, compile, test, repeat in the //active// local Package.
-#* NOTE: when making changes in the //non-active// local Package(s) you may have to re-run the `orc mount` command to pick up changes.  The basic rule is: Any time __new__ header file(s) are added to these //non-active// local Packages the new header file(s) will not be visible to the //active// local Package until the `orc mount` has been re-run on the updated //non-active// local Package(s).  Adding new __non-header__ file(s) will be visible immediately to the //active// local Package.
-
-# Check-in sources code changes made to the local Package(s) into your organization's SCM repository.  This step is ''not'' done using the Outcast tools.</pre>
+''Note'': Currently the distinction between a //Foreign// and //Readonly// packages is more conceptual than technical.  It is possible that the two types will be collapsed into a single package type.</pre>
 </div>
-<div created="20140905013839247" creator="JohnTaylor" modified="20150221160344370" modifier="JohnTaylor" tags="Files Branching [[Directories &amp; Files]]" title="Branch Log">
-<pre>The &lt;code&gt;branch.log&lt;/code&gt; file is comma separated file that contains the branch history of the package.  See [[branching rules|Branching Rules]] for how branching works. 
-
-* The file is only appended
-* The file should never be manually edited, always use the provided tools to update the &lt;code&gt;branch.log&lt;/code&gt; file.
-* Each branch operation (branch/merge) is single line entry
-* Each entry contains N comma-separated values.  See below for the entry format
-* The last entry in the file indicates/identifies the current branch.
-** No other order (of entries) is assumed/guaranteed.
-** If no&lt;code&gt;branch.log&lt;/code&gt; file is present, then the current branch is assumed to be //main//.
-
-!!Entry format
-Branch operation
-
-```
-BRANCH &lt;frm&gt;/&lt;frm-ver&gt; TO &lt;dst&gt;/&lt;min-ver&gt;
-```
-
-Merge operation
-
-```
-MERGE &lt;frm&gt;/&lt;ver&gt; (&lt;frm-wgt&gt;) &lt;dst&gt;/&lt;ver&gt; (&lt;dst-wgt&gt;) TO &lt;dst&gt;/&lt;min-ver&gt;
-```
-
-
-Where:
-
-|frm|Is the //from// branch, i.e. the code line that is being branched, or the code line that is being merged |
-|ver|Is the version of the code line being operated on |
-|dst|Is the //destination// branch, i.e. the code line that is the newly branch, or the code line being merged to. |
-|min-ver |Specifies the minimum version number for the next publish operation (after the merge) on the destination code line. |
-|dst-wgt |Specifies the [[change weight|Branching Rules]] of the destination code line at the time of the merge operation. |
-|frm-wgt|Specifies the [[change weight|Branching Rules]] of the from code line at the time of the merge operation. |
-
-
-
-!!!Examples:
-```
-BRANCH main/2.10.3 TO blue/2.10.4
-MERGE blue/3.1.20 (major)  main/2.11.5 (minor) TO main/3.2.0
-```
-</pre>
+<div created="20141017032122507" modified="20211127205237897" tags="Glossary" title="Breaking Change">
+<pre>A breaking change in a package is when any backwards incompatible changes are introduced to the package's APIs</pre>
 </div>
-<div created="20140907171136490" creator="JohnTaylor" modified="20150221155050653" modifier="JohnTaylor" tags="Branching" title="Branch Weight Algorithm">
-<pre>!! Algorithm for calculating [[change weights|Branching Rules]]
-# Create a directed graph/tree from the branch history, where the root of the tree is the original publish point on //main//.  Each publish point from the branch history is a node in the tree.
-# Identify the two proposed publish points that the merge point is being derived from.
-# Derive the [[LCA|http://http://en.wikipedia.org/wiki/Lowest_common_ancestor]] for the two nodes identified in step 2.
-# For each node identified in step 2, walk the tree //backwards// until the LCA is encounter.  At each &quot;parent edge&quot; a change weight is calculated.  The //heaviest// change weight calculated is the change weight used when determining the version number of the derived merged point.  
-#*How the change weight is calculated for each parent edge is function of type of parent edge.  See below for additional details.  
-#*There are three types of parent edges: 
-#**''direct''.  The parent/child edge is a direct lineage, i.e both parent and child are on the same branch
-#**''branch''.  The branch edge is where the child node has been directly branched from the parent node
-#**''merge''.  The merge edge is where the parent node is actual the //step parent// (i.e. in terms of the branching rules, the parent is the //src// point) to the child node.
-
-!!Pseudo code for calculating [[change weights|Branching Rules]].
-!!!Click [[here|Branching Example]] for examples of branching
-
-```
-calculate_weight( CHILD, LCA, WGT )
-    // Stop recursive traversal when the LCA is reached.
-    // This also handles the special case where the LCA is also a direct contributor to the merge point
-    if ( &lt;CHILD is the same as the LCA&gt; ) then
-        WGT = max( WGT,  'zero' )
-        &lt;exit algorithm&gt;   
-    
-    // Determine the parent and the parent/child relationship
-    parent, edge = &lt;derive parent (and edge type) for CHILD based on the shortest path to the LCA&gt;
-
-    // Handle the three edge type
-    if ( &lt;edge is 'direct'&gt; ) then
-        w = &lt;calculate version delta between CHILD and parent&gt;
-
-    elif ( &lt;edge is 'branch'&gt; ) then
-        w = &lt;calculate version delta between CHILD and parent&gt;
-
-    else   // edge type must be 'merge' at this point
-        w = CHILD-&gt;directParent-&gt;merge_wgt
-
-    // Keep track of heaviest weight found
-    WGT = max( WGT, w )
-    if ( WGT == 'major ) then
-       &lt;exit algorithm since 'major' is the heaviest possible wgt&gt;
-
-    // Continue the backwards travesal
-    calculate_weight( parent, LCA, WGT )
-```
-</pre>
+<div created="20211010172608916" modified="20211010173603131" tags="Glossary" title="code reuse in place">
+<pre>Code resuse in place - or //true reuse// is the ability to reuse source
+code files without modification or cloning, so there is no loss of
+quality or functionality in reused modules.</pre>
 </div>
-<div created="20141017030707081" modified="20141017030811760" tags="Contents" title="Branching">
-<pre>!!Topics
-&lt;h2&gt;
-&lt;ul&gt;
-&lt;$list filter=&quot;[tag[Branching]sort[title]]&quot;&gt;&lt;li&gt;&lt;$link&gt;&lt;$view field=&quot;title&quot;/&gt;&lt;/$link&gt;&lt;/li&gt;
-&lt;/$list&gt;
-&lt;/ul&gt;
-&lt;/h2&gt;</pre>
-</div>
-<div created="20140907184231389" creator="JohnTaylor" modified="20141017031318397" modifier="JohnTaylor" tags="Branching" title="Branching Example">
-<pre>| merge point | //frm// point | //dst// point | LCA | Branch History |h
-|''main/1.0.1'' |blue/1.0.1 |main/1.0.0 |main/1.0.0 | [img[./documentation/branching3.svg]] |
-|''main/1.3.0'' |red/1.2.0 |main/1.2.1 |main/1.1.0 |~|
-|''main/2.0.0'' |purple/4.7.5 |main/1.3.0 |blue/1.0.1 |~|
-|''red/1.3.0'' |main/1.3.0 |red/1.2.0 |red/1.2.0 |~|
-|''purple/4.9.0'' |main/2.3.3 |purple/4.8.9 |purple/4.7.5 |~|
-|''red/2.0.0'' |main/2.3.3 |red/1.3.0 |main/1.3.0 |~|
-|''main/2.5.0'' |red/2.7.5 |main/2.4.0 |main/2.3.3 |~|
-
-
-</pre>
-</div>
-<div created="20140905022420182" creator="JohnTaylor" modified="20150221155534534" modifier="JohnTaylor" tags="Branching" title="Branching Rules">
-<pre>!!Rules, requirements, etc. associated with branching
-* A ''//change weight//'' is the cumulative most significant change type (e.g. patch, minor, major) on a code line between the [[Lowest Common Ancestor (LCA)|http://en.wikipedia.org/wiki/Lowest_common_ancestor]] and the new merge point of the code lines being merged.  Each code line being merged has a //change weight//.
-** Validate change weights:
-*** ''zero'' - no changes on the branch
-*** ''patch'' - only //patch// changes have been made on the branch
-*** ''minor'' - at least one //minor// change has been made on the branch an no //major// changes have been made.
-*** ''major'' - at least one //major// change has been made on the branch.
-** Note: A //change// is considered to be when at least one file has been been checked in/submit to the SCM repository. 
-* The algorithm details for calculating the change weights can be found [[here|Branch Weight Algorithm]]
-* The minimum or starting version number of a newly created branch is the last published version number - plus one to the patch index - of the source code line.
-** e.g. BRANCH main/2.0.0 TO blue/2.0.1  
-
-!! Truth table for determining the new minimum version for the destination branch after the merge
-
-| __frm-wgt__ | __dst-wgt__ || __min-ver__ |h
-| zero | zero || ''dst''-ver.p++  |
-| patch | zero ||  ''dst''-ver.p++  |
-| minor | zero ||  ''dst''-ver.n++ |
-| major | zero || ''dst''-ver.m++  |
-| patch | patch || ''dst''-ver.p++  |
-| minor | patch || ''dst''-ver.n++ |
-| major | patch || ''dst''-ver.m++ |
-| patch | minor || ''dst''-ver.p++  |
-| minor | minor || ''dst''-ver.n++ |
-| major | minor || ''dst''-ver.m++ |
-| patch | major || ''dst''-ver.p++  |
-| minor | major || ''dst''-ver.n++ |
-| major | major || ''dst''-ver.m++  |
-
-
-!! Examples:
-!!!Click [[here|Branching Example]] for graphical examples of branching 
-```
-MERGE orange/3.1.20 (major)  main/2.11.5 (minor) TO main/3.2.0
-MERGE yellow/1.0.20 (patch)  main/2.11.5 (major) TO main/2.11.6
-```
-
-* Note: When incrementing a version index, all (if any) indexes to the right of the index being incremented is set to zero.  See [[Sematic Versioning|http://www.semver.org]] for more details on semantic versioning.
-
-</pre>
-</div>
-<div created="20141017032122507" modified="20150221160518140" tags="Glossary" title="Breaking Change">
-<pre></pre>
-</div>
-<div created="20140726153207314" creator="JohnTaylor" modified="20150221161950230" modifier="JohnTaylor" tags="standards miscellaneous Overview" title="Coding Standards">
+<div created="20140726153207314" creator="JohnTaylor" modified="20211010192412589" modifier="JohnTaylor" tags="standards miscellaneous" title="Coding Standards">
 <pre>Outcast has very few coding standards requirements - mostly around [[naming|Naming Conventions]].  That said, below are some recommended coding standards for  new package development.
 
 |Standard |Language| Usage  |Comments |h
 |[[John's Coding Standard|http://integerfox.com/outcast/documentation/codingstandard.htm]]| C++ |Targeted for embedded development |Very basic and brief.  The recommended default for embedded C++ packages in Outcast |
 </pre>
 </div>
-<div created="20180714154300241" modified="20180715164725118" tags="[[Directories &amp; Files]] Directories" title="Compiler Scripts">
-<pre>When building the source code there is always the issue on where the compiler(s) are installed and how to have //common// compiler environment across all developers machines as well as the organization's Continuous Integration (CI) and/or Build servers.  
-
-
-Outcast addresses this issue by having a collection of scripts (one per compiler toolchain) in the package's `top/compilers/` directory.  The only requirements for these scripts is that properly configure/set-the-environment for a specific compiler and that the configuration/setup //works// for all development/build use cases, i.e. for developers and for the CI/build server.
-
-The //compiler scripts// are defined and maintained by the packages' owners.  A package owner in this context is defined as:
-
-* Packages that your organization develops or is the principle maintainer.
-* Packages that your organization’s CI/Build server(s) will be building.
-
-
-For the proof-of-concept this requirements is met the following:
-
-# A single well defined per-machine location is identified.  And said location must be //valid// for all build machines (i.e. developers, CI build machine, etc.)
-## On Windows host machines, this is `c:\compilers`
-
-# In this location there is:
-## A collection of symbolic links are defined that point to actual installed compilers.  See example below
-## A collection of batch files that setup the environment for each compiler.
-
-# The scripts in the packages' `\top\compilers` directory simply invoke the script(s) in the `c:\compilers` directory
-
-Example `c:\compilers` directory:
-
-&lt;&lt;&lt;
-```
- c:\compilers&gt;dir
- Volume in drive C has no label.
- Volume Serial Number is 3AAA-F210
-
- Directory of c:\compilers
-
-07/15/2018  10:44 AM    &lt;DIR&gt;          .
-07/15/2018  10:44 AM    &lt;DIR&gt;          ..
-07/14/2018  10:11 AM    &lt;SYMLINKD&gt;     kpit-rx-elf-v15.01 [C:\PROGRA~2\KPIT\GNURXV~1.01-]
-07/15/2018  10:42 AM               393 kpit-rx-elf-v15.01.bat
-07/14/2018  10:12 AM    &lt;SYMLINKD&gt;     mingw64-v5.1.0 [c:\TDM-GCC-64]
-07/15/2018  10:44 AM               110 mingw64-v5.1.0.bat
-07/14/2018  10:33 AM    &lt;SYMLINKD&gt;     mingw64-v8.1.0 [c:\mingw-w64\mingw64]
-07/15/2018  10:44 AM               110 mingw64-v8.1.0.bat
-07/15/2018  10:42 AM             6,120 vcvars32-vc14.bat
-               4 File(s)          6,733 bytes
-               5 Dir(s)  142,584,111,104 bytes free
-
-c:\compilers&gt;cat mingw64-v5.1.0.bat
-@echo off
-set PATH=C:\compilers\mingw64-v5.1.0\bin;%PATH%
-echo:MinGW-x64 Compiler Environment set (v5.1.0)
-
-c:\compilers&gt;
-```
-&lt;&lt;&lt;</pre>
+<div created="20211010172711637" modified="20211127205249819" tags="Glossary" title="copy-n-paste reuse">
+<pre>Copy-n-paste reuse is the practice of making a copy (or cloning) source code and then modifying the copy.  Once edited, the quality/functionality of the copied the code diverges from the original code.</pre>
 </div>
-<div created="20150227022248723" modified="20150227030354876" tags="Proof-of-Concept workflow" title="Creating a new Package">
+<div created="20150227022248723" modified="20211128152015218" tags="Proof-of-Concept workflow" title="Creating a new Package">
 <pre>!!The following workflow assumes the following:
 
 * The the Outcast tools have been [[installed|Installing]] on the developer's PC and the command path has been updated to include the Outcast `bin/` directory.
-* The [[Native Outcast Universe|Package Universe]] and [[Package Directory|Package Directory]] are setup and the required Outcast environment variables have been sent to reference said locations.
-
+* The SCM for the primary package is GIT
  
 !!Create a new Package Workflow steps....
+Note: These steps typically need to be only done once.
 
-# Create a workspace or use an already existing workspace.  The sub-steps below summarizes how to create a workspace.  Also, see the [[install|Installing]] instructions for a detailed example.
-## Create the workspace directory.  It is recommended to have a common parent/root directory for all of the workspaces.
-## Change your current directory to the newly created directory and run the `orc mkwrk` command
-## If using [[NQBP|http://integerfox/nqbp]] as your build engine, set the environment variable `NQBP_BIN` to `&lt;rootpath&gt;/&lt;workspace_dir_name&gt;/xpgks/nqbp`
-# Create the Package directory under/in your workspace directory.  The details of this step is dependent on your organziation's SCM tools.  For example if using git, set the //cwd// to workspace directory and do a `git init &lt;pkgdir&gt;` where `&lt;pkgdir&gt;` is the name of the Package.
-# Change your current directory to the newly created package directory and create the following directories:
-#* `top/`
-#* `src/`
-#* `tests/`
-#* `projects/`    ; Optional
-# Create the Package Specification file by setting the current directory to the `top/` directory and running the `orc mksepc` command.  
-## Edit the following items under the `[info]` section of the created `pkg.specification` file.  Do ''not'' edit/modify any of the other sections.  All of the other items/sections should only be updated using `orc` commands.
+# Run the `orc info` command to set the package's name, brief description, etc.  
 
-##* `name`
-##* `desc`
-##* `owner`
-##* `email`
-##* `url`
+#* Note: This step will create the package's `pkg.info/` directory and `package.json` file.
 
-# Create the initial script stubs required for the publish sequence by running the `orc mktools` command in the `top/` directory.
-## Modify these scripts as need for your organization's develop tools/policies.  ''Note:'' A default implementation is provided as part of the scripts - but the developer still needs to enable/select the default implementation.  In addition, the default implementation is data driven through  //config// files (e.g. `publish_build.list`) located in the `top/` directory.  The developer must provide/generate these config files.
+# If the package is intended to be adoptable as a //overlay// package, then do the following:
 
-# All done!  All source code should be added under the `src/` directory.  All unittest projects should be added under the `tests/` directory.  Any application projects should be added under the `projects/` directory.  ''Note:'' The term __project__ here is the directory where a developer builds an application and/or unittests - typically there is very little source code contained in the project directories.
+## Run the `orc dirs set` command to specify the package's //primary// directories.  The //primary// directories are the top-level directories that will be overlaid when being adopted as //overlay// package.
 
+## ''Optionally'' run the `orc dirs xset` command to specify the package's //adopted-extra// directories.  The //adopted-extra// directories will be copied in the primary package's `pkg.overlaid/&lt;adopted-pkg&gt;/` directory when `&lt;adopted-pkg&gt;` is adopted as a //overlay// package.
+
+## Use a text editor to create the `pkg.info/ignore-dirs.lst` file.  This file is used to specified directories that should ''not'' be copied as part of the package's //primary// directories when being adopted as an //overlay// package.
+
+##* Note: The file contents have the same semantics as a GIT ignore file.
+##* Note: This files needs to created/exists even if it is empty.
+
+## Run the `orc dirs -u ls` command to create the package's `pkg.info/pkg-dirs.lst` file.  This command generates the list of directories 'owned' by the new package.
+
+# Commit and push the new files that the above steps created.
 </pre>
 </div>
-<div created="20170615030502280" modified="20170615034909278" tags="Other" title="Creating a Visual Studio Solution for a Package">
-<pre>!! How to integrate Visual Studio to work with Outcast Packages
-Visual Studio is a very handy-dandy code editor.  For years I resisted the Borg, but once I started writing C#/.NET code it is now my editor of choice.  This does not mean I think its a perfect editor (that accolade belong to the now end-of-life'd [[CodeWright|https://en.wikipedia.org/wiki/CodeWright]]).  How with some strong arming and some acceptance to the VS way, Visual Studio can be used effectively with Outcast packages.
-
-My goal was to create a single solution which could navigate (and have Intellisense work) across all of the packages in single workspace.   The integeration is not perfect it is missing the following:
-
-* Locating/define the project specific header files, e.g. colony_config.h, colony_map.h
-* Invoking nqbp from within VS.
-
-!! How to create a VS Solution for a workspace with a VS Project per package.
-The following direction will create VS project(s) that 'auto' add all of the source code files to each project.  The 'auto' add feature only works when the project is loaded, this means if you add file - you will to unload then reload the project (right click on the project name in the solution explorer) where the new file(s) were added (or close and reopen the solution).
-
-# Create an empty solution in the parent directory of the workspace
-## Use 'File-&gt;New-&gt;Project From Existing Code' and create a project/solution with the same name as the workspace
-## Don't add any files
-## Select 'external build'
-# Create a project for each package
-## Use 'File-&gt;New-&gt;Project From Existing Code' and create a project/solution with the same name as the package
-##* Note: This creates a new solution and project
-## Don't add any files
-## Select 'external build'
-## Select the project properities (right click onthe project name)
-## Change the Configuration_Properties-&gt;NMake-&gt;IntelliSense-&gt;Include Search Path to include:
-### References to the pkg/src directory for each external package dependency
-### Reference to the THIS pkg's src/ directory
-###* NOTE: Use the 'xpkgs/' path for ALL include references!  You will have to manual type the 'xpkgs/' directory since the dialog box resolve the link to the actual target
-## Save and close the project/solution
-## Manually edit the pkg.vcxproj file and add the following XML snippet
-##&gt;`&lt;ItemGroup&gt;`
-##&gt;`  &lt;ClCompile Include=&quot;zoe\xpkgs\&lt;mypkgname&gt;\src\**\*.c&quot; /&gt;`
-##&gt;`  &lt;ClCompile Include=&quot;zoe\xpkgs\&lt;mypkgname&gt;\src\**\*.cpp&quot; /&gt;`
-##&gt;`  &lt;ClCompile Include=&quot;zoe\xpkgs\&lt;mypkgname&gt;\src\**\*.S&quot; /&gt;`
-##&gt;`  &lt;ClCompile Include=&quot;zoe\xpkgs\&lt;mypkgname&gt;\src\**\*.asm&quot; /&gt;`
-##&gt;` &lt;ClInclude Include=&quot;zoe\xpkgs\&lt;mypkgname&gt;\src\**\*.h&quot; /&gt;`
-##&gt;`&lt;/ItemGroup&gt;`
-# Open the workspace solution created in step 1 
-## Add the PROJECT created in step 2
-## Delete the orignal dummy/placeholder project that was created in step 1a
-## Save the solutin
-## Repeat steps 2-3 for each package
-
-!!</pre>
+<div created="20211010200556181" modified="20211010200730061" tags="Overview" title="Detailed MCP relationships">
+<pre>[img[./documentation/detailed-mcp-relationships.svg]]</pre>
 </div>
-<div created="20150221160040098" modified="20150221160130905" tags="Contents" title="Directories &amp; Files">
-<pre>!!Directory Topics
-&lt;h2&gt;
-&lt;ul&gt;
-&lt;$list filter=&quot;[tag[Directories]sort[title]]&quot;&gt;&lt;li&gt;&lt;$link&gt;&lt;$view field=&quot;title&quot;/&gt;&lt;/$link&gt;&lt;/li&gt;
-&lt;/$list&gt;
-&lt;/ul&gt;
-&lt;/h2&gt;
-
-!!File Topics
-&lt;h2&gt;
-&lt;ul&gt;
-&lt;$list filter=&quot;[tag[Files]sort[title]]&quot;&gt;&lt;li&gt;&lt;$link&gt;&lt;$view field=&quot;title&quot;/&gt;&lt;/$link&gt;&lt;/li&gt;
-&lt;/$list&gt;
-&lt;/ul&gt;
-&lt;/h2&gt;</pre>
-</div>
-<div created="20140803162036980" creator="JohnTaylor" modified="20150224215931822" modifier="JohnTaylor" tags="miscellaneous Tools toolbar standards" title="Environment Variables">
+<div created="20140803162036980" creator="JohnTaylor" modified="20211128150139812" modifier="JohnTaylor" tags="Proof-of-Concept" title="Environment Variables">
 <pre>!!Below is list of operating system environment variables that are used by Outcast
 
 |Variable | Req |Description |h
-|`OUTCAST_PKGS_ROOT`| Y |This variable specifies the location of the [[packages/|Packages Directory]] directory on a development machine.|
-|`OUTCAST_PKGS_UVERSE`| Y |This variable specifies the location of the [[native universe|Package Universe]] that is file accessible (i.e. on the local box or on a network/file share). |
-|`OUTCAST_UVERSE_TYPE`| n |This variable sets the default universe type. If not set, the default is 'git' |
-|`OUTCAST_SCM_TOOL` | n |This variable sets the default SCM tool. If not set, the default is 'git' |
+|`OUTCAST_SCM_PRIMARY_TOOL` | n |This variable sets the default SCM tool for use when accessing/modifying the ''primary'' package. If not set, the default is 'git' |
+|`OUTCAST_SCM_ADOPTED_TOOL` | n |This variable sets the default SCM tool for use when accessing/modifying the ''adopted'' package(s). If not set, the default is 'git' |
 </pre>
 </div>
-<div created="20140809035342632" creator="JohnTaylor" modified="20150221160353385" modifier="JohnTaylor" tags="Files [[Directories &amp; Files]]" title="Export Headers File">
-<pre>The file &lt;code&gt;export_headers.lst&lt;/code&gt; in a package's &lt;code&gt;top/&lt;/code&gt; directory is used to list which headers to expose (i.e. what gets mounted/linked into the Workspace's &lt;code&gt;xinc/&lt;/code&gt; directory) for use by client packages.
+<div created="20211011193436494" modified="20211128152337064" tags="Proof-of-Concept" title="Example package.json file">
+<pre>The following is a example of a package's `package.json` file.  This file contains the package's description, dependencies, and publish history
 
-If no &lt;code&gt;export_headers.lst&lt;/code&gt; exists for the package, then ''all'' of the package's header files under the &lt;code&gt;src/&lt;/code&gt; directory are exposed.
-
-!!The  &lt;code&gt;export_headers.lst&lt;/code&gt; is a simple text file that has the following format
-
-* Blank lines are ignore
-* Lines starting with '#' are treated as comment lines (i.e. ignored).
-* Path information is relative to the package's root directory.
-* An entry can identify a single/specific header.  
-* An entry can contain wildcards.  The wildcards are used to match all files within a single directory.
-* A recursive wildcard can be use to apply a filter/pattern starting from a specific directory.  The recursive wildcard/marker is &lt;code&gt;...&lt;/code&gt;
-* An entry starting with a leading '-' applies //exclude// semantics to any entry, i.e. all files identified by the entry are explicity excluded from the list of exposed/exported header files.
-** The entries/rules are applied in top down order, i.e. later entries override previous entries.
-* A prefix character of '!' can be used include other 'export header' files.  This allows the definition of the export header list to be done at individual source code directories.
-** Wildcards and the recursive wildcard can be applied to the name of the export header files to be included.
-** The exclude semantics applied to exclude the contents of the export header file(s) being included.
-
-!! Example &lt;code&gt;export_headers.lst&lt;/code&gt; file
 ```
-# Export a specific file
-src/Foo/bar.h
+{
+  &quot;dependencies&quot;: {
+    &quot;strong&quot;: [
+      {
+        &quot;pkgname&quot;: &quot;colony.bsp.renesas.rx&quot;,
+        &quot;pkgtype&quot;: &quot;overlay&quot;,
+        &quot;adoptedDate&quot;: &quot;Fri Nov 26 19:45:53 2021&quot;,
+        &quot;parentDir&quot;: null,
+        &quot;version&quot;: {
+          &quot;semanticVersion&quot;: &quot;1.0.1&quot;,
+          &quot;branch&quot;: null,
+          &quot;tag&quot;: &quot;OUTCAST2-main-1.0.1&quot;
+        },
+        &quot;repo&quot;: {
+          &quot;name&quot;: &quot;colony.bsp.renesas.rx&quot;,
+          &quot;type&quot;: &quot;git&quot;,
+          &quot;origin&quot;: &quot;https://github.com/johnttaylor&quot;
+        },
+        &quot;depType&quot;: &quot;S&quot;
+      },
+      {
+        &quot;pkgname&quot;: &quot;colony.bsp&quot;,
+        &quot;pkgtype&quot;: &quot;overlay&quot;,
+        &quot;adoptedDate&quot;: &quot;Sat Nov 27 19:21:22 2021&quot;,
+        &quot;parentDir&quot;: null,
+        &quot;version&quot;: {
+          &quot;semanticVersion&quot;: &quot;0.1.0&quot;,
+          &quot;branch&quot;: null,
+          &quot;tag&quot;: &quot;OUTCAST2-main-0.1.0&quot;
+        },
+        &quot;repo&quot;: {
+          &quot;name&quot;: &quot;colony.bsp&quot;,
+          &quot;type&quot;: &quot;git&quot;,
+          &quot;origin&quot;: &quot;https://github.com/johnttaylor&quot;
+        }
+      }
+    ],
+    &quot;weak&quot;: [
+      {
+        &quot;pkgname&quot;: &quot;nqbp&quot;,
+        &quot;pkgtype&quot;: &quot;foreign&quot;,
+        &quot;adoptedDate&quot;: &quot;Fri Nov 26 03:15:39 2021&quot;,
+        &quot;parentDir&quot;: &quot;xsrc&quot;,
+        &quot;version&quot;: {
+          &quot;semanticVersion&quot;: &quot;2.2.0&quot;,
+          &quot;branch&quot;: null,
+          &quot;tag&quot;: &quot;OUTCAST2-main-2.2.0&quot;
+        },
+        &quot;repo&quot;: {
+          &quot;name&quot;: &quot;nqbp&quot;,
+          &quot;type&quot;: &quot;git&quot;,
+          &quot;origin&quot;: &quot;https://github.com/johnttaylor&quot;
+        },
+        &quot;depType&quot;: &quot;S&quot;
+      },
+      {
+        &quot;pkgname&quot;: &quot;catch&quot;,
+        &quot;pkgtype&quot;: &quot;overlay&quot;,
+        &quot;adoptedDate&quot;: &quot;Sat Nov 27 19:20:34 2021&quot;,
+        &quot;parentDir&quot;: null,
+        &quot;version&quot;: {
+          &quot;semanticVersion&quot;: &quot;2.13.7&quot;,
+          &quot;branch&quot;: null,
+          &quot;tag&quot;: &quot;OUTCAST2-main-2.13.7&quot;
+        },
+        &quot;repo&quot;: {
+          &quot;name&quot;: &quot;catch&quot;,
+          &quot;type&quot;: &quot;git&quot;,
+          &quot;origin&quot;: &quot;https://github.com/johnttaylor&quot;
+        }
+      },
+      {
+        &quot;pkgname&quot;: &quot;freertos&quot;,
+        &quot;pkgtype&quot;: &quot;readonly&quot;,
+        &quot;adoptedDate&quot;: &quot;Sat Nov 27 19:23:36 2021&quot;,
+        &quot;parentDir&quot;: &quot;xsrc&quot;,
+        &quot;version&quot;: {
+          &quot;semanticVersion&quot;: &quot;8.2.1&quot;,
+          &quot;branch&quot;: null,
+          &quot;tag&quot;: &quot;OUTCAST2-main-8.2.1&quot;
+        },
+        &quot;repo&quot;: {
+          &quot;name&quot;: &quot;freertos&quot;,
+          &quot;type&quot;: &quot;git&quot;,
+          &quot;origin&quot;: &quot;https://github.com/johnttaylor&quot;
+        }
+      }
+    ]
+  },
+  &quot;directories&quot;: {
+    &quot;primary&quot;: [
+      &quot;src&quot;,
+      &quot;tests&quot;
+    ],
+    &quot;adoptedExtras&quot;: [
+      &quot;top&quot;
+    ]
+  },
+  &quot;info&quot;: {
+    &quot;desc&quot;: &quot;Colony is C++ class library targeted specifically for embedded development.  Colony.Core is the base system/interfaces for the Colony packages.&quot;,
+    &quot;owner&quot;: &quot;John Taylor&quot;,
+    &quot;email&quot;: &quot;John.T.Taylor@gmail.com&quot;,
+    &quot;url&quot;: &quot;www.integerfox.com/colony.core&quot;,
+    &quot;repo&quot;: {
+      &quot;name&quot;: &quot;colony.core&quot;,
+      &quot;type&quot;: &quot;git&quot;,
+      &quot;origin&quot;: &quot;https://github.com/johnttaylor&quot;
+    },
+    &quot;pkgname&quot;: &quot;colony.core&quot;
+  },
+  &quot;publish&quot;: {
+    &quot;current&quot;: {
+      &quot;comment&quot;: &quot;Try again at publishing as a Outcast2 package&quot;,
+      &quot;version&quot;: &quot;2.0.2&quot;,
+      &quot;date&quot;: &quot;Sun Nov 28 14:33:57 2021&quot;,
+      &quot;timestamp&quot;: 1638110037
+    },
+    &quot;history&quot;: [
+      {
+        &quot;comment&quot;: &quot;Initial publish as a Outcast2 package&quot;,
+        &quot;version&quot;: &quot;2.0.1.&quot;,
+        &quot;date&quot;: &quot;Sat Nov 20 20:15:42 2021&quot;,
+        &quot;timestamp&quot;: 1637439342
+      }
+    ]
+  }
+}
+```</pre>
+</div>
+<div created="20211128171622717" modified="20211128173500660" tags="Glossary" title="Foreign Package">
+<pre>An adopted Foreign Package is exclusively copied-to/contained with a sub directory within a Primary Package's SCM repository.  Foreign Packages are assumed to be //editable// within the Primary Package's repository, i.e. customization, extensions, deletions, etc. are expected to occur on the copied contents.
 
-# Export all files in single directory
-src/Foo/Bar/*.h
-
-# Recursive export of all files that end with 'Api.h'
-src/...*Api.h
-
-# Recursive export of all header files name public.h
-src/...public.h
-
-# Do not export any header files from the Gold/ directory
--src/Gold/*.h
-
-# But do export the money.h file in the gold directory
-src/Gold/money.h
-
-# Include another 'export' list. 
-# For all Gold/ sub-directories use the content of any found 'export header&quot; files
-!src/Gold/...export_headers.lst
-```
-!! Supported Pattern matching
-| Pattern | Meaning |h
-| * |matches everything|
-| ? |matches any single character|
-| [seq] |matches any character in //seq// |
-| [!seq] |matches any character not in //seq// |
-
-</pre>
+An example of Foreign Package would be the build system [[nqbp|http://integerfox.com/nqbp/]] package. This is because it is expected/likely that modifications will need to be made to the [[nqbp|http://integerfox.com/nqbp/]] toolchain file(s) as work on the Primary Package progresses.</pre>
 </div>
 <div created="20150221160528663" modified="20150221160552951" tags="Contents" title="Glossary">
 <pre>!!Terms
@@ -10049,14 +9909,13 @@ src/Gold/money.h
 &lt;/ul&gt;
 &lt;/h2&gt;</pre>
 </div>
-<div created="20150224220024771" modified="20180707144737913" tags="Tools Overview Contents" title="Installing">
+<div created="20150224220024771" modified="20211128150254734" tags="Proof-of-Concept Overview Contents" title="Installing">
 <pre>The following steps are how to install the ''//proof-of-concept// Outcast'' tools on a developer PC.  
 
 ''Note: The examples snippets provided in these instructions are for a Windows box, however the same steps work/apply to a Linux/Unix install''.  If/when there are any difference between Windows/Linux - the difference will be noted in the instructions.
 
-!!!NOTE: The Outcast tools create/use symbolic links.  Windows 7 (and higher) support symbolic links, ''however'' //administrator// privilege is required to make symbolic links.  This means the you must always launch your DOS box with the __//Run as Administrator//__ option when you use Outcast tools.  An ''alternative'' to running the DOS box as Administrator can be found [[here|Permission to make symbolic links]]
 
-# Install Python 2.7.8 (if not already installed).
+# Install Python 3.8.5 or newer (if not already installed).
 
 # Install Git (if not already installed).  For the proof-of-concept [[Github|http://github.com]] is used for all of the SCM and Outcast repositories.
 # For these instructions all of the tools, packages, //live// source code, etc. is under the top level root directory: ''`\_devel`''.  This is not a requirements, just a simplification for these install instructions.
@@ -10077,215 +9936,9 @@ Resolving deltas: 100% (38/38), done.
 Checking connectivity... done.
 
 `
-# Create the Native Outcast Universe and Package directories.  See [[here|WUV Relationships]] for more details on relationship between Universes, Package directories, developers, etc. In this example both Universe and Package directory will be local to a developer's PC and located in the directory `\_devel`
-## Create the Package directory `'\_devel\Packages`
-## Create the Native Universe directory by cloning the [[Foreign Outcast Universe|http://github.com/johnttaylor/Outcast-Universe]]  from [[Github|http://github.com]]
+# Add the Outcast `bin/` directory to the command path.  This can be done configuring the PC's environment, or once per terminal window
 
-#&gt;`C:\_devel&gt;mkdir Packages
-
-C:\_devel&gt;git clone https://github.com/johnttaylor/Outcast-Universe.git
-Cloning into 'Outcast-Universe'...
-remote: Counting objects: 57, done.
-remote: Compressing objects: 100% (52/52), done.
-remote: Total 57 (delta 27), reused 27 (delta 2), pack-reused  Unpacking objects: 100% (57/57), done.
-Checking connectivity... done.
-
-C:\_devel&gt;dir
- Directory of C:\_devel
-
-02/24/2015  04:30 PM    &lt;DIR&gt;          .
-02/24/2015  04:30 PM    &lt;DIR&gt;          ..
-02/24/2015  04:10 PM    &lt;DIR&gt;          Outcast
-02/24/2015  04:22 PM    &lt;DIR&gt;          Outcast-Universe
-02/24/2015  04:27 PM    &lt;DIR&gt;          Packages
-
-`
-
-# Create a workspace directory.  A [[workspace|Workspace Directory]] is where individual Packages are editted, built, unittested, and changes checked in/out of your SCM repository. For this these install instructions all workspaces will be located under `\_devel\workspaces`. The workspace `\_devel\workspace\fox` will be used/assumed for the remaining of these instructions.
-
-#&gt; `C:\_devel&gt;mkdir workspaces
-
-C:\_devel&gt;cd workspaces
-
-C:\_devel\workspaces&gt;mkdir fox
-
-C:\_devel\workspaces&gt;cd fox
-
-C:\_devel\workspaces\fox&gt;
-
-`
-# Setup the necessary Outcast and [[NQBP|http://integerfox.com/nqbp]] environment variables. Also update the command path for Outcast `bin/` directory.   //Note: There are additional Outcast [[environment variables|Environment Variables]], but since Git repositories are being used for managing the source code of the packages as well as for the Outcast Universe - the default settings are acceptable.//
-
-#&gt; `C:\_devel\workspaces\fox&gt;set OUTCAST_PKGS_UVERSE=\_devel\Outcast-Universe
-
-C:\_devel\workspaces\fox&gt;set OUTCAST_PKGS_ROOT=\_devel\Packages
-
-C:\_devel\workspaces\fox&gt;set NQBP_BIN=C:\_devel\workspaces\fox\xpkgs\nqbp
-
-C:\_devel\workspaces\fox&gt;set PATH=%PATH%;c:\_devel\Outcast\bin
-
-`
-
-# Finish preparing the `fox` workspace.  Two special directories - `xpkgs/` and `xinc/` - for ''each'' workspace are required.  The Outcast tool - `orc` can be used to create these additional directories. This step only needs to be done once in the lifetime of an individual workspace.
-#&gt; `C:\_devel\workspaces\fox&gt;orc mkwrk
-
-C:\_devel\workspaces\fox&gt;dir
- Directory of C:\_devel\workspaces\fox
-
-02/24/2015  04:38 PM    &lt;DIR&gt;          .
-02/24/2015  04:38 PM    &lt;DIR&gt;          ..
-02/24/2015  04:38 PM    &lt;DIR&gt;          xinc
-02/24/2015  04:38 PM    &lt;DIR&gt;          xpkgs
-
-`
-# Fetch source code package(s) into the `fox` workspace.  //Note: these instructions fetch both [[Colony.Core|http://integerfox.com/colony-core]] and [[Colony.Posix|http://integerfox.com/colony.posix]].  However, only one - Colony.core (for Windows) or Colony.Posix (for Linux) - needs to be fetched for a given workspace/PC.//
-
-#&gt;`C:\_devel\workspaces\fox&gt;git clone https://github.com/johnttaylor/colony.core.git
-Cloning into 'colony.core'...
-remote: Counting objects: 2490, done.
-remote: Compressing objects: 100% (999/999), done.
-remote: Total 2490 (delta 1114), reused 2469 (delta 1101), pack-reused 0
-Receiving objects: 100% (2490/2490), 3.21 MiB | 1.39 MiB/s, done.
-Resolving deltas: 100% (1114/1114), done.
-Checking connectivity... done.
-Checking out files: 100% (2680/2680), done.
-
-C:\_devel\workspaces\fox&gt;git clone https://github.com/johnttaylor/colony.posix.git
-Cloning into 'colony.posix'...
-remote: Counting objects: 3010, done.
-remote: Compressing objects: 100% (1240/1240), done.
-remote: Total 3010 (delta 1589), reused 2762 (delta 1351), pack-reused 0
-Receiving objects: 100% (3010/3010), 6.77 MiB | 1.91 MiB/s, done.
-Resolving deltas: 100% (1589/1589), done.
-Checking connectivity... done.
-Checking out files: 100% (2312/2312), done.
-
-C:\_devel\workspaces\fox&gt;dir
- Directory of C:\_devel\workspaces\fox
-
-02/24/2015  04:38 PM    &lt;DIR&gt;          .
-02/24/2015  04:38 PM    &lt;DIR&gt;          ..
-02/24/2015  04:50 PM    &lt;DIR&gt;          colony.core
-02/24/2015  04:51 PM    &lt;DIR&gt;          colony.posix
-02/24/2015  04:38 PM    &lt;DIR&gt;          xinc
-02/24/2015  04:38 PM    &lt;DIR&gt;          xpkgs
-
-`
-
-
-# Fetch and mount any/all dependencies of an individual source code Package.
-## View the current packages mounted for the workspace; and what package archives and top files available. 
-##&gt;`C:\_devel\workspaces\fox\colony.core&gt;orc ls      // display mounted packages
-
-C:\_devel\workspaces\fox\colony.core&gt;orc ls -k   // display pulled package archives
-
-C:\_devel\workspaces\fox\colony.core&gt;orc ls -n   // display package top files
-catch-main-1.0.53
-colony.core-main-1.0.0
-colony.posix-main-1.0.0
-nqbp-main-1.0.1
-nqbp-main-1.0.2
-nqbp-main-1.0.3
-nqbp-main-1.0.4
-nqbp-main-1.0.5
-
-`
-## Fetch and mount dependencies
-##&gt;`C:\_devel\workspaces\fox\colony.core&gt;orc getdeps colony.core
-
-C:\_devel\workspaces\fox\colony.core&gt;orc ls      // display mounted packages
-catch\main\1.0.53
-nqbp\main\1.0.5
-
-C:\_devel\workspaces\fox\colony.core&gt;orc ls -k   // display pulled package archives
-catch\main\1.0.53
-nqbp\main\1.0.5
-
-C:\_devel\workspaces\fox\colony.core&gt;orc ls -n   // display package top files
-catch-main-1.0.53
-colony.core-main-1.0.0
-colony.posix-main-1.0.0
-nqbp-main-1.0.1
-nqbp-main-1.0.2
-nqbp-main-1.0.3
-nqbp-main-1.0.4
-nqbp-main-1.0.5
-
-`
-
-# ''Last step!'' Build a unittest project to verify everything is okay.  The unittest projects assume that the compiler toolchain is already setup and accessible from the command line, e.g. for the Microsoft Visual Studio compiler - first run the `vcvars32.bat` batch file.
-#&gt;`C:\_devel\workspaces\fox\colony.core&gt;cd tests\Cpl\Container\_0test\windows\vc12
-
-C:\_devel\workspaces\fox\colony.core\tests\Cpl\Container\_0test\windows\vc12&gt;vcvars32
-
-C:\_devel\workspaces\fox\colony.core\tests\Cpl\Container\_0test\windows\vc12&gt;nqbp.py
-
-================================================================================
-= START of build for:  a.exe
-= Toolchain:           VC++ 12, 32bit (Visual Studio 2013)
-= Build Configuration: win32
-= Begin (UTC):         Wed, 25 Feb 2015 03:15:36
-= Build Time:          1424834136 (54ED3E58)
-================================================================================
-= Cleaning Project and local Package derived objects...
-= Cleaning External Package derived objects...
-=====================
-= Building Directory: src\Cpl\Container
-AvlTree_.cpp
-HashTable_.cpp
-Item.cpp
-Key.cpp
-=
-= Archiving: library.lib
-=====================
-= Building Directory: src\Cpl\Container\_0test
-dictionary.cpp
-...
-...
-=====================
-= Building Directory: src\Cpl\System\Win32\_realtime
-Api.cpp
-ElaspedTime.cpp
-Semaphore.cpp
-=
-= Archiving: library.lib
-=====================
-= Building Project Directory:
-main.cpp
-=====================
-= Linking...
-================================================================================
-= END of build for:    a.exe
-= Toolchain:           VC++ 12, 32bit (Visual Studio 2013)
-= Build Configuration: win32
-= Elapsed Time (hh mm:ss): 00 01:03
-================================================================================
-
-C:\_devel\workspaces\fox\colony.core\tests\Cpl\Container\_0test\windows\vc12&gt;_win32\a.exe
-
-@@ Fatal Error: Container Error: Double Insert. item=00443DC8, prev container=00443DAC, new container=00443DB4
-
-@@ Fatal Error: Container Error: Double Insert. item=00441568, prev container=00441548, new container=00441540
-
-@@ Fatal Error: Container Error: Double Insert. item=0043D660, prev container=0043D5E4, new container=0043D620
-
-@@ Fatal Error: KeyPlainType::compare(): mismatch in key lengths. this=00988060, my len=2 != 6
-
-@@ Fatal Error: KeyPlainType::compare(): mismatch in key lengths. this=0098808C, my len=2 != 6
-Map (0043DE54)
-[apple]
-[cherry]
-[orange]
-[pear]
-[pear1]
-
-@@ Fatal Error: Container Error: Double Insert. item=00443C80, prev container=0098B170, new container=0098B128
-TableStats: items=5, buckets=5, emptyBuckets=4, averagePerBucket=5.000000, maxItemPerBucket=5
-TableStats: items=0, buckets=3, emptyBuckets=3, averagePerBucket=0.000000, maxItemPerBucket=0
-TableStats: items=5, buckets=3, emptyBuckets=0, averagePerBucket=1.666667, maxItemPerBucket=3
-===============================================================================
-All tests passed (546 assertions in 4 test cases)
-
+#&gt;`set PATH=%PATH%;\_devel\Outcast\bin
 `</pre>
 </div>
 <div created="20141012031702770" modified="20141019034705283" title="LeftMenu">
@@ -10307,56 +9960,11 @@ __''//Table-of-Contents//''__
 
 &lt;div align=&quot;center&quot;&gt;&lt;iframe src=&quot;./license.txt&quot; frameborder=&quot;0&quot; width=&quot;100%&quot; height=&quot;800&quot;&gt;&lt;/iframe&gt;&lt;/div&gt;</pre>
 </div>
-<div created="20150227030534971" modified="20150227043734397" tags="Proof-of-Concept workflow" title="Managing Dependencies">
-<pre>!!The following workflow assumes the following:
+<div created="20211127202301187" modified="20211127202316447" tags="Glossary" title="Mono-Consuming-Poly Repo (MCP)">
+<pre>A [[Mono Repo|https://en.wikipedia.org/wiki/Monorepo]] paradigm is a software development strategy where code for many projects is stored in the same repository. A Poly Repo paradigm separates different projects, libraries, sub-systems, etc. into individual independent repositories  (e.g. using `git submodules`).  There are pros and cons to both approaches (just google //mono vs multi repo//).  However, in my experience neither of these approaches provided a solution that is both scalable and low overhead.
 
-* The the Outcast tools have been [[installed|Installing]] on the developer's PC and the command path has been updated to include the Outcast `bin/` directory.
-* The [[Native Outcast Universe|Package Universe]] and [[Package Directory|Package Directory]] are setup and the required Outcast environment variables have been sent to reference said locations.
-* Source code within individual packages is organized per the requirements for a [[workspace directory|Workspace Directory]], i.e. root level directories include: `top/`, `src/`, `tests/`, etc. 
- 
-!!Please review the description/definition of Outcast [[dependencies|Package Dependencies]] before proceeding.
-
-!!Modify Dependencies Workflow steps....
-# A packages dependencies can be viewed by issuing the `orc checkdeps --print` command.  ''Note:'' The `orc checkdeps` can create directed-graph diagrams if [[GraphViz|http://www.graphviz.org]] is install on your PC.
-# Additions, updates, and removals of dependencies are done using the `orc moddeps` command.  This command updates the Package's `pkg.specification` file.  The command supports/understands //immediate//, //transitive//, and //weak// [[dependencies|Package Dependencies]].  ''Note:'' the `orc moddeps` checks - with respect to a valid dependency graph - the modifications before committing the changes to the Package's `pkg.specification` file.  If the resulting dependency graph is invalid - the command will fail and the `pkg.specification` is ''not'' updated.
-
-!!Checking for Upgrades Workflow steps
-# A packages dependencies can be viewed by issuing the `orc checkdeps --print` command.  ''Note:'' The `orc checkdeps` can create directed-graph diagrams if [[GraphViz|http://www.graphviz.org]] is install on your PC.
-# To check if there are updates/upgrades to a Package's dependencies - run the `orc newer` command.  This command will provide a list of possible //upgrades//.  The developer is responsible for then using the `orc moddeps` to manually update the Package's `pkg.specification` file for any desired updates.  At this time there is ''no'' &quot;auto-upgrade&quot; command/tool.</pre>
-</div>
-<div created="20140803034158233" creator="JohnTaylor" modified="20150221161702781" modifier="JohnTaylor" tags="standards miscellaneous Overview" title="Naming Conventions">
-<pre>!Requirements:
-!!Package names 
-# Can contain letters, numbers, underscores ('_'), and periods ('.').  
-# Package names can ''not'' start with an underscore. 
-# Package names can ''not'' start with a number
-# Strongly encouraged (but not a hard requirement) to be globally unique across your Outcast //universe//.   If there is a name collision between multiple packages, only one of those packages can be used to build a given application/project.
-# Case insensitive.  This is because the package name will be used as directory name and not all file system support case sensistive names. 
-# The following names can ''not'' be used package names:
-##&lt;code&gt;xpkgs&lt;/code&gt;
-##&lt;code&gt;xinc&lt;/code&gt;
-##&lt;code&gt;top&lt;/code&gt;
-##&lt;code&gt;projects&lt;/code&gt;
-##&lt;code&gt;tests&lt;/code&gt;
-
-!! Package Fork/Branch names
-Packages can be branched and/or forked.  All packages are assumed to on the //main// branch and no additional branch/fork qualifier is used/required.  When a non-//main// branched (i.e. forked) package is used/created it must be explicated named.  
-
-# Fork names shall comply with the Package name requirements.
-# The name &lt;code&gt;main&lt;/code&gt; can ''not'' be used a fork name.
-# Fork names are //flat//, i.e. if your package is a fork of a fork  - in Outcast it is represented as a single fork/ branch name.
-
-''Note:'' A package consumer can only consume a single version and single branch/fork of a package.  If the contents of a branched/forked package is intended to be consumed along side of the original package, to Outcast the branched/forked package must be treated (i.e. named as such) as separate, unique package.
-
-!! Namespaces: C++
-
-# Strongly recommended to have globally unique C++ namespaces across your Outcast //universe//. If there is a name collision between namespaces in multiple packages, only one of those packages can be used to build an application/project.
-# A single package can contain more than one namespace
-
-!! Namespaces: C and assembler
-# C and assembler programming language do not support the concept of namespaces.  However to prevent name collisions, the concept of namespace is applied to C and assembler
-# Namespaces are implemented in C/assembler as prefix to all symbols in the global symbol table as well as any symbol in an header file.  For example: given the C++ namespace &lt;code&gt;Foo::Bar&lt;/code&gt;, the C equivalent would be &lt;code&gt;Foo_Bar_mySymbol&lt;/code&gt;.
-# All Outcast requirements for C++ namespaces apply to C/Assembler namespaces.</pre>
+The ''Mono-Consuming-Poly Repo (MCP)'' strategy is a //my project first// approach with the benefits of reusing and/or consuming packages from other repositories.  The //my project first// means that when consuming other repositories the day-to-day workflow should have no or minimal overhead over a Monorepo strategy and fully isolate //my project// from the change management of the external repositories.
+</pre>
 </div>
 <div created="20140727230105366" creator="JohnTaylor" modified="20141017031355408" modifier="JohnTaylor" tags="OO References" title="OO Articles">
 <pre>List of Articles, References, Recommend Readings, etc.  To be redundant, it is ''//strongly//'' encourage that the reader actually read these items!
@@ -10373,47 +9981,30 @@ Packages can be branched and/or forked.  All packages are assumed to on the //ma
 |[[Stable Dependencies Principle|file:./articles/stability.pdf]] |//THE DEPENDENCIES BETWEEN PACKAGES IN A DESIGN SHOULD BE IN THE DIRECTION OF THE STABILITY OF THE PACKAGES. A PACKAGE SHOULD ONLY DEPEND UPON PACKAGES THAT ARE MORE STABLE THAT IT IS.// |
 |[[Principles and Patterns|file:./articles/p_and_p.pdf]] |Summary of OO Principles and Patterns |</pre>
 </div>
-<div created="20170615030250034" modified="20170615034640160" tags="Contents" title="Other">
-<pre>&lt;h3&gt;
-&lt;ul&gt;
-&lt;$list filter=&quot;[tag[Other]sort[title]]&quot;&gt;&lt;li&gt;&lt;$link&gt;&lt;$view field=&quot;title&quot;/&gt;&lt;/$link&gt;&lt;/li&gt;
-&lt;/$list&gt;
-&lt;/ul&gt;
-&lt;/h3&gt;
-</pre>
+<div created="20211128172837987" modified="20211128173437194" tags="Glossary" title="OverlayPackage">
+<pre>An Overlay Package have their primary source tree overlaid on top of  the Primary Package's source tree when the Overlay package is adopted.  Overlay Packages provides the most scalability because:
+
+* Only the Overlay package's primary content is copied when adopted.  This prevents multiple instance of the same packaged being adopted when there are transitive dependencies.
+
+*There is single/common directory structure for the build scripts/makefile.  This means that unique compiler header search path defintions are ''not'' required for each adopted package.
+
+*The Overlay package's unit tests are buildable/executable within the Primary package's repository without modifications.</pre>
 </div>
-<div created="20210705202913625" modified="20210705211245787" tags="[[Directories &amp; Files]] Directories" title="outcast/ directory">
-<pre>!!TODO
-The `outcast/` directory is not under SCM (e.g. add to the .gitignore file)
+<div created="20211009212456792" modified="20211128173932559" tags="Contents" title="Overview">
+<pre>Outcast is a proof of concept for implementing a hybrid [[Mono-Consuming-Poly Repo (MCP)|Mono-Consuming-Poly Repo (MCP)]] paradigm to provide a solution to the problem: ''//how to manage, in a team environment, a scalable reusable code base?//''
 
-Directory is a workspace for updating the pkg.* files.  Initial publish - the files are created using orc.  On subsequence published - the 'previous' files are 'extracted' - then updated as part of the publishing process.
+A [[Mono Repo|https://en.wikipedia.org/wiki/Monorepo]] paradigm is a software development strategy where code for many projects is stored in the same repository. A Poly Repo paradigm separates different projects, libraries, sub-systems, etc. into individual independent repositories  (e.g. using `git submodules`).  There are pros and cons to both approaches (just google //mono vs multi repo//).  However, in my experience neither of these approaches provided a solution that is both scalable and low overhead.
 
-How to define 'previous' when branching is involved?
+The ''Mono-Consuming-Poly Repo (MCP)'' strategy is a //my project first// approach with the benefits of reusing and/or consuming packages from other repositories.  The //my project first// means that when consuming other repositories the day-to-day workflow should have no or minimal overhead over a Monorepo strategy and fully isolate //my project// from the change management of the external repositories.
 
-What about non pkg.* file content?
+Outcast assumes the following logical relationship with respect to reusing packages and SCM repositories.  The ''primary'' package is original content of the repository.  The ''adopted'' packages are copies of other repositories' primary package.
 
-* not really scalable to a commercial tool - but I vote for a single tiddlewiki page and any support files
+[img[./documentation/repo-package-relationship.svg]]
 
 
-Is outcast/ a directory? or is it a temp directory?
+As with the original Outcast project, Outcast 2.0's first step is/was to create a set of tools as a proof-of-concept to realize the day-to-day workflow for developers to create and consume reusable code; and for that workflow to be scalable into large team environment.  
 
-* temp directory
-* pkg.* is essential meta data
-** implies a single source of truth for meta data, i.e. a Universe is SCM repo
-*** Could the SCM Branching be used to manage branching of packages? I am going to say no.  The meta data is 'global' - not physically branched when a package is branched
-*** The branch.log file must be a single file (i.e. not branched in the SCM)
-*** What about //private forks//? How does this work/compatible with  a single source of truth for the meta data?
-
-* `top/` is user managed content for the package file - is under SCM control (I.e. updated prior to publishing)</pre>
-</div>
-<div created="20140726152202471" creator="JohnTaylor" modified="20150226023527895" modifier="JohnTaylor" tags="Contents" title="Overview">
-<pre>Outcast is a project that was started as part of [[Project Eden|http://www.integerfox.com/#Eden]].  Outcast is for the lack of better term - a software development paradigm- that encompasses SCM and build processes, requirements trace-ability, design methodologies, unit testing, programming languages, and documentation. All this was a result of trying to solve the problem of how to manage, in a team environment, a scalable reusable code base.
-
-''So all of the above means what...?''  The first step is/was to create a set of tools as part of a proof-of-concept to realize the day-to-day workflow for developers to create and consume reusable code; and for that workflow to be scalable into large team environment.  The second step is to validate (or invalidate) and refine the workflow by creating and reusing //real// code.  This is where the various [[Colony.*|https://github.com/johnttaylor]] Github projects come into the picture.  The last step of the proof-of-concept will be to explore ways to incorporate/facilitate requirements traceability into the workflow.  
-
-The [[Outcast repository|https://github.com/johnttaylor/Outcast]] on Github contains a collection of Python scripts for the proof-of-concept tools.  All of these tools/scripts are command line based and run on both Windows and Linux.
-
-!!! The overview of the Outcast proof-of-concept is is described [[here|Proof-of-Concept]].
+The Outcast 2.0 scripts and tools are contained in the [[Outcast repository|https://github.com/johnttaylor/Outcast]] on the `master` branch (''note:'' the original Outcast 1.0 tools are availabe on the 'outcast-1.0 branch).  All of these tools/scripts are command line based and run on both Windows and Linux.
 
 !!!More
 &lt;h3&gt;
@@ -10425,42 +10016,24 @@ The [[Outcast repository|https://github.com/johnttaylor/Outcast]] on Github cont
 
 {{LeftMenu}}</pre>
 </div>
-<div created="20150227030637064" modified="20150412040855400" tags="Glossary Overview" title="Package Dependencies">
+<div created="20150227030637064" modified="20211128170532860" tags="Proof-of-Concept Glossary Overview" title="Package Dependencies">
 <pre>Packages can and do depend on other Packages.  When consuming/using a package - you become dependent not only that specific package - but all of it dependencies.  This creates dependency graphs which can be potentially quite complex and/or deep. Part of the Outcast concept to manage - in a user friendly manner - the dependency trees of Packages.
 
-Outcast has two __types__ of dependencies - //''immediate''// and //''transitive''//. An //immediate// dependency is where package B directly references package C, e.g. source code in package B has `#include` to a header file in package C.  In fact for C/C++ code all `#include` statements define the package's //immediate// dependencies.  A //transitive// dependency is a functonal dependency which holds by the virtue of transitivity.  For example: package B directly references package C, and package C directly references package Z -  therefore due to the transitive nature of dependencies - B is dependent on package C and Z where the dependency on Z is considered a //transitive// dependency.
+!!! Dependency Types
+There are two __types__ of dependencies - //''immediate''// and //''transitive''//. An //immediate// dependency is where package B directly references package C, e.g. source code in package B has `#include` to a header file in package C.  In fact for C/C++ code all `#include` statements define the package's //immediate// dependencies.  A //transitive// dependency is a functonal dependency which holds by the virtue of transitivity.  For example: package B directly references package C, and package C directly references package Z -  therefore due to the transitive nature of dependencies - B is dependent on package C and Z where the dependency on Z is considered a //transitive// dependency.
 
+The current Outcast tools only supports specifying //''immediate''// dependencies, i.e. the `orc adopt` command creates an immediate dependency for primary package.  This means that the user is required to satisfy (i.e. adopt additional packages) to satisfy all transitive dependency that result when adopting a package
+
+* For example: given the primary package is `A`.  Package `A` adopts package `B`.  Now package `A` has an immediate dependency on package `B`.  However, package `B` has an immediate dependency on package `C`.  This means that package `A` will need to also adopt package `C`.
+
+The Outcast command `orc deps`  provides dependency checking to assist the user in identifying what packages need to be adopted to satisfy all transitive dependencies.
+
+* ''Note'': the Outcast allow/support adopting //non-Outcast// package as //Readonly// or //Foreign// packages.  However, non-Outcast packages do not contain the dependency meta data (in a form the tools understand)  to properly manage dependencies.
+
+!!! Strong vs. Weak Dependencies
 Outcast also  has two __classification__ of dependencies - //''strong''// and //''weak''//.  The difference between a //strong// and a //weak// dependency is that a Package's //weak// dependencies to do ''not'' transfer to consumer(s) of the Package.  This means that if package A has a strong dependency on package B and a weak dependency on package C; then if package Z uses/depends on package A - package Z is dependent on packages A and B; and ''not'' C. The concept of weak dependencies allows a package to have dependencies that are only required for its unittests and not impose a transitive dependency on to its consumers.  This is helpful to prevent cyclic dependency trees and/or to allow a platform independent package to be unittested against specific platforms.
 
-''TO BE flushed out in detail''
-
-*weak dependency can conceptually and literally introduce cyclic dependencies.
-** The tools will need to be update to deal with this (currently they handle some of the cases - but not all of cases)
-** This okay - or at least rationalized as okay - because weak are for dependencies are for supporting unittests not for when being consumed by other packages.
-** However the cyclic dependencies cause a problem at publish time, i.e. a chicken-n-egg thing (duh!)
-*** This argues for the tools to support the concept of publishing even with incomplete/undefined dependency - ''but only'' for incomplete/undefined weak dependencies.
-* add the concept of a //Pending// published package state (using the same mechanism that deprecates/deletes packages)
-** add new command that will resolve the //incomplete dependencies// and move published packages out of the //Pending// states.
-** A package published with incomplete/invalid weak dependencies would be an example of a published package in the //pending// state.  
-*** Any package that is published and depends/references a package in the //pending// state --&gt;is put in the //pending// state
-* First pass at updating tools
-** Tools updated to not generate an error for all weak-cyclic use cases.
-*** Will generated a warning when pkg A has weak dependency on pkg B and pkg B has a strong dependency on pkg A.
-** Still working on how to publish when a change(s) are made to multiple packages and there is weak cyclic dependency condition between the packages involved.
-*** Work Around: two stage publish and then deprecate the intermediate/incorrect published package(s).  For example:
-***&gt;Given A-1.0.2 w:-&gt; B:1.0.0 and B:1.0.0 s:-&gt;A-1.0.0
-***&gt;Make changes to both A &amp; B
-***&gt;Publish A-1.0.3 ''without'' updating the weak dep on B and ''without'' building or testing (because the changes to B are missing)
-***&gt;Publish B-1.0.1 with strong dep s:-&gt;A-1.0.3
-***&gt;Publish A-1.0.4 with weak dep w:-&gt;B:1.0.1
-***&gt;Deprecate A-1.0.3
-
-
-
-
-
-
-</pre>
+The `orc adopt` command defaults to adopting packages as strong dependencies.  The command's `--weak` option is used to specify the adoption is a weak dependency.  In addition, the `orc deps mv` command can be used to toggle a existing adopted dependency between strong and weak.</pre>
 </div>
 <div created="20140821013917558" creator="JohnTaylor" modified="20150221161151861" modifier="JohnTaylor" tags="Overview" title="Package Granularity">
 <pre>Determining the granularity of package (i.e. the amount of code in a package) can be difficult, especially when first starting out with packages.  Every team, organization, code base, package, etc. is different and there is no single right answer.  Unfortunately there are many wrong answers.  The list below contain formal theory, general suggestions, and/or concepts to think about when selecting granularity of packages.
@@ -10479,119 +10052,37 @@ Outcast also  has two __classification__ of dependencies - //''strong''// and //
 ** Package boundaries often decouples the ''//who//'' works on individual packages, i.e. team A works on package Y, and team B works on package X.  How well, how heavy/light weight the communication is between the teams will directly contribute to how effectively the organization deals with breaking changes.
 * Package granularity ''can'' be changed latter (albeit as a breaking change).  A //large// package can be broken down into smaller packages at a latter date, i.e. when the package contents are mature and/or stable.  Conversely a collection of //small// packages can be combined into single larger package, i.e. early in the code's life cycle and wanting to minimize the process overhead due to the volatility of the code.</pre>
 </div>
-<div created="20140810163602721" creator="JohnTaylor" modified="20150221160402795" modifier="JohnTaylor" tags="Files [[Directories &amp; Files]]" title="Package Specification File">
-<pre>The &lt;code&gt;package.spec&lt;/code&gt; file is a text file that is used to describe the package with respect to it dependencies. 
+<div created="20211127203303963" modified="20211127204703003" tags="Overview Glossary" title="Package Volatility">
+<pre>When developing a new package be ''judicious'' when making the package available for //resuse//, i.e. publishing the package for consumption by others.  Or said another way, ''don't publish a new package until it is mature'' and you have no planned breaking changes in the work in the immediate future. Yes breaking changes do and will occur with mature packages, but dealing with breaking changes on a weekly basis is counter productive.
 
-* The file is located in package's &lt;code&gt;top/&lt;/code&gt; directory.
-* Contains the package's version number.
-* Enumerates the package's immediate dependencies.
-* Enumerates the package's (if any) [[weak depdendencies|Weak Dependencies]].
-* Enumerates the package's (if any) [[transitive depdendencies|Transistive Dependencies]].
-
-//''Note: Do __not__ manually edit the 'dependency' sections of this file.''// Always use the Outcast tools to ensure that your //dependency// sections are correct and consistent.
-
-!!File Format
-```
-[info]
-name:     &lt;mypackage_name&gt;
-version:  &lt;major&gt;.&lt;minor&gt;.&lt;patch&gt;[-&lt;prerel&gt;]
-desc:     &lt;summary_description....&gt;
-owner:    &lt;owner_name&gt;
-email:    &lt;owner_email&gt;
-url:      &lt;owner_url&gt;
-
-[immediate_deps]
-&lt;pkgname&gt;/[&lt;branch&gt;]/&lt;vernum&gt;
-...
-
-[weak_deps]
-&lt;pkgname&gt;/[&lt;branch&gt;]/&lt;vernum&gt;
-...
-
-[transitive_deps]
-&lt;pkgname&gt;/[&lt;branch&gt;]/&lt;vernum&gt;
-...
-```</pre>
+If you have new code that you ''know'' will be its own package in the future - the recommendation is to start the 'new code' as part of the repository of the project that will be the first consumer of the new code.    Once this code has matured - then you can spin it off into its own repository/package.  In addition - if you make the new repository/package as a adoptable [[overlay package]] then it will be transparent (to the build scripts, etc.) to the original first-consumer repository when switching over from //owning// the new package's code to //adopting// the new package.</pre>
 </div>
-<div created="20140830150542417" creator="JohnTaylor" modified="20180713005728909" modifier="JohnTaylor" tags="Glossary" title="Package Universe">
-<pre>A Package universe is repository of  [[package top|Types Of Files]] files.  Within the Outcast paradigm, any package that is intended to be reused/shared, must be published to a package universe.
-
-!!There are two categories of Package Universes:
-* ''Native Universe''.  
-** Functions as a filesystem accessible cache for searching published packages.
-*** Site/group/machine specific staging area for publishing packages
-* ''Foreign Universe''. 
-** Can be located anywhere.  Foreign universes can be private to an organization, business unit, etc. or they can be public, e.g. public accessible via the internet.
-!!Contents of Package Universe
-* A default [[vault file|Types Of Files]]
-* Zero or more [[package top|Types Of Files]] files
-** Zero or one package [[vault file|Types Of Files]] associated with individual package top file.
-[img[./documentation/universecontent.svg]]
-
-!!Package Universe Types
-* The mechanism for hosting and transferring files in/out of package universe can be anything. The initial/first supported universe type uses [[git|http://www.git-scm.com]] for a package universe repository.
-</pre>
+<div created="20211128170929199" modified="20211128174107030" tags="Glossary" title="Primary Package">
+<pre>A Primary package contains the original source code for a SCM repository, i.e. the contents of 'why' the repository exists.</pre>
 </div>
-<div created="20140822024948419" creator="JohnTaylor" modified="20150221160653351" modifier="JohnTaylor" tags="Glossary" title="Package Vault">
-<pre>An Outcast Package Vault is a repository of [[package archive|Types Of Files]] files.  </pre>
+<div created="20140726152202471" creator="JohnTaylor" modified="20211127202219098" modifier="JohnTaylor" tags="Overview" title="Project History">
+<pre>Outcast is a project that was started as part of [[Project Eden|What is Eden?]].  The first incarnation of Outcast was ambitious in that it attempted to create a software development paradigm that encompasses SCM and build processes, requirements trace-ability, design methodologies, unit testing, programming languages, and documentation. This lofty scope was a result of trying to solve the problem of how to manage, in a team environment, a scalable reusable code base.  The current goals/scope for Outcast (well Outcast 2.0) is to provide a solution for a [[Mono-Consuming-Poly Repo (MCP)]] paradigm.  The change of direction was the direct result of the original Outcast proof-of-concept and lessons learned.  Depending on your point-of-view, the original Outcast either was a success because of what as learned; or it was an epic fail ;-).  
+
+Okay [[MCP|Mono-Consuming-Poly Repo (MCP)]] is a mouthful, but the ultimate problem that Outcast is trying solve is the original problem statement of: ''//how to manage, in a team environment, a scalable reusable code base?//''.  The claim is that MCP provides a low-overhead solution to this problem.
+
+Click [[here|Why Outcast 2.0?]] for the gory details on why the change in scope.</pre>
 </div>
-<div created="20140803155258448" creator="JohnTaylor" modified="20150221160727147" modifier="JohnTaylor" tags="[[Directories &amp; Files]] Directories Glossary" title="Packages Directory">
-<pre>The &lt;code&gt;packages/&lt;/code&gt; directory is a local (to the development machine) repository of retrieved packages.  There can be many versions of single package in the &lt;code&gt;package/&lt;/code&gt; directory and it is up to the individual [[Workspaces Directories|Workspace Directory]] to select which instance of package to use/consume.  There is only ''one'' &lt;code&gt;packages/&lt;/code&gt; directory per development machine and it can be shared across many users and many [[Workspaces Directories|Workspace Directory]]  .
- 
-
-!!The packages/ directory has the following structure/organization
-
-@@.dirtree
-*`&lt;packages&gt;`
-**`&lt;pkgname&gt;` ; Name of external Package
-***`&lt;branch&gt;` ; Branch name ('//main//' if not branched)
-****`&lt;vernum&gt;` ; Version number
-***** `top` 
-***** `projects` 
-***** `src`
-***** `tests` 
-**`&lt;pkgname 2&gt;`
-***`&lt;branch&gt;`
-****`&lt;vernum&gt;`
-***** `...` 
-@@
-
-</pre>
-</div>
-<div created="20180707144121932" modified="20180707144613070" tags="Tools" title="Permission to make symbolic links">
-<pre>The following are instructions to grant a user or permission group the privilege to create symbolic links without having Administrator access.
-
-''Note:'' Symbolic links under Windows is only supported on Windows 7 or newer versions.
-
-If you are not joined to a domain, you can use secpol.msc.
-
-# Press `Start`
-# type secpol.msc
-# Press `Enter`
-# Computer configuration → Windows Settings → Security Settings → Local Policies → User Rights Assignment → Create symbolic links
-# Right click on 'Creat Symoblic links' and select 'Properties'
-# Add users/groups as needed</pre>
-</div>
-<div created="20150226020724233" modified="20150227030449496" tags="Overview Contents" title="Proof-of-Concept">
+<div created="20150226020724233" modified="20211127211143479" tags="Contents" title="Proof-of-Concept">
 <pre>!!Basic assumptions and/or requirements.
 # THE GRANULE OF REUSE IS THE GRANULE OF RELEASE. ONLY COMPONENTS THAT ARE RELEASED THROUGH A TRACKING SYSTEM CAN BE EFFECTIVELY REUSED. (aka the [[The Reuse/Release Equivalence Principle|OO Articles]]).
 # Reuse will be at the source code level
 # A //Package// will be the unit of reuse/release.
 # [[Semantic versioning|http://semver.org]] shall be used identify and manage the released versions of Packages.
 # An application can consume one or more Packages.
-# The developer and the organization shall have the ability to develop/build from released Packages ''and/or'' unreleased source code directly from the SCM repository (or any mix of Packages and unreleased source).
 # The mechanism for releasing, storing, searching Packages must be scalable to a large number of Packages as well a large number of releases per Package.
-# Automated Package dependency management.
 # Do not replicate or duplicate the functionality of a [[SCM Tool|https://en.wikipedia.org/wiki/Software_configuration_management]].  Outcast should be a complimentary tool, not an alterntive/replacement for SCM tools.
 # Must be [[SCM Tool|https://en.wikipedia.org/wiki/Software_configuration_management]] agnostic
 ## Must support releasing source code from many/different SCM branches (can not assume code is only released on //main//.
 # Must be host platform agnostic, i.e. must run on Windows, Linux, etc.
 
 !!High level implementation...
-* Git is the default SCM repository for both managing published packages as well as individual source code packages.  The Outcast tools allow other SCM tools - but only Git is/has been implemented.
-* The [[NQBP|https://integerfox.com/nqbp]] build engine is used as the default build engine for releasing/publishing packages.  The Outcast scripts are designed to support any build engine - however the build engine is required to support the [[Workspace Directory|Workspace Directory]] organization, specifically the `xpkgs/` and `xinc/` concept/directories.
-* Automating the actual build/release process is not officially part of the Outcast proof-of-concept, however [[Jenkins|http://jenkins-ci.org/]] is used internally for publishing/releasing all Packages that have a Windows host platform. //Note: __publishing__ a Package __is__ automated as part of the proof-of-concept - just not the integration with a 'build machine'.//
-* A Released Package has two outputs - a [[top file|Types of Files]] and a [[archive file|Types of Files]].  The //top// file contains the essential information of Package and is what is published to [[Foreign Outcast Universe|Package Universe]]. //Top// files are searched when evaluating Package dependencies. The intent/goal here is to reduce the footprint to minimize the performance impact when the number of Packages/Releases gets large.  The //archive// file contains the entire Package contents and is only retrieved when consuming a Package.  The //archive// file is what is published/pushed the [[Package Vault|Package Vault]].
+* Git is the default SCM repository for source code packages.  The Outcast tools allow other SCM tools - but only Git is/has been implemented.
+* Automating the actual build/release process is not part of the Outcast proof-of-concept.
 * There is a collection of Python [[scripts|Tools]] that implement the proof-of-concept.  The `orc` script is primary tool that a developer would use.  The remaining tools - while stand alone - provide functionality in support of `orc` sub-commands.
 
 !!Workflows for the Outcast proof-of-concept
@@ -10602,23 +10093,55 @@ If you are not joined to a domain, you can use secpol.msc.
 &lt;/ul&gt;
 &lt;/h3&gt;</pre>
 </div>
-<div created="20150226041118499" modified="20150226041153413" tags="Proof-of-Concept workflow" title="Publish Workflow">
+<div created="20150226031550108" modified="20211128152031023" tags="Proof-of-Concept workflow" title="Publish a Package">
 <pre>!!The following workflow assumes the following:
 
 * The the Outcast tools have been [[installed|Installing]] on the developer's PC and the command path has been updated to include the Outcast `bin/` directory.
-* The [[Native Outcast Universe|Package Universe]] and [[Package Directory|Package Directory]] are setup and the required Outcast environment variables have been sent to reference said locations.
-* Source code within individual packages is organized per the requirements for a [[workspace directory|Workspace Directory]], i.e. root level directories include: `top/`, `src/`, `tests/`, etc. 
+* The SCM for the primary package is GIT
+
  
 !!Publish Workflow steps....
-</pre>
+
+# The source-code/changes are completed and ready to submit a pull request.
+
+# Use the `orc info` command to set the package's basic information.      
+#* NOTE: this step only needs to be performed ONCE during the life of the     package (or on change of the package's information).
+
+# If the package is intended to be adopted as an //overlay// package, use the `orc dirs set` command to set the package's primary directories.
+#* NOTE: this step only needs to be performed ONCE during the life of the     package (or on change of the package's primary directories ).
+
+# If the package is intended to be adopted as an //overlay// package, use     the `orc dirs xset` command to set the package's 'adopted-extra' dirs.     
+#* NOTE: this step only needs to be performed ONCE during the life of the     package (or on change of the package's adopted-extra directories ).
+
+# If the package is intended to be adopted as an //overlay// package, edit     (or create) the package's `ignore-dirs.lst` file.  Populate the file as     needed.
+#*  NOTE: this step only needs to be performed ONCE during the life of the package (or on change of the package's ignore directories ).
+
+# Run the `orc publish` command to specify the semantic version information  and brief description of what is being published.
+
+# Commit and push changes to the package's Outcast files.
+
+# Create the pull request for publishing the source-code/changes.
+
+#  Complete the pull request process and merge the PR into its parent     branch.
+
+# If the parent branch is not a //release// branch, then propagate the merged changes to the //release// branch
+
+# Create a Tag/label - with the same semantic version information from     step 6 - and apply the tag/label to the //release// branch from step  9 (or 10).
+#*  Note: make sure that the tag gets pushed back to the           package's origin (e.g. `git push origin MY-TAG-Maj.Min.Patch`)</pre>
 </div>
-<div created="20141017030416459" modified="20141017031409346" tags="Contents" title="References">
+<div created="20211128172016483" modified="20211128173447414" tags="Glossary" title="Readonly Package">
+<pre>A Readonly Package is specialized [[Foreign Package]] with the following characteristics:
+
+* The content are read only, i.e. &quot;&quot;not&quot;&quot; editable 
+* Can be easily switched to other version(s)/branches from their original source repository.
+
+An example of Readonly Package would be third-party graphic package where ongoing updates/enhancements are expected from the package's vendor.</pre>
+</div>
+<div created="20141017030416459" modified="20211127205533908" tags="Contents" title="References">
 <pre>&lt;h2&gt;
 
 * [[OO Articles]]
-* [[Doxygen Manual|file:./references/doxygen_manual-1.8.7.pdf]] 
 * [[Sematic Versioning|http://www.semver.org]]
-*[[GraphViz|http://www.graphviz.org]]
 
 &lt;/h2&gt;</pre>
 </div>
@@ -10685,15 +10208,7 @@ While I don't believe in //one SDLC process to rule them all// - I do have stron
  
  </pre>
 </div>
-<div created="20210705202726712" modified="20210705202907218" tags="[[Directories &amp; Files]] Directories" title="Source Code Organization">
-<pre>!!TODO
-Source is organized by namespace (For C code this is a convention).  
-
-Conceptually all code (internal + external) exists under  a single `src/` directory.  
-
-Put excepts from PIM here</pre>
-</div>
-<div created="20150224215003080" modified="20150226030134115" tags="Contents" title="Tools">
+<div created="20150224215003080" modified="20211128150206747" tags="Proof-of-Concept" title="Tools">
 <pre>A set command line tools have been created to manage and publish packages as part of the Outcast proof-of-concept.  Below is an overview of these tools.  
 
 These tools use a small number of environment variables.  A description of the these variables can be found [[here|Environment Variables]]
@@ -10701,80 +10216,36 @@ These tools use a small number of environment variables.  A description of the t
 |greenaltrows |k
 |Name |Description |h
 |orc |Is used to manage packaging and/or workspaces. `orc` contains numerous sub commands.  Set below for a sample list of sub commands.  To get the current list type: `orc help` |
-|ceres |Is used for managing Outcast Universes.  `ceres` contains numerous sub commands.  Set below for a sample list of sub commands.  To get the current list type: `ceres help`  |
 |evie |Is a wrapper for invoking the SCM tool being used.  This allows the core Outcast tools to be independent of actual SCM tool being used to store the source code and Outcast Universes. `evie` contains numerous sub commands.  Set below for a sample list of sub commands.  To get the current list type: `evie help` |
-|bob |Is a wrapper for building one or more projects .  The `orc publish` command uses the `bob` script to build all of a package unittest projects as part of the publish sequence. |
-|chuck |Is a wrapper for invoking a package's automated unit tests. The `orc publish` command uses the `chuck` script to execute all of a package unittest projects as part of the publish sequence. |
-|nqbp |[[NQBP|http://integerfox.com/nqbp]] is the original build engine for Outcast. It supports Outcast's [[workspace|Workspace Directory]] organization |
 -----
 
 !!! `orc` sub command table
 
 |solidborders|k
 |command |description |h
-|archive     |Archive file operations. |
-|bhist        |Lists the branch history of a Package. |
-|cat          |Displays content of Package Top files. |
-|checkdeps    |Checks a pkg.specification file for valid dependencies. |
-|getdeps      |Pulls and Mounts dependent Packages. |
-|ls           |Lists the mounted packages and available packages. |
-|lsvault      |Lists packages in the specified Package Vault. |
-|mkspec       |Creates a template pkg.specification file. |
-|mktools      |Creates a template tools/ directory. |
-|mkvault      |Creates a template Package Vault file. |
-|mkwrk        |Creates a Workspace directory. |
-|moddeps      |Adds, updates, and deletes a Package's dependencies.  |
-|mount        |Mounts a Package into the current workspace's 'xpkgs/' directory.  |
-|namespaces   |Check for namespace collisions in the current workspace. |
-|newer        |Checks if there are newer dependent packages available. |
-|publish      |Publishes a Package to the Native Outcast Universe. |
-|pullv        |Pulls a Package Archive from a Package Vault. |
-|pushv        |Pushes a Package Archive to one or more Package Vaults. |
-|rmpkg        |Marks a published package as Do-Not-Use or deprecated. |
-|rmvault      |Removes a Package Archive from one or more Package Vaults. |
-|top          |Creates a package top file for a local package. |
-|umount       |Unmounts a Package from the current workspace's 'xpkgs/' directory. |
-|which        |Displays branch/version information of a mounted package. |
-
-
-!!! `ceres` sub command table
-
-|solidborders|k
-|command |description |h
-|commit       |Commit changes of the Package Universe metadata files. |
-|distribute   |Distributes the Package Top file to Package Universes. |
-|lock         |Locks one or more Native Package metadata files. |
-|refresh      |Updates the Native Package Universe from the Foreign UVerse. |
+|adopt |Adopts an external package. |
+|cat |Displays information for a package. |
+|deps |Checks and manages a package dependencies. |
+|dirs |Manages my package's 'Owned' directories. |
+|info |Sets/updates the package description and information. |
+|ls           |Lists the adopted packages. |
+|mv |Moves existing readonly or foreign adopted packages. |
+|publish |Publishes the Primary package. |
+|rm |Removes an adopted package. |
 
 
 !!! `evie` sub command table
 
 |solidborders|k
 |command |description |h
-|archive      |Archive a Package without SCM metadata. |
-|checkin      |Checks in one or more files to the SCM repository. |
-|checkout     |Checks out one or more files from the SCM repository. |
-|label        |performs various SCM label operations. |
-|pending      |Checks if there are any pending check ins and/or checked out files. |
-|revert       |Reverts/cancels the checkouts for the speficied files. |
-|sync         |Sync's the workspace with the SCM Repository. |
+|copy |Creates a non-tracked/local copy of a SCM Repository. |
+|findroot |Returns the root directory of the current local repository. |
+|mount |Creates a semi-tracked/local copy of a SCM Repository. |
+|rm |Removes a previously copied SCM Repository. |
+|umount |Removes a previously mounted SCM Repository. |
+|update |Updates a previously mounted SCM Repository. |
 
 </pre>
-</div>
-<div created="20140824162849115" creator="JohnTaylor" modified="20180714154247185" modifier="JohnTaylor" tags="Directories [[Directories &amp; Files]]" title="Top Directory">
-<pre>The &lt;code&gt;top/&lt;/code&gt; directory contains all of the information that Outcast needs (on a per package basis) to manage packages.  Within the Outcast tools, the contents &lt;code&gt;top/&lt;/code&gt; directory is accessible/browse-able without having to retrieve the entire package contents.  Because of this partitioning, it is recommend that a certain amount of documentation, help, faq, etc. information is included as well.
-
-!!Required files
-|File Name |Comments |h
-|^[[package.spec|Package Specification File]] |Identifies the package and its dependencies |
-|^[[export_headers.lst|Export Headers File]] |List of public-to-the-package header files, i.e. the list of header files to expose/export when the package is being consumed.  This file is optional. When not present all header files are exposed/exported. |
-|^change.log |Publish history of the package.  Note: Does not contain promotion history. |
-|^promotion.log |Optional. Log of promotions.  Append only.  Not sorted, i.e records out-of-time-sequence. |
-|^[[branch.log|Branch Log]] |Optional. Log of branches. Append only.  Not sorted, i.e records out-of-time-sequence. |
-|^tools/build |A Python script that //builds// the content of the package.  This script is called as part of the //publish// process to verify that package content //compiles//.  If build fails, the publish process is aborted. |
-|^tools/clean |A Python script that removes all derived objects from the package.  This script is called as part of the //publish// process to ensure that no derived objects get included in the published package content. |
-|^tools/test |A Python script that executes zero or more tests against the package contents.  This script is called as part of the //publish// process to verify the validity of the package contents. If any of the test(s) fail, the publish process is aborted. |
-|^compilers/|Contains a set of script files used to configure and/or set the environment for the various compiler toolchains used by the package //owner// for building the package's projects and unittest applications. |</pre>
 </div>
 <div created="20141019034755923" modified="20180707181825746" tags="$:/tags/TopLeftBar" title="TopButtons">
 <pre>&lt;div class=&quot;tc-page-controls tc-toolbar&quot;&gt;
@@ -10790,50 +10261,26 @@ These tools use a small number of environment variables.  A description of the t
 {{$:/core/ui/Buttons/close-all}}
 &lt;div&gt;</pre>
 </div>
-<div created="20140822025142053" creator="JohnTaylor" modified="20150221160412235" modifier="JohnTaylor" tags="Files [[Directories &amp; Files]]" title="Types Of Files">
-<pre>The following table is summary of different types of files in Outcast
+<div created="20211009205703913" modified="20211010192716748" tags="Overview" title="What is Eden?">
+<pre>Eden is an art project that my wife Sally and I started. Sally is high school art teacher and I am a software engineer turned software manager. We would have discussions about art, her personal artwork, our children artwork and how everyone but me had &quot;art&quot; on the walls in our home. This inevitably lead to talking about creativity and problem solving skills required to design and write software vs. the creativity and problem solving skills to create traditional art. We would both comment on how everyone has different degrees of ability when it comes to creativity and problem solving (okay, I admit I did more than my fair share of ranting over the lack of ability on the part of some the developers I have come across in my career. Don't even get me started on why some developers can't grasp that the concept of a consistent white-space style is a good thing). It also lead to her off hand (or infamous) boast of &quot;I can a make art out of anything&quot;. I immediately replied with, &quot;Fine. Make art from my source code&quot;.
 
-|File Type |File Name/Extension |Description |h
-|top, or package top | ''.top'' |A //top// file is tar/zip file of a package's &lt;code&gt;top/&lt;/code&gt; directory.  The //top// file is intended to contain all of the essential information of package.  //Top// files for example contain the package's version info, dependencies, package summary, etc. |
-|archive, or package archive | ''.tar'', ''.gz'', ''bz2'', ''.zip'' |An //archive// file is typically a compressed tar file that contains the entire contents of a package. |
-|[[Export Headers File|Export Headers File]] | ''export_headers.lst'' |The [[export header file(s)|Export Headers File]] are used to enumerate which headers file in a package are exposed as the public interface of the package (i.e. what header files will be accessible by consumers of the package |
-|[[Pacakge spec|Package Specification File]] | ''package.spec'' |The //package spec// file is where the package's name, version, owner, and dependency information is formally stored. |
-|vault file | ''.vault'' |A configuration file that contain information to access a Package Vault. The file must contain at least one //vault//.  It can also contain many secondary/mirror vaults. |
-|default vault | ''default.vault'' |A vault file contained in a [[Native Package Universe|Package Universe]] that specifies the default vault(s) to use when publishing/installing package archives. |
-|[[Branch log|Branch Log]] | ''branch.log'' |Contains the branch history of package. |</pre>
+As we talked more about the idea, it became apparent to me that for my part, the &quot;source code&quot; would have to be something meaningfully. To me the goal, or art of software engineering is solving not just a specific problem, but to solve that problem in such a way that it can be extended to many problems, i.e. the difference between a one-off vs. a platform implementation. This meant that the source code component of Project Eden would have to be complete and have a non trivial purpose in the context of software development. And so began [[SW-Eden|SW-Eden]].
+
+But the story does not end there. After many months working [[SW-Eden|SW-Eden]] I finally had something to give to my wife for her to do here part. Well, as it turns out, creating art &quot;..out of anything&quot; is hard. So she kept putting off working on ~ProjectEden. In the mean time, I took a new job, we moved north, and as you expect life happens and ~ProjectEden went on hold. During this time I would occasionally bring up our &quot;art project&quot;, but no more progress was made. Being frustrated on the show-n-tell part of the project (everyone wants some form of recognition) - I continued to ponder on the topics of frameworks, software architecture, object oriented design, and how to manage a reusable code repository in a team environment. Then very unexpectantly, our lives where turned upside down, and as a result we loaded up the truck so speak and moved back south. At this point, I finally decided to do something concrete with my musing and so began [[Overview]]. </pre>
 </div>
-<div created="20140803153042238" creator="JohnTaylor" modified="20210705211328328" modifier="JohnTaylor" tags="Directories [[Directories &amp; Files]] Glossary" title="Workspace Directory">
-<pre>!!An Outcast workspace has the following structure/organization
+<div created="20211010162721806" modified="20211127205334022" tags="Overview" title="Why Outcast 2.0?">
+<pre>''TL;DR:'' Managing, publishing, consuming dependent packages is ''complex and painful''.
 
-@@.dirtree
+''The long version:'' The original version of Outcast had progressed to where I could use scripts to for day-to-day develop, perform CI builds, and published packages for the [[Colony.* eco-system|http://integerfox.com/colony.core/]]. It worked well for day-to-day development - but getting the CI builds stood up and the hassle of published packages was ''not'' for the faint of heart.   Package management is complicated and there is no one-size-fits all solution even when the scope is bounded by C/C++ projects in the embedded space. My experience with Outcast was that it would force adopters to use a &quot;size 9&quot; solution for package management - and that defeated the whole //scalable// thingy of the original problem space.
 
-*`&lt;WorkspaceRoot&gt;`
-**`xpkgs` ; Root directory for loaded external packages
-***`&lt;symlink_ext_pkg#1&gt;` ; Symbolic link to an external Package in the //'packages/'// directory
-**** `outcast` ; External Package's Outcast pkg info 
-**** `src` ; External Package's  source directories
-**** `top` ; External Package's  top directory
-**** `...` ;External Package's specific directories 
-***`&lt;symlink_ext_pkg#2&gt;` ; Symbolic link to an external Package in the //'packages/'// directory
-****`...`
-**`xinc`; Root directory for public interfaces of the loaded/mounted external packages. Note: All files in directory tree are symbolic links to either external or local Packages.
-***`&lt;namespace1&gt;` ; Include directory retains the namespace organization of the individual packages
-****`...` 
-***`&lt;namespace2&gt;`  
-****`...`
-** `&lt;local_pkg #1&gt;` ; Local package, i.e. contents are pulled/pushed directly to your SCM
-*** `outcast` ; Outcast pkg info 
-*** `src` ;  Local Package's source directories
-*** `top` ; Local Package's top directory
-*** `...` ; Local Package's specific directories
-** `&lt;local_pkg #2&gt;`
-***`...`
 
-@@</pre>
-</div>
-<div created="20140823144722434" creator="JohnTaylor" modified="20150221161209621" modifier="JohnTaylor" tags="Overview" title="WUV Relationships">
-<pre>!!Relationships between Workspaces, Universes, and Vaults
-[img[./documentation/wuvrelationships.svg]]</pre>
+''Outcome:'' I was not satisfied with the end result of Outcast - especially viewed in the context of developing a product in the //real world// with actual ship dates using a team of developers of various skill sets and abilities.  
+
+The original problem space of Outcast is: //how to manage, in a team environment, a scalable reusable code base?//. So instead of trying to boil the ocean, Outcast 2.0 is focused on achieving the benefits of [[code reuse in place]] with as little overhead, imposed structure/process as possible.  
+
+I had worked on several professional projects where we used a single repository strategy for each product and then a copy-edit approach for bringing in a core set of middle-ware that was maintained in separate repo.  This approach worked great for the //active project// because we could modify the copied middleware at will (e.g. removed 64bit support because we had be compatible with a legacy platform that did not support 64bit integers) and not have deal with any compatibilities issue with the original middleware repository.  Because our edits to the copied repository was limited to extending or removing functionality (not tweaking or customizing existing code), the //active project// enjoyed all of the benefits of [[reuse-in-place|code reuse in place]] even we technically were doing [[copy-n-paste reuse]].  And because our mods to the copied repository was limited to extending/removing functionality merging in updates (and backporting enhancements) was a simple process (on that note: I highly recommended the diff tool [[Beyond Compare|https://www.scootersoftware.com/]]).
+
+So ''Outcast 2.0'' attempts to solve problem space - not by following letter-of-law of [[code resuse|code resue in place]] - but by a low overhead strategy to realized the benefits of code reuse in a scalable, team environment.  The low overhead strategy is to have single repository and then adopt (i.e. copy in) other packages/repositories ''without'' requiring a formalized package management tools/process.</pre>
 </div>
 
 </div>

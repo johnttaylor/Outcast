@@ -1,120 +1,69 @@
 """
  
-Outputs a the content of Package 'top file' to the display
+Displays information about the specified package
 ===============================================================================
 usage: orc [common-opts] cat [options] 
-       orc [common-opts] cat [options] <pkgname>
-       orc [common-opts] cat [options] <pkgnbv>
+       orc [common-opts] cat [options] <adoptedpkg>
 
 Arguments:
-    <pkgname>           Package name in the current Workspace to operate on.  If 
-                        no <pkgname> is specified, it is assumed that the CWD is
-                        in the top/ directory of a locak package - and that
-                        local package is the package to run command against.
-    <pkgnbv>            Package in the Native Package Universe.  The package
-                        is specified using the 'nbv' format (name-branch-
-                        version, eg. 'mypkg-main-1.0.4).
-                        
+    <adoptedpkg>        Name of an adopted package to inspect
+    
 Options:
-    --spec              Display the pkg.specification file
-    --jrnl              Display the pkg.journal file
-    --ns                Display the pkg.namespaces file
-    --branch            Display the pkg.branching file
-    --nsfilter          Display the namespaces.filter file
-    --export            Display the export_headers.lst file
-    --pkgjrnl           Display the package journal file (from the Native 
-                        Package Universe).
+    --indent NUM        Number of spaces when indenting JSON output.
+                        [Default: 2]
     -h, --help          Display help for this command
 
 Common Options:
     See 'orc --help'
-
-
+    
+    
 Notes:
-    o The default operation if no file-selection option is specified is to
-      display the pkg.specification file.
-    o If a '.' is used for <pkgname> then <pkgname> is derived from the
-      the current working directory where the command was invoked from.  
-        
+    o If  <adoptedpkg> is not speficied, then the repository's package 
+      information is displayed.
+    
 """
+import os, sys
+import utils
 from docopt.docopt import docopt
-import subprocess, os, tarfile
-import utils, deps
+from my_globals import PACKAGE_INFO_DIR
+from my_globals import OVERLAY_PKGS_DIR
+from my_globals import PACKAGE_FILE
+
 
 #---------------------------------------------------------------------------------------------------------
 def display_summary():
-    print("{:<13}{}".format( 'cat', 'Displays content of Package Top files.' ))
+    print("{:<13}{}".format( 'cat', 'Displays information for a package' ))
     
 
 #------------------------------------------------------------------------------
 def run( common_args, cmd_argv ):
     args = docopt(__doc__, argv=cmd_argv)
 
-    # Trap the '.' notation for <pkgname> argument
-    utils.check_use_current_package( args )
+    # Display my package info
+    if ( not args['<adoptedpkg>'] ):
+        utils.cat_package_file(int(args['--indent']))
 
-    # Select which file to display
-    file = 'pkg.specification'
-    if ( args['--jrnl'] ):
-        file = 'pkg.journal'
-    elif ( args['--ns'] ):
-        file = 'pkg.namespaces'
-    elif ( args['--branch'] ):
-        file = 'pkg.branching'
-    elif ( args['--nsfilter'] ):
-        file = 'namespaces.filter'
-    elif ( args['--export'] ):
-        file = 'export_headers.lst'
-    
-    
-    # The package journal file is handle differently
-    elif ( args['--pkgjrnl'] ):
-        if ( not args['<pkgname>'] ):
-            exit( "ERROR: When using the --pkgjrnl option you must specify a <pkgname>" )
-        f = os.path.join( common_args['--uverse'], args['<pkgname>'] + ".journal" )
-        _cat_file(f, "ERROR: Unable to open Package Journal file: {} ({})" )
-        exit(0)
-         
-    # assumed top/ directory
-    if ( not args['<pkgname>'] ):
-        _cat_file(file, "ERROR: Unable to open Top file: {} ({})" )
- 
-    # local package
-    elif ( args['<pkgname>'].find('-') == -1 ):
-        f = os.path.join(common_args['-w'], args['<pkgname>'], 'top', file )
-        _cat_file(f, "ERROR: Unable to open Top file: {} ({})" )
-
-
-    # Use package from Native Uverse
+    # Display an adopted package
     else:
-        f = os.path.join( common_args['--uverse'], args['<pkgname>'] + ".top" )
-        
-        # Open the child top file
-        try:
-            tar    = tarfile.open( f )
-        except Exception as ex:
-            exit("ERROR: Trying to locate/read Package Top File: {} ({})".format(f,ex) )
-            
-        # Get the branch history
-        try:
-            fh = tar.extractfile( 'top/' + file )
-        except Exception as ex:
-            exit ( "ERROR: Package {} does not contain file: {}.".format(f,file) )
-            tar.close()
-            exit(0)
+        # Check if the adopted package is actually adopted
+        json_dict = utils.load_package_file()
+        pkgobj, deptype, pkgidx = utils.json_find_dependency( json_dict, args['<adoptedpkg>'] )
+        if ( pkgobj == None ):
+            sys.exit( f"ERROR: The package - {args['<adoptedpkg>']} is NOT an adopted package" )
 
-        # Display history
-        utils.cat_file( fh, False, False )
-        tar.close()    
-    
-    
-#------------------------------------------------------------------------------
-def _cat_file(f,msg):
-    try:
-        fd = open( f, 'r' )
-        utils.cat_file( fd, False, False )
-        fd.close()
-            
-    except Exception as ex:
-        exit( msg.format(f,ex) )
+        # OVERLAY package
+        if ( pkgobj['pkgtype'] == 'overlay' ):
+            utils.cat_package_file( int(args['--indent']), path=os.path.join( OVERLAY_PKGS_DIR(), args['<adoptedpkg>'], PACKAGE_INFO_DIR() ) )
+
+        # Readonly/Foreign Packages
+        else:
+            if ( pkgobj['parentDir'] == None ):
+                sys.exit( f"ERROR: the {PACKAGE_FILE()} file is corrupt. There is no parent directory for the package: {args['<adoptedpkg>']}" )
+            json_dict = utils.cat_package_file( int(args['--indent']), path=os.path.join( pkgobj['parentDir'], args['<adoptedpkg>'], PACKAGE_INFO_DIR() ) )
+            if ( json_dict == None ):
+                sys.exit( f"ERROR: No package information is available for the Readonly/Foreign package: {args['<adoptedpkg>']}" )
+
+
+
         
+

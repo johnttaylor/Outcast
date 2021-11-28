@@ -1,17 +1,22 @@
 """Collection of helper functions"""
 
 
-import os, errno, fnmatch, subprocess, time, copy
-import symlinks, platform, tarfile
+import sys, os, errno, fnmatch, subprocess, time, calendar, copy
+import errno, stat, shutil
+import json
+import collections
+from gitignore_parser import parse_gitignore
 from collections import deque
+#import platform, tarfile
+#from collections import deque
 
-# Globals
-from my_globals import OUTCAST_XPKGS_DIRNAME
-from my_globals import OUTCAST_XINC_DIRNAME
-from my_globals import OUTCAST_LOCAL_PKG_SUFFIX
-from my_globals import OUTCAST_USER_NAME
-from my_globals import OUTCAST_PKGS_UVERSE
-from my_globals import OUTCAST_PKGS_ROOT
+from my_globals import PACKAGE_INFO_DIR
+from my_globals import PACKAGE_FILE
+from my_globals import PKG_DIRS_FILE
+from my_globals import IGNORE_DIRS_FILE
+from my_globals import PACKAGE_FILE
+from my_globals import OVERLAY_PKGS_DIR
+from my_globals import PACKAGE_ROOT
 
 
 # Module globals
@@ -19,145 +24,14 @@ _dirstack = []
 quite_mode   = False
 verbose_mode = False
 
-#-----------------------------------------------------------------------------
-def render_dot_file_as_pic( pictype, oname ):
-    if ( pictype ):
-        cmd   = "dot -T{} -x -O {}".format(pictype,oname)
-        fname = "{}.{}".format( oname, pictype )
-        if ( os.path.isfile(fname) ):
-            print_warning("Removing existing rendered {} file: {}".format(pictype,fname) )
-            try:
-                os.remove(fname)
-            except Exception as ex:
-                exit( "ERROR: {}".format(ex) )
-        
-        p  = subprocess.Popen( cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
-        r  = p.communicate()
-        r0 = '' if r[0] == None else r[0].decode()
-        r1 = '' if r[1] == None else r[1].decode()
-        if ( p.returncode ):
-            print( r0 + ' ' + r1 )
-            exit( "ERROR: Failed rendering the .DOT file (ensure that the GraphVis 'bin/' directory is in your path)" )
-        
-
-
-#-----------------------------------------------------------------------------
-def set_workspace( args, skipwrk=False ):
-    if ( skipwrk ):
-        return
-        
-    if ( not args['-w'] ):
-        wrkroot = detect_workspace_root( os.getcwd() )
-        if ( wrkroot == None ):
-            exit( "ERROR: Can not auto detect the Workspace root directory" )
-        args['-w'] = wrkroot
-
-    args['-w'] = standardize_dir_sep( os.path.realpath(args['-w']) )  
-    if ( not os.path.exists( args['-w'] ) ):
-        exit( "ERROR: Invalid path - {} - for the Workspace root directory".format( args['-w'] ) ) 
-        
-        
-def detect_workspace_root( starting_dirname ):
-    result = starting_dirname
-    
-    if ( _test_for_markers( starting_dirname ) == False ):
-        
-        # get parent directory
-        parent = os.path.abspath(os.path.join(starting_dirname, os.path.pardir))
-
-        # Fail if I get to the root directory without finding my markers
-        if ( os.path.split(parent)[0] == starting_dirname ):
-            return None
-
-        # Try my parent
-        result = detect_workspace_root( parent )
-     
-    return result
-        
-def _test_for_markers( dir ):
-    result = False
-
-    if ( os.path.isdir(dir + os.sep + OUTCAST_XPKGS_DIRNAME()) and os.path.isdir(dir + os.sep + OUTCAST_XINC_DIRNAME()) ):
-        result = True
-
-    return result    
-
-
-def check_use_current_package( args ):
-    if ( args['<pkgname>'] == '.' ):
-        path   = os.getcwd();
-        wspace = detect_workspace_root( path )
-        pkg    = path[len(wspace):]
-        args['<pkgname>'] = pkg.split(os.sep)[1]
-        
-
-#-----------------------------------------------------------------------------
-def set_uverse( args, skipenv=False ):
-    if ( skipenv ):
-        return
-        
-    # Check the environment variable 
-    if ( not args['--uverse'] ):
-        uverse = os.environ.get( OUTCAST_PKGS_UVERSE() )
-        if ( uverse == None ):
-            exit( "ERROR: The {} environment variable is not set.".format(OUTCAST_PKGS_UVERSE()) )
-        args['--uverse'] = uverse
-    
-    args['--uverse'] = standardize_dir_sep( os.path.realpath(args['--uverse']) )  
-
-    if ( not os.path.exists( args['--uverse'] ) ):
-        exit( "ERROR: Invalid path - {} - for native Outcast universe directory".format( args['--uverse'] ) ) 
-    
-    
-def set_packages_dir( args, skipenv=False ):
-    if ( skipenv ):
-        return
-        
-    # Check the environment variable 
-    if ( not args['-p'] ):
-        pkgroot = os.environ.get( OUTCAST_PKGS_ROOT() )
-        if ( pkgroot == None ):
-            exit( "ERROR: The {} environment variable is not set.".format(OUTCAST_PKGS_ROOT()) )
-        args['-p'] = pkgroot
-            
-    args['-p'] = standardize_dir_sep( os.path.realpath(args['-p']) )  
-
-    if ( not os.path.exists( args['-p'] ) ):
-        exit( "ERROR: Invalid path - {} - for the Packages directory".format( args['-p'] ) ) 
-    
-    
-def set_user_name( args, skipenv=False ):
-    if ( skipenv ):
-        return
-        
-    # Get user name from the environment
-    if ( not args['--user'] ):
-        user = os.environ.get( OUTCAST_USER_NAME() )
-        if ( user == None ):
-            exit( "ERROR: The {} environment variable is not set.".format(OUTCAST_USER_NAME()) )
-        args['--user'] = user
-    
-        
-def set_password( args ):
-    # Set an empty/blank password when not explicitly specified
-    if ( not args['--passwd'] ):
-        args['--passwd'] = 'none'   
-                    
-
+TEMP_IGNORE_FILE_NAME = '__temp_' + IGNORE_DIRS_FILE() + "._delete_me__"
 #-----------------------------------------------------------------------------
 def standardize_dir_sep( pathinfo ):
     return pathinfo.replace( '/', os.sep ).replace( '\\', os.sep )
     
+def force_unix_dir_sep( pathinfo ):
+    return pathinfo.replace( '\\', '/')
 
-def epoch_secs_to_short_local( epoch_secs ):
-    sec = int(epoch_secs)
-    return time.strftime("%Y/%m/%d %H:%M:%S", time.localtime(sec))
-
-
-def short_local_to_epoch_secs( string ):
-    return int( time.mktime( time.strptime( string, "%Y/%m/%d %H:%M:%S" ) ) )
-    
-    
 def push_dir( newDir ):
     global _dirstack
     
@@ -173,6 +47,12 @@ def pop_dir():
     os.chdir( _dirstack.pop() )
 
 #-----------------------------------------------------------------------------
+def deque_delete_nth(d, n):
+    d.rotate(-n)
+    d.popleft()
+    d.rotate(n)
+
+#-----------------------------------------------------------------------------
 def print_warning( msg ):
     if ( not quite_mode ):
         print( "Warn:  " + msg )
@@ -182,7 +62,6 @@ def set_quite_mode( newstate ):
     quite_mode = newstate
        
 
-#-----------------------------------------------------------------------------
 def print_verbose( msg, no_new_line=False, bare=False ):
     if ( verbose_mode ):
         if ( not no_new_line ):
@@ -200,27 +79,56 @@ def set_verbose_mode( newstate ):
     global verbose_mode
     verbose_mode = newstate
        
-        
-#-----------------------------------------------------------------------------
-def get_pkg_source( pkg_symlink, pkg_root, wrk_root=None, suffix=None ):
-    info   = symlinks.get_link_source( pkg_symlink )
-    result = info.replace( pkg_root, '', 1  )
-    if ( wrk_root != None ):
-        if ( info.startswith(wrk_root) ):
-            result = info.replace( wrk_root, '', 1 ) + os.sep + suffix
+       
+def display_scm_message( cmd, msg, scm ):
+    cmd = f"evie.py --scm {scm} {cmd} {msg}"
+    t = run_shell( cmd, False )
+    if ( not is_error(t) and t[1] != None and t[1] != '' ):
+        print( t[1] )
 
-    return result
   
+#-----------------------------------------------------------------------------
+def run_shell( cmd, verbose_flag=False, on_err_msg=None ):
+    if ( verbose_flag ):
+        print_verbose(cmd)
+        p = subprocess.Popen( cmd, shell=True )
+    else:
+        p = subprocess.Popen( cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
+
+    r  = p.communicate()
+    r0 = '' if r[0] == None else r[0].decode()
+    r1 = '' if r[1] == None else r[1].decode()
+    if ( p.returncode != 0 and on_err_msg != None ):
+        exit(on_err_msg)
+    return (p.returncode, f"{r0} {r1}" )
+
+def is_error( t ):
+    if ( t[0] != 0 ):
+        return True;
+
+    return False
+
+def check_results( t, err_msg, scm_cmd=None, scm_msg=None, scm=None ):
+    if ( t[0] != 0 ):
+        if ( t[1] != None and t[1] != 'None None' ):
+            print(t[1])
+        if ( scm_cmd == None ):
+            sys.exit( err_msg )
+        else:
+            print( err_msg )
+            display_scm_message( scm_cmd, scm_msg, scm )
+            sys.exit(1)
+
+
+
 #-----------------------------------------------------------------------------
 def mkdirs( dirpath ):
     
     # Attempt to create the workspace directory    
     try:
-        os.makedirs(dirpath)
+        os.makedirs(dirpath, exist_ok=True)
     except OSError as exc: 
-        if exc.errno == errno.EEXIST and os.path.isdir(dirpath):
-            pass
-        else: raise
+        sys.exit( f"Unable to create directory path: {dirpath} ({exc})" )
 
     
 def cat_file( fobj, strip_comments=True, strip_blank_lines=True ):
@@ -239,309 +147,551 @@ def cat_file( fobj, strip_comments=True, strip_blank_lines=True ):
 
         print( line )
         
+def remove_tree( root, err_msg=None, warn_msg=None ):
+    try:
+        shutil.rmtree( root, ignore_errors=False, onerror=_handleRemoveReadonly )
+    except Exception as exc:
+        if ( err_msg != None ):
+            sys.exit( f'{err_msg} ({exc})' )
+        elif ( warn_msg != None ):
+            print_warning( f'{warn_msg} ({exc})' )
+
+
+# This function handles issue with Windows when deleting files marked as readonly
+def _handleRemoveReadonly(func, path, exc):
+  excvalue = exc[1]
+  if func in (os.rmdir, os.remove, os.unlink) and excvalue.errno == errno.EACCES:
+      # ensure parent directory is writeable too
+      pardir = os.path.abspath(os.path.join(path, os.path.pardir))
+      if not os.access(pardir, os.W_OK):
+        os.chmod(pardir, stat.S_IRWXU| stat.S_IRWXG| stat.S_IRWXO)
+
+      os.chmod(path, stat.S_IRWXU| stat.S_IRWXG| stat.S_IRWXO) # 0777
+      func(path)
+  else:
+      raise   
+  
+# This function returns true the root the primary repository
+def find_root( primary_scm_tool, verbose ):
+    # Note: Running the SCM command creates a nested run_shell scenario - it only works if 'verbose' is turned off (because the 'verbose' output gets mixed in when the git command's output)
+    cmd = f'evie.py --scm {primary_scm_tool} findroot'
+    t   = run_shell( cmd, False )
+    check_results( t, "ERROR: Failed find the root of the primary/local Repository" )
+    return t[1].strip()
         
-#-----------------------------------------------------------------------------
-def parse_pattern( string ):
-    # default result values
-    parent_dir = ''
-    pattern    = string
-    rflag      = False
+# Sets/clears the 'readonly' bit/flag for the entire specified directory tree
+def set_tree_readonly( root, set_as_read_only = True ):
+    mode = stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH if set_as_read_only else stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH
+    for root,dirs,files in os.walk(root):
+        for f in files:
+            filename = os.path.join(root, f)
+            os.chmod(filename, mode)
     
-    # Search for supported wildcards 
-    idx = string.find('...')
-    if ( idx != -1 ):
-        rflag = True
-    else:
-        idx = string.find('?')
-        if ( idx == -1 ):
-            idx = string.find('[')
-            if ( idx == -1 ):
-                idx = string.find('*')
-                
-                
-    # Seperate parent directory from pattern/filename
-    if ( idx != -1 ):
-        end_idx    = string.rindex(os.sep,0,idx)
-        parent_dir = string[:end_idx]
-        if ( rflag ):
-            pattern = string[end_idx+1+3:] 
-        else:    
-            pattern = string[end_idx+1:]
-        
-    return (idx!=-1, rflag, parent_dir, pattern )
 
+# Copies only the files in the src-dir to the dst-dir
+def copy_files( srcdir, dstdir ):
+    src_files = os.listdir(srcdir)
+    for file_name in src_files:
+        full_file_name = os.path.join(srcdir, file_name)
+        if os.path.isfile(full_file_name):
+            mkdirs( dstdir )
+            shutil.copy(full_file_name, dstdir)
 
-#------------------------------------------------------------------------------
-def parse_entry( line, pkgpath ):
-    file_include = False
-    if ( line.startswith('!') ):
-        line         = line[1:]
-        file_include = True
-        
-    has_pattern, rflag, parent_dir, pattern = parse_pattern( line )
-    path  = pkgpath + os.sep + parent_dir
-    files = []
+# Deletes all of the files in a directory AND deletes the directory if it is empty after deleting the files
+def delete_directory_files( dir_to_delete ):
+    src_files = os.listdir( standardize_dir_sep( dir_to_delete) )
+    for file_name in src_files:
+        full_file_name = os.path.join(dir_to_delete, file_name)
+        if os.path.isfile(full_file_name):
+            os.remove( full_file_name )
 
-    # Process a 'normal' entry 
-    if ( not file_include ):
-        if ( not has_pattern ):
-            files.append( pkgpath + os.sep + pattern )
-        elif ( not rflag ):
-            files.extend( get_file_list( pattern, path ) )
-        else:
-            files.extend( walk_file_list( pattern, path ) )
+    # Delete the dir if it is now empty
+    try:
+        os.rmdir( dir_to_delete )
+    except:
+        pass
 
-    # Process a 'include' entry (reference to another export header file)
-    else:
-        if ( not has_pattern ):
-            read_export_header_file( pkgpath + os.sep + pattern, pkgpath, files )
-        elif ( not rflag ):
-            export_files = get_file_list( pattern, path )
-            for f in export_files:
-                read_export_header_file( f, pkgpath, files )
-        else:
-            export_files = walk_file_list( pattern, path )
-            for f in export_files:
-                read_export_header_file( f, pkgpath, files )
-        
-    return files
-        
-        
 #-----------------------------------------------------------------------------
-def get_file_list( pattern, parentdir ):
-    list  = []
-    if ( os.path.exists( parentdir ) ):
-        files = os.listdir(parentdir)
-        for f in fnmatch.filter(files,pattern):
-            list.append( os.path.join(parentdir,f) )
-      
-    return list
-    
-        
+# return None if not able to load the file
+def load_package_file( path=PACKAGE_INFO_DIR(), file=PACKAGE_FILE(), does_file_exist=None):
+    f = os.path.join(  path, file )
+
+    try:
+        with open(f) as f:
+            result = check_package_file( json.load( f ) )
+            does_file_exist = True
+            return result
+
+    except Exception as e:
+        does_file_exist = True
+        return check_package_file( {} )
+
+def load_dependent_package_file( pkgobj, file=PACKAGE_FILE() ):
+    # OVERLAY package
+    if ( pkgobj['pkgtype'] == 'overlay' ):
+        return load_package_file( os.path.join( OVERLAY_PKGS_DIR(), pkgobj['pkgname'], PACKAGE_INFO_DIR() ) )
+
+    # Readonly/Foreign Packages
+    else:
+        if ( pkgobj['parentDir'] == None ):
+            sys.exit( f"ERROR: the {PACKAGE_FILE()} file is corrupt. There is no parent directory for the package: {pkgobj['pkgname']}" )
+        return load_package_file( os.path.join(  pkgobj['parentDir'], pkgobj['pkgname'], PACKAGE_INFO_DIR() ) )
+
+def write_package_file( json_dictionary ):
+    # make sure the pkgs.info directory exists
+    if ( not os.path.isdir( PACKAGE_INFO_DIR() ) ):
+        mkdirs( PACKAGE_INFO_DIR() )
+
+    od = collections.OrderedDict(sorted(json_dictionary.items()))
+    f  = os.path.join(  PACKAGE_INFO_DIR(),PACKAGE_FILE() )
+    data = json.dumps( od, indent=2 )
+    with open( f, "w+" ) as file:
+        file.write( data )
+
+def cat_package_file( indent=2, path=PACKAGE_INFO_DIR(), file=PACKAGE_FILE() ):
+    f = os.path.join(  path, file )
+
+    try:
+        with open(f) as f:
+            json_dict =  json.load( f )
+            od = collections.OrderedDict(sorted(json_dict.items()))
+            print( json.dumps( od, indent=indent ) )
+            return json_dict
+    except Exception as e:
+        sys.exit( f"ERROR: Corrupt package file - {f} ({e})" )
+
+
+def json_get_dep_package( dep_list, package_to_find ):
+    if ( len(dep_list) > 0 ):
+        try:
+            idx = 0
+            for p in dep_list:
+                if ( p['pkgname'] == package_to_find ):
+                    return p, idx
+                idx = idx + 1
+
+            return None, None
+        except Exception as e:
+            sys.exit( f"ERROR: Package file (dependencies) is corrupt {e}" )
+    return None, None
+
+def json_create_dep_entry( pkgname, pkgtype, parentdir, date_adopted, ver_sem, ver_branch, ver_id, repo_name, repo_type, repo_origin ):
+    ver_dict  = { "semanticVersion" : ver_sem, "branch" : ver_branch, "tag" : ver_id }
+    repo_dict = { "name" : repo_name, "type": repo_type, "origin" : repo_origin }
+    dep_dict  = { "pkgname" : pkgname, "pkgtype" : pkgtype, "adoptedDate": date_adopted, "parentDir" : parentdir, "version" : ver_dict, "repo": repo_dict }
+    return dep_dict
+
+def json_update_package_file_with_new_dep_entry( json_dict, new_dep_entry, is_weak_dep=False ):
+    if ( is_weak_dep ):
+        json_dict['dependencies']['weak'].append( new_dep_entry )
+    else:
+        json_dict['dependencies']['strong'].append( new_dep_entry )
+    write_package_file( json_dict )
+
+def json_find_dependency( json_dictionary, pkgname ):
+    deptype    = 'strong'
+    pkgobj,idx = json_get_dep_package( json_dictionary['dependencies'][deptype], pkgname )
+    if ( pkgobj == None ):
+        deptype    = 'weak'
+        pkgobj,idx = json_get_dep_package( json_dictionary['dependencies'][deptype], pkgname )
+        if ( pkgobj == None ):
+            return None, None, None
+    return pkgobj, deptype, idx
+
+# Returns list of dictionary 'dep' entries (a 'depType' key pair set to S|W is added to the dep dictionary instances)
+def get_dependency_list( json_dict, include_immediate=True, include_weak=True ):
+   # Get immeidate deps
+    pkgs = []
+    if ( include_immediate ):
+        for p in json_dict['dependencies']['strong']:
+            p['depType'] = 'S'
+            pkgs.append( p )
+
+    # Get weak deps
+    if ( include_weak ):
+        for p in json_dict['dependencies']['weak']:
+            p['depType'] = 'W'
+            pkgs.append( p )
+
+    return pkgs
+
+# Returns an empty list if no overlaid dirs
+def json_get_list_adopted_overlay_deps( json_dictionary):
+    olist = []
+    try:
+        deps = json_dictionary['dependencies']['strong']
+        for d in deps:
+            if ( d['pkgtype'] == 'overlay' ):
+                olist.append( d )
+        deps = json_dictionary['dependencies']['weak']
+        for d in deps:
+            if ( d['pkgtype'] == 'overlay' ):
+                olist.append( d )
+    except:
+        pass
+
+    return olist
+
+def json_get_dep_parentdir( depdict ):
+    return '<none>' if depdict['parentDir'] == None else depdict['parentDir']
+
+def json_get_dep_semver( depdict ):
+    return '<none>' if depdict['version']['semanticVersion'] == None else depdict['version']['semanticVersion']
+
+def json_get_dep_branch( depdict ):
+    return '<none>' if depdict['version']['branch'] == None else depdict['version']['branch']
+
+def json_get_dep_tag( depdict ):
+    return '<none>' if depdict['version']['tag'] == None else depdict['version']['tag']
+
+def json_get_dep_repo_name( depdict ):
+    return '<none>' if depdict['repo']['name'] == None else depdict['repo']['name']
+
+def json_get_dep_repo_type( depdict ):
+    return '<none>' if depdict['repo']['type'] == None else depdict['repo']['type']
+
+def json_get_dep_repo_origin( depdict ):
+    return '<none>' if depdict['repo']['origin'] == None else depdict['repo']['origin']
+
+
+def json_get_package_primary_dirs( json_dictionary ):
+    if ( json_dictionary != None ):
+        return json_dictionary['directories']['primary']
+
+def json_get_package_extra_dirs( json_dictionary ):
+    l = []
+    try:
+        for d in json_dictionary['directories']['adoptedExtras']:
+            l.append( standardize_dir_sep(d) )
+    except:
+        pass
+    return l
+   
+    return json_dictionary['directories']['adoptedExtras']
+
+
+def json_update_package_file_with_new_primary_dirs( json_dictionary, list_of_dirs ):
+    json_dictionary['directories']['primary'] = list_of_dirs
+    write_package_file( json_dictionary )
+
+def json_update_package_file_with_new_extra_dirs( json_dictionary, list_of_dirs ):
+    stdlist = []
+    for d in list_of_dirs:
+        stdlist.append( force_unix_dir_sep( d ) )
+    json_dictionary['directories']['adoptedExtras'] = stdlist
+    write_package_file( json_dictionary )
+
+
+def json_update_package_file_info( json_dictionary, pkgname = None, desc =None, owner=None, email=None, url=None, rname=None, rtype=None, rorigin=None ):
+    if ( pkgname != None ):
+        json_dictionary['info']['pkgname']        = pkgname
+    if ( desc != None ):
+        json_dictionary['info']['desc']           = desc
+    if ( owner != None ):
+        json_dictionary['info']['owner']          = owner
+    if ( email != None ):
+        json_dictionary['info']['email']          = email
+    if ( url != None ):
+        json_dictionary['info']['url']            = url
+    if ( rname != None ):
+        json_dictionary['info']['repo']['name']   = rname
+    if ( rtype != None ):
+        json_dictionary['info']['repo']['type']   = rtype
+    if ( rorigin != None ):
+        json_dictionary['info']['repo']['origin'] = rorigin
+
+def json_copy_info( json_dict_in ):
+    dict_out = { 'info':{} }
+    dict_out['info']['pkgname']        = json_dict_in['info']['pkgname']
+    dict_out['info']['desc']           = json_dict_in['info']['desc']
+    dict_out['info']['owner']          = json_dict_in['info']['owner']
+    dict_out['info']['email']          = json_dict_in['info']['email']
+    dict_out['info']['url']            = json_dict_in['info']['url']
+    dict_out['info']['repo']           = {}
+    dict_out['info']['repo']['name']   = json_dict_in['info']['repo']['name']
+    dict_out['info']['repo']['type']   = json_dict_in['info']['repo']['type']
+    dict_out['info']['repo']['origin'] = json_dict_in['info']['repo']['origin']
+
+    return dict_out
+
+# create version entry.  If NO date is provided than the current time is used
+def json_create_version_entry( comment, semver, date=None ):
+    now = int(time.time())
+    t   = time.gmtime(now)
+    if ( date != None ):
+        t   = time.strptime( date )
+        now = calendar.timegm( t )
+    entry  = { "comment" : comment, "version" : semver, "date" : time.asctime(t), "timestamp": now }
+    return entry
+
+# update the 'current' published version
+def json_update_current_version( json_dict, ver_entry, save_pkg=True ):
+    json_dict['publish']['current'] = ver_entry
+    if ( save_pkg ):
+        write_package_file( json_dict )
+
+
+# Create a new 'current' and adds the old-current to the history array
+def json_add_new_version( json_dict, ver_entry, save_pkg=True ):
+    prev = json_dict['publish']['current']
+    hist = json_dict['publish']['history']
+    if ( prev != None ):
+        hist.insert(0, prev)
+    json_update_current_version( json_dict, ver_entry, save_pkg )
+
+# edits an existing history entry
+def json_update_history_version( json_dict, idx, comment, semver, save_pkg=True  ):
+    # validate the index
+    idx = int(idx)
+    if ( idx >= len(json_dict['publish']['history']) or idx <  0 ):
+        sys.exit(f"ERROR: Index value {idx} is out of range." )
+
+    # Use the existing timestamp - but with new comments/ver
+    e = json_dict['publish']['history'][idx]
+    updated = json_create_version_entry( comment, semver, e['date'] )
+    json_dict['publish']['history'][idx] = updated
+
+    if ( save_pkg ):
+        write_package_file( json_dict )
+
+# Returns the Publish dictionary
+def json_get_published( json_dict ):
+    return( json_dict['publish'] )
+
+# Returns the current published version
+def json_get_current_version( json_dict ):
+    return json_dict['publish']['current']
+
+# Returns the current published version
+def json_get_current_semver( json_dict ):
+    return json_dict['publish']['current']['version']
+
+# Returns the published history
+def json_get_version_history( json_dict ):
+    return json_dict['publish']['history']
+
+# returns the package's name
+def json_get_package_name( json_dict ):
+    return json_dict['info']['pkgname']
+
+# Performs a basic check of the file contents and/or ensure that a minimal number of key/value pairs exist
+def check_package_file( json_dict_in ):
+    if ( not 'publish' in json_dict_in ):
+        json_dict_in['publish'] = {}
+    if ( not 'current' in json_dict_in['publish'] ):
+        json_dict_in['publish']['current'] = None
+    if ( not 'history' in json_dict_in['publish'] ):
+        json_dict_in['publish']['history'] = []
+
+    if ( not 'dependencies' in json_dict_in ):
+        json_dict_in['dependencies'] = {}
+    if ( not 'strong' in json_dict_in['dependencies'] ):
+        json_dict_in['dependencies']['strong'] = []
+    if ( not 'weak' in json_dict_in['dependencies'] ):
+        json_dict_in['dependencies']['weak'] = []
+
+    if ( not 'directories' in json_dict_in ):
+        json_dict_in['directories'] = {}
+    if ( not 'primary' in json_dict_in['directories'] ):
+        json_dict_in['directories']['primary'] = None
+    if ( not 'adoptedExtras' in json_dict_in['directories'] ):
+        json_dict_in['directories']['adoptedExtras'] = None
+
+    if ( not 'info' in json_dict_in ):
+        json_dict_in['info'] = {}
+    if ( not 'pkgname' in json_dict_in['info'] ):
+        json_dict_in['info']['pkgname'] = None
+    if ( not 'desc' in json_dict_in['info'] ):
+        json_dict_in['info']['desc'] = None
+    if ( not 'owner' in json_dict_in['info'] ):
+        json_dict_in['info']['owner'] = None
+    if ( not 'email' in json_dict_in['info'] ):
+        json_dict_in['info']['email'] = None
+    if ( not 'url' in json_dict_in['info'] ):
+        json_dict_in['info']['url'] = None
+    if ( not 'repo' in json_dict_in['info'] ):
+        json_dict_in['info']['repo'] = {}
+    if ( not 'name' in json_dict_in['info']['repo'] ):
+        json_dict_in['info']['repo']['name'] = None
+    if ( not 'type' in json_dict_in['info']['repo'] ):
+        json_dict_in['info']['repo']['type'] = None
+    if ( not 'origin' in json_dict_in['info']['repo'] ):
+        json_dict_in['info']['repo']['origin'] = None
+
+    return json_dict_in
+
 #-----------------------------------------------------------------------------
-def walk_file_list( pattern, pkgpath ):
+# return None if not able to load the file
+def load_dirs_list_file( path=PACKAGE_INFO_DIR(), file=PKG_DIRS_FILE() ):
+    f = os.path.join( path, file )
+    try:
+        with open(f) as f:
+            lines = f.readlines()
+            result = []
+            for l in lines:
+                result.append( standardize_dir_sep(l.strip()) )
+            return result
+
+    except Exception as e:
+        print( e )
+        return None
+
+def save_dirs_list_file( list_of_dirs, path=PACKAGE_INFO_DIR(), file=PKG_DIRS_FILE() ):
+    f = os.path.join( path, file )
+    try:
+        with open(f, 'w') as f:
+           files = "\n".join(list_of_dirs)
+           f.write(force_unix_dir_sep( files) )
+    except:
+        sys.exit( f"WARNING: Failed to update the {f} with the directory list" )
+
+# return None if not able to load the file
+def load_overlaid_dirs_list_file( adopted_pkg_name, dir_list_file_root=OVERLAY_PKGS_DIR() ):
+    if ( adopted_pkg_name == None ):
+        return None
+    p = os.path.join( dir_list_file_root, adopted_pkg_name, PACKAGE_INFO_DIR() )
+    return load_dirs_list_file( path=p )
+
+# returns None if there is no 'ignore file' in the pkg.info dir
+def get_ignore_file( root ):
+    f = os.path.join( root, PACKAGE_INFO_DIR(), IGNORE_DIRS_FILE() )
+    if ( os.path.isfile( f ) ):
+        return f
+
+    return None
+
+# Filters the directory list by the 'ignore file', dirs with no files
+# If 'ignore_file' does NOT exist - than all dirs are returned
+def walk_dir_filtered_by_ignored( tree_to_walk, ignore_file, pkgroot ):
+    push_dir(pkgroot)
+
+    ignored = None
+    if ( ignore_file != None ):
+        try:
+            # Temporarly make a copy of the ignore file in the package root
+            tmpname = os.path.join( pkgroot, TEMP_IGNORE_FILE_NAME )
+            shutil.copy( ignore_file, tmpname )
+            ignored = parse_gitignore( tmpname )
+            os.remove( TEMP_IGNORE_FILE_NAME )
+        except:
+            ignored = None
+
     list = []
-    for root, dirs, files in os.walk(pkgpath):
-        for f in fnmatch.filter(files,pattern):
-            list.append( os.path.join(root,f) )
+    for root, dirs, files in os.walk(tree_to_walk):
+        if ( len(files) > 0 ):
+            if ( ignored == None or ignored( root ) == False ):
+                list.append( standardize_dir_sep(root) )
             
+    pop_dir()
     return list        
 
 
-#-----------------------------------------------------------------------------
-def concatenate_commands( cmd1, cmd2 ):
-    if ( platform.system() == 'Windows' ):
-        return cmd1 + " & " + cmd2
-    else:
-        return cmd1 + " , " + cmd2
-
-
-#-----------------------------------------------------------------------------
-def read_export_header_file( hfile, pkgpath, headers ):         
+# create list of dirs from adopted overlay dependencies
+def get_adopted_overlaid_dirs_list( list_of_dep_pkgs, dir_list_file_root=OVERLAY_PKGS_DIR() ):
+    result = []
     try:
-        inf = open( hfile, 'r' )
+        for p in list_of_dep_pkgs:
+            d = load_overlaid_dirs_list_file( p['pkgname'], dir_list_file_root )
+            if ( d != None ):
+                result.extend( d )
+    except Exception as e:
+        pass
 
-        # process all entries in the file        
-        for line in inf:
-           
-            # drop comments and blank lines
-            line = line.strip()
-            if ( line.startswith('#') ):
-                continue
-            if ( line == '' ):
-                continue
+    return result
+
+# gets a list of directories owned by a package being adopted
+def get_adoptee_owned_dirs(  path_to_package_file=PACKAGE_INFO_DIR(), dir_list_file_root=OVERLAY_PKGS_DIR()  ):
+    package_json = load_package_file( path_to_package_file);
+    dirs         = load_overlaid_dirs_list_file( json_get_package_name(package_json), dir_list_file_root )
+    return dirs
+
+# Gets list of a packages owned directories
+def get_owned_dirs( pkgroot, path_to_package_file=PACKAGE_INFO_DIR(), dir_list_file_root=OVERLAY_PKGS_DIR() ):
+    package_json = load_package_file( path_to_package_file);
+    overlay_deps = json_get_list_adopted_overlay_deps( package_json )
+    odirs        = get_adopted_overlaid_dirs_list( overlay_deps, dir_list_file_root )
+    dirsPrimary  = json_get_package_primary_dirs(package_json) 
+    localdirs    = []
+    ignorefile   = get_ignore_file(pkgroot)
+    if ( dirsPrimary == None or len(dirsPrimary) == 0 ):
+        sys.exit( "ERROR: NO 'primary' directories have been specified for the package" )
+
+    for d in dirsPrimary:
+        l = walk_dir_filtered_by_ignored( d, ignorefile, pkgroot ) 
+        localdirs.extend( l )
+    
+    # Remove overlaid directories
+    return [x for x in localdirs if x not in odirs]
+
+#-----------------------------------------------------------------------------
+def copy_pkg_info_dir( dstdir, srcdir ):
+    if ( not os.path.isdir( srcdir ) ):
+        sys.exit( f"ERROR: Missing package info directory ({srcdir})" )
+    mkdirs( dstdir )
+    shutil.copytree( srcdir, dstdir, dirs_exist_ok=True )
+
+def copy_extra_dirs( dstdir, src_package_root ):
+    extra_dirs = get_extra_dirs( src_package_root )
+    for d in extra_dirs:
+        src = os.path.join( src_package_root, d )
+        dst = os.path.join( dstdir, d )
+        shutil.copytree( src, dst, dirs_exist_ok=True )
+
+def get_extra_dirs( src_package_root ):
+    package_path = os.path.join( src_package_root, PACKAGE_INFO_DIR())
+    package_json = load_package_file( path=package_path )
+    return json_get_package_extra_dirs( package_json )
+
+#-----------------------------------------------------------------------------
+def get_adopted_semver( src_pkg_info, default_return_value, pkgname, warn_nover ):
+    package_json = load_package_file( path=src_pkg_info )
+    current      = json_get_current_version( package_json )
+    result       = default_return_value
+    try:
+        result = current['version']
+    except Exception as e:
+        pass
+
+    if ( result == None and warn_nover ):
+        print( f"Warning: No semantic version was specified/available for the adoptee package: {pkgname}" )
+    
+    return result
+
+#-----------------------------------------------------------------------------
+# Returns a tuple: (<strongList>, <weakList>), lists will be empty if no cyclical deps
+def check_cyclical_deps( mypkg_name, pkgobj, suppress_warnings=False, file=PACKAGE_FILE() ):
+    cyc_strong = []
+    cyc_weak = []
+
+    # Get Dependencies info
+    dep_dict = load_dependent_package_file( pkgobj, file )
+    if ( dep_dict == None and suppress_warnings == False ):
+        print( f"Warning: Not able to check for Cyclical dependencs because the {pkgobj['pkgname']} does NOT have package.json file" )
+        return (cyc_strong, cyc_weak)
+
+    # Check for strong cyclical deps
+    dep_deps = get_dependency_list( dep_dict, include_immediate=True, include_weak=False )
+    for d in dep_deps:
+        if ( d['pkgname'] == mypkg_name ):
+            cyc_strong.append( d )
+
+    # Check for weak cyclical deps
+    dep_deps = get_dependency_list( dep_dict, include_immediate=False, include_weak=True )
+    for d in dep_deps:
+        if ( d['pkgname'] == mypkg_name ):
+            cyc_weak.append( d )
+
+    return(cyc_strong, cyc_weak)
+
+
+#-----------------------------------------------------------------------------
+def build_vernum( m, n, p, pre=None ):
+    ver = "{}.{}.{}".format(m,n,p)
+    if ( pre != None and pre != ''):
+        ver = "{}-{}".format(ver,pre)
        
-            # 'normalize' the file entries
-            line = standardize_dir_sep( line.strip() )
-        
-            # Process 'add' entries
-            if ( not line.startswith('-') ):
-                headers.extend( parse_entry(line,pkgpath) )
-            
-                # make sure there are not duplicates in the list
-                headers = list(set(headers))
-     
-            # Process 'exclude' entries
-            else:    
-                xlist = parse_entry(line[1:],pkgpath)
-                for e in xlist:
-                    try:
-                        headers.remove(e)
-                    except:
-                        pass
-    
-        inf.close()
-    except:
-        print_warning( "Unable to open export header file: {}".format(hfile) )
-        
-    return headers
-    
-#-----------------------------------------------------------------------------
-def walk_linksrc( linksrc, parentpath, common_args ):
-    list = []
-    for root, dirs, files in os.walk(parentpath):
-        for f in files:
-            info    = get_pkg_source( os.path.join(root,f), common_args['-p'], common_args['-w'], OUTCAST_LOCAL_PKG_SUFFIX() )
-            display = info
-            if ( OUTCAST_LOCAL_PKG_SUFFIX() in info ):
-                parts   = info.split(os.sep)
-                path    = os.path.join( *parts[1:-1] )
-                info    = os.path.join( common_args['-w'], path )
-                display = os.path.join( OUTCAST_LOCAL_PKG_SUFFIX(), path )
-                
-            if ( info.startswith(linksrc) ):
-                list.append( (os.path.join(root,f), display) ) 
-            
-    return list
-    
-#-----------------------------------------------------------------------------
-def walk_clean_empty_dirs( path ):
-    for dirpath, _, _ in os.walk(path, topdown=False):
-        if dirpath == path:
-            break
-                
-        try:
-            os.rmdir(dirpath)
-        except OSError as ex:
-            if ( ex.errno == errno.ENOTEMPTY ):
-                pass
+    return ver
 
-#-----------------------------------------------------------------------------
-class Node(object):
-    def __init__(self, data ):
-        self.data     = data
-        self.nodenum  = 0
-        self.parent   = None
-        self.children = []
-
-    def __repr__(self, level=0):
-        ret = "{} {}\n".format( "  "*level, repr(self.data) )
-        for child in self.children:
-            ret += child.__repr__(level+1)
-        return ret
-    
-       
-    def add_child_node( self, obj ):
-        self.children.append( obj )
-        obj.parent = self
-        
-    def remove_child_node( self, obj ):
-        self.children.remove(obj)
-        obj.parent = None
-            
-    def remove_all_children_nodes( self ):
-        for c in self.children:
-            c.parent = None
-        self.children = []
-        
-    def add_child_data( self, data ):
-        c = Node(data)
-        self.add_child_node( c )
-        
-    def add_children_nodes( self, list ):
-        for o in list:
-            self.add_child_node( o )
-            
-    def add_children_data( self, list ):
-        for d in list:
-            self.add_child_data( d )
-            
-    def get_children( self ):
-        return self.children    
-        
-    def get_data( self ):
-        return self.data
-            
-    def set_data( self, newdata ):
-        self.data = newdata
-        
-    def set_nodenum( self, num ):
-        self.nodenum = num
-        
-    def get_nodenum( self ):
-        return self.nodenum
-        
-
-    def set_node_number_by_height( self, num ):
-        queue = deque()
-        queue.append( self )
-        while( len(queue) > 0 ):
-            node         = queue.popleft()
-            node.nodenum = num
-            num         += 1
-            for c in node.children:
-                queue.append(c)
-    
-    def clone_sub_tree_from( self, src ):
-        self.data     = copy.deepcopy(src.data)
-        self.nodenum  = 0
-        self.children = []
-        self._clone_children_from( src )
-        
-            
-    def _clone_children_from( self, src ):
-        for x in src.children:
-            newnode = Node(None)
-            self.add_child_node( newnode )
-            newnode.clone_sub_tree_from( x )
-        
-def flatten_tree_to_list( root_node, list_to_append_to ):
-    for cnode in root_node.get_children():
-        list_to_append_to.append(cnode.get_data())
-        flatten_tree_to_list( cnode, list_to_append_to )    
-                               
-# Format is <pkg>\<branch>\<ver>
-def convert_to_long_format( entry, stripLeadingChar='*', sep=os.sep ):
-    p,b,v = entry
-    if ( p[0] == stripLeadingChar ):
-        p = p[1:]
-
-    c = f'{p}{sep}{b}'
-    if ( v != '' ):
-        c = f'{c}{sep}{v}'
-    
-    return c
-        
-
-#-----------------------------------------------------------------------------
-def find_duplicates_in_list(l, filter_blank_comment_lines=False):
-    """ Returns a list of duplicate entries.  If no duplicates, then an empty list is returned"""
-    if ( filter_blank_comment_lines ):
-        filtered = []
-        for x in l:
-            if ( x.startswith('#') or x.strip() == '' ):
-                continue
-            filtered.append( x )
-        l = filtered
-
-    return list(set([x for x in l if l.count(x) > 1]))
-
-
-def remove_duplicates( l ):
-    return list(set(l))
-        
-def remove_from_list( item, l ):
-    if ( item in l ):
-        l.remove(item)
-        
-#-----------------------------------------------------------------------------
-def run_shell( cmd, verbose_flag=False, on_err_msg=None ):
-    if ( verbose_flag ):
-        print_verbose(cmd)
-        p = subprocess.Popen( cmd, shell=True )
-    else:
-        p = subprocess.Popen( cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
-
-    r  = p.communicate()
-    r0 = '' if r[0] == None else r[0].decode()
-    r1 = '' if r[1] == None else r[1].decode()
-    if ( p.returncode != 0 and on_err_msg != None ):
-        exit(on_err_msg)
-    
-    return (p.returncode, "{} {}".format(r0,r1) )
-
-
-#-----------------------------------------------------------------------------
 def parse_vernum( string ):
     pre = None
     t   = string.split('.')
@@ -559,142 +709,8 @@ def parse_vernum( string ):
     
     return (t[0], t[1], t[2], pre)
     
-def parse_package_name( string ):
-    # Returns a tuple: (pkg, branch, (maj.min.pat[-pre]), original_string )
-    pkg, branch, ver = string.split('-',2) 
-    return (pkg, branch, ver, string )
 
-def build_vernum( m, n, p, pre=None ):
-    ver = "{}.{}.{}".format(m,n,p)
-    if ( pre != None and pre != ''):
-        ver = "{}-{}".format(ver,pre)
-       
-    return ver
-
-def numerically_compare_versions( ver1, ver2 ): # Returns -1, 0, 1 when ver1<ver2, ver1==ver2, ver1>ver2 respectively
-    ver1_major, ver1_minor, ver1_patch, ver1_pre = parse_vernum( ver1 )
-    ver2_major, ver2_minor, ver2_patch, ver2_pre = parse_vernum( ver2 )
-    
-    # Compare major indexes
-    if ( ver1_major < ver2_major ):
-        return -1
-    if ( ver1_major > ver2_major ):
-        return 1
-    
-    # Compare minor indexes (If I get here the major indexes are equal)
-    if ( ver1_minor < ver2_minor ):
-        return -1
-    if ( ver1_minor > ver2_minor ):
-        return 1
-            
-    # Compare patch indexes (If I get here the minor indexes are equal)
-    if ( ver1_patch < ver2_patch ):
-        return -1
-    if ( ver1_patch > ver2_patch ):
-        return 1
-            
-    # Compare prerel indexes (If I get here the patch indexes are equal)
-    if ( ver1_pre < ver2_pre ):
-        return -1
-    if ( ver1_pre > ver2_pre ):
-        return 1
-            
-    # If I get there - both versions are numerically equal
-    return 0
-    
-            
-def is_ver1_backwards_compatible_with_ver2( newer, older, newer_bhist=None ):
-    pkg_older, branch_older, ver_older = older
-    pkg_newer, branch_newer, ver_newer = newer
-    
-    
-    # Same branch...
-    if ( branch_older == branch_newer ):
-        return _test_compatible( ver_older, ver_newer )
-    
-    # Different branches, but NO branch history provided
-    elif ( newer_bhist == None ):
-        # Withouth branch history, there is no way to determine compatibility
-        return False   
-
-    # Reverse traversal of branch history looking for compatibility
-    else:
-        # Walk the tree 'backwards'
-        nodes, first, last = bhist
-        return _inspect_parents( branch_newer, ver_newer, branch_older, ver_older, last )
-
-        
-def increment_version( base_ver, inc_patch=False, inc_minor=False, inc_major=False, new_prelease=None ):
-    m,n,p,pre = parse_vernum( base_ver )
-    if ( inc_major ):
-        m   = int(m) + 1
-        n   = 0
-        p   = 0
-        pre = ''
-    elif ( inc_minor ):
-        n   = int(n) + 1
-        p   = 0
-        pre = ''
-    elif ( inc_patch ):
-        p   = int(p) + 1
-        pre = ''
-
-    if ( new_prelease != None ):
-        pre = new_prelease
-        
-    return build_vernum( m, n, p, pre )            
-
-def _inspect_parents( now_bname, now_ver, older_bname, older_ver, curnode, level=0 ):
-    
-    # Verbose info
-    if ( level == 0 ):
-        print_verbose("BEGIN branch compatibility traversal for target/older node: {} {}".format(older_bname, older_ver) )
-    print_verbose( "{:>2} : curnode={}, now={} {}".format(level, curnode, now_bname, now_ver ) )
-    level += 1
-    
-    # NOTE: There are two scenarios for what my "parent" link means:
-    #       1) Direct lineage, i.e. same branch just older publish point.  At this
-    #          point I need to check if there was compatibility break between the
-    #          two publish points.  And since we are still on the same branch, the
-    #          semantic versioning is still valid
-    #       2) Start of a new branch.  This is potentially problematic because I
-    #          now need to test compatibility across branches which breaks 
-    #          semantic versioning.  HOWEVER, the branching/version rules for when
-    #          starting a new branch is that the 1st publish point on the new 
-    #          branch is based/derived from the origin line.  What this means is
-    #          in this very specific use case it is OKAY to compare version across
-    #          branches.
-   
-    # Trap the case of a 'new branch'
-    if ( now_bname != curnode.name ):
-        if ( curnode.name == older_bname ):
-            return _test_compatible( older_ver, now_ver )
-
-    # Check if I am compatible with latest branch node on my direct lineage
-    if ( not _test_compatible( curnode.version, now_ver ) ):
-        return False
-    
-    # Stepparent -->i.e. go back via merge path
-    if ( curnode.stepparent != None ):
-        if ( _get_merge_wgt( curnode.stepparent, curnode ) == 'major' ):
-            return False
-        
-        # if the step-parent branch IS the 'right branch' -->do compatibility check immediately
-        if ( curnode.stepparent.name == older_bname ):
-            return _test_compatible( older_ver, curnode.stepparent.version )
-        
-        # keep searching    
-        if ( _inspect_parents( curnode.stepparent.name, curnode.stepparent.version, older_bname, older_ver, curnode.stepparent, level ) ):
-            return True
-                
-    # Go back in direct lineage
-    if ( curnode.parent != None ):
-        return _inspect_parents( curnode.name, curnode.version, older_bname, older_ver, curnode.parent, level )
-    else:
-        return False
-        
-
-def _test_compatible( older, newer ):
+def is_semver_compatible( older, newer ):
 
     older_major, older_minor, older_patch, older_pre = parse_vernum( older )
     newer_major, newer_minor, newer_patch, newer_pre = parse_vernum( newer )
@@ -726,546 +742,102 @@ def _test_compatible( older, newer ):
     # If I get here - the versions are compatible
     return True
 
-
 #-----------------------------------------------------------------------------
-def append_to_file( fd, filename ):
-    try:
-        f   = open( filename, "r" )
-        buf = f.read(1024)
-        while( buf != '' ):
-            fd.write(buf)
-            buf = f.read(1024)
-        f.close()
-        
-    except Exception as ex:
-        exit( "ERROR: {}".format(ex) )        
+class Node(object):
+    def __init__(self, data ):
+        self.data     = data
+        self.nodenum  = 0
+        self.parent   = None
+        self.children = []
 
-#-----------------------------------------------------------------------------
-def print_tar_list( tar_file_name, verbose=False ):
-    try:
-        print( tar_file_name )
-        t = tarfile.open( tar_file_name )
-        t.list( verbose )
-        t.close()
-    except Exception as ex:
-        exit( "ERROR: Can't read archive file: {}. Error={}.".format( tar_file_name, ex ) )
-        
-
-
-
-#------------------------------------------------------------------------------
-#
-# BRANCHING SUPPORT
-#
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-def parse_branch_log( fobj, fname='' ):
+    def __repr__(self, level=0):
+        ret = "{}{}-{} ({})\n".format( "  "*level, self.get_pkgname(), self.get_semver(), self.get_dep_type() )
+        for child in self.children:
+            ret += child.__repr__(level+1)
+        return ret
     
-    nodes    = {}
-    last     = None
-    branches = set()
-
-    # process all entries in the file        
-    for line in fobj:
-       
-        # drop comments and blank lines
-        line = line.strip()
-        if ( line.startswith('#') ):
-            continue
-        if ( line == '' ):
-            continue
-   
-        # tokenize the line
-        tokens = line.split()
-    
-        # Parse BRANCH entries
-        if ( tokens[0] == 'BRANCH' and tokens[2] == 'TO' ):
+    def add_child_node( self, obj ):
+        self.children.append( obj )
+        obj.parent = self
         
-            # create new nodes (but only when needed)
-            src = _get_node( nodes, tokens[1] )
-            dst = _get_node( nodes, tokens[3] )
-    
-            # capture the semantics from the entry
-            src.add_branch( dst )
-            dst.set_parent( src )
-
-            # House keeping
-            last = dst
-            branches.add( src.name )
-            branches.add( dst.name )
-                            
-        # Parse MERGE entries
-        elif ( tokens[0] == 'MERGE' and tokens[5] == 'TO' ):
-        
-            # Parse 'weight' fields
-            wgt_stp = _parse_wgt(tokens[2])
-            wgt_par = _parse_wgt(tokens[4]) 
-            if ( wgt_stp == None ):
-                print_warning( "Invalid entry - bad <src-wgt> [{}]".format(line) )
-                continue
-            if ( wgt_par == None ):
-                print_warning( "Invalid entry - bad <dst-wgt> [{}]".format(line) )
-                continue
+    def remove_child_node( self, obj ):
+        self.children.remove(obj)
+        obj.parent = None
             
-            # create new nodes (but only when needed)
-            step   = _get_node( nodes, tokens[1] )
-            parent = _get_node( nodes, tokens[3] )
-            dst    = _get_node( nodes, tokens[6] ) 
-
-            # capture the semantics from the entry
-            step.add_merged_to( dst, wgt_stp )
-            parent.set_child( dst )
-            parent.set_wgt( wgt_par )
-            dst.set_parent( parent )
-            dst.set_stepparent( step )
+    def remove_all_children_nodes( self ):
+        for c in self.children:
+            c.parent = None
+        self.children = []
+        
+    def add_child_data( self, data ):
+        c = Node(data)
+        self.add_child_node( c )
+        return c
+        
+    def add_children_nodes( self, list ):
+        for o in list:
+            self.add_child_node( o )
             
-            # House keeping
-            last = dst
-            branches.add( parent.name )
-            branches.add( step.name )
-            branches.add( dst.name )
-                            
-        # Spit out a warning for invalid entries
-        else:
-            print_warning( "Invalid entry [{}]".format(line) )
-                
-
-
-    first, blists = _derive_child_links( nodes, branches )
-    if ( first == None ):
-        exit( "ERROR: There is no valid 'root' to the branch history in file:{}.  The branch history MUST start with a BRANCH entry from 'main'.".format(fname) )
-    return (nodes, first, last, blists)
-
-    
-def get_branch_and_min_ver_info( fobj, fname='' ):
-    # process all entries in the file        
-    last = None
-    for line in fobj:
-       
-        # drop comments and blank lines
-        line = line.strip()
-        if ( line.startswith('#') ):
-            continue
-        if ( line == '' ):
-            continue
-   
-        # tokenize the line
-        tokens = line.split()
-    
-        # Parse BRANCH entries
-        if ( tokens[0] == 'BRANCH' and tokens[2] == 'TO' ):
-            last = tokens[3]
-                            
-        # Parse MERGE entries
-        elif ( tokens[0] == 'MERGE' and tokens[5] == 'TO' ):
-            last = tokens[6]
-                            
-        # Spit out a warning for invalid entries
-        else:
-            print_warning( "Invalid entry [{}]".format(line) )
-                
-    # Spit an warning if no entries found
-    if ( last == None ):
-        print_warning( "No valid entries in the branch history file: {}.  Default to 'NO BRANCHES'.".format(fname) )
-        return (None, None)
-        
-    return standardize_dir_sep(last).split(os.sep)   
-     
-        
-#------------------------------------------------------------------------------
-def _derive_child_links( nodes, branches ):
-
-    # set child links one branch at time
-    fist  = None
-    lists = []
-    for b in branches:
-        l = []
-        for n in nodes.values():
-            if ( n.name == b ):
-                l.append( n )
-        
-        # Sort oldest to newest
-        l.sort(BranchNode.cmp)
-        
-        # update child pointers
-        next  = 1
-        count = len(l)
-        for i in l:
-            if ( next < count ): 
-                child = l[next].fullname
-                i.set_child( nodes[child] )
-                i.child.set_parent( i )
-            next += 1
-                
-        # capture the root of branch history (MUST be main/* something by definition)
-        if ( b == 'main' ):
-            first = l[0]
-            lists.insert(0,l)
-        else:
-            lists.append( l )
+    def add_children_data( self, list ):
+        for d in list:
+            self.add_child_data( d )
             
-    return first, lists
-                            
-def _get_node( nodes, name_ver, create_if_not_found=True ):
-    key = standardize_dir_sep(name_ver)
-    if ( key in nodes ):
-        return nodes[key]
-    elif ( create_if_not_found ):
-        n = BranchNode( key )
-        nodes[key] = n
-        return n
-    else:
-        return None
-
-def _parse_wgt( token ):
-    w = token.strip("()")
-    if ( w == 'major' ):
-        return w
-    if ( w == 'minor' ):
-        return w
-    if ( w == 'patch' ):
-        return w
-    if ( w == 'zero' ):
-        return w
+    def get_children( self ):
+        return self.children    
         
-    return None
-       
-#------------------------------------------------------------------------------
-def print_branch_history( bhist ):
-    nodes, first, last, blists = bhist
-    
-    for b in blists:
-        print_single_branch_history( b, nodes )
-        print()
-
-def print_single_branch_history( blist, nodes ):
-    for i in blist:
-        if ( i.stepparent != None ):
-            print( " "*4, "<-- MERGE ", i.stepparent.fullname, "({})".format( _get_merge_wgt(i.stepparent,i) ), "({})".format(i.parent.wgt), )
-        print( i.fullname )
-        if ( len(i.branches) > 0 ):
-            for b in i.branches:
-                print( " "*4, "BRANCH -->", b.fullname )
-        if ( len(i.mergedto) > 0 ):
-            for m in i.mergedto:
-                print( " "* 4, "MERGE  -->", m.fullname )
-
-def _get_merge_wgt( src, dst ):
-    idx = 0
-    for i in src.mergedto:
-        if ( i.fullname == dst.fullname ):
-            return src.merge_wgts[idx]
-        idx += 1
-        
-    return None
-                           
-#------------------------------------------------------------------------------
-def create_branch_dot_file( fname, bhist ):
-    with open(fname, 'w' ) as f:
-        f.write( "digraph { \n" )
-        
-        nodes, first, last, blists = bhist
-        for branch in blists:
-            for n in branch:
-                p = n.fullname.replace(os.sep,"/")
-                if ( n.child ):
-                    value = None
-                    if ( n.wgt != None ):
-                        value = n.wgt
-                    _write_trans( f, p, n.child.fullname, bold=True, label=value )
-                for b in n.branches:
-                    _write_trans( f, p, b.fullname, arrow_empty=True )
-                for m in n.mergedto:
-                    _write_trans( f, p, m.fullname, dashed=True, arrow_empty=True, label=_get_merge_wgt(n,m) )
-
-        f.write( "}\n" )
-
-
-def _write_trans( fd, p, childname, bold=False, solid=True, dotted=False, dashed=False, arrow_empty=False, arrow_normal=True, label=None ):
-    c = childname.replace(os.sep,"/")
-    fd.write( '"{}" -> "{}"'.format(p,c) )
-    if ( bold ):
-        fd.write( ' [style=bold]' )
-    elif( dotted ):
-        fd.write( ' [style=dotted]' )
-    elif( dashed ):
-        fd.write( ' [style=dashed]' )
-    elif( solid ):
-        fd.write( ' [style=solid]' )
-    
-    if ( arrow_empty ):
-        fd.write( ' [arrowhead=empty]' )
-    elif ( arrow_normal ):
-        fd.write( ' [arrowhead=normal]' )
-    
-    if ( label != None ):
-        fd.write( ' [label={}]'.format(label) )
-                
-    fd.write( ' \n' )
-
-#------------------------------------------------------------------------------
-class BranchNode:
-    def __init__(self,name_and_version=None):
-        self.name       = ''
-        self.version    = ''
-        self.branches   = []
-        self.child      = None
-        self.mergedto   = []
-        self.merge_wgts = []
-        self.parent     = None
-        self.stepparent = None
-        self.wgt        = None
-        
-
-        # Set name & version when provided: format is "<name>/<vernum>"
-        if ( name_and_version != None ):
-            self.name, self.version = standardize_dir_sep(name_and_version).split(os.sep)
-        
-        self.fullname = self.name + os.sep + self.version
+    def get_data( self ):
+        return self.data
             
-    def add_branch(self, branch_node):
-        self.branches.append( branch_node )
+    def set_data( self, newdata ):
+        self.data = newdata
         
-    def add_merged_to(self, merge_node, merge_wgt ):
-        self.mergedto.append( merge_node )
-        self.merge_wgts.append( merge_wgt )
+    def set_nodenum( self, num ):
+        self.nodenum = num
         
-    def set_parent(self, parent ):
-        self.parent = parent
+    def get_nodenum( self ):
+        return self.nodenum
         
-    def set_stepparent(self, stepparent ):
-        self.stepparent = stepparent
+    def get_dep_type( self ):
+        return self.data[1]
+
+    def get_pkgname( self ):
+        return json_get_package_name( self.data[0] ) if self.data[0] != None else self.data[2]['pkgname']
+
+    def get_semver( self ):
+        return json_get_current_semver( self.data[0] ) if self.data[0] != None else self.data[2]['version']['semanticVersion']
+    
+    def get_path_to_me( self ):
+        path = deque()
+        path.append( self )
+        parent = self.parent 
+        while( parent != None ):
+            path.appendleft( parent )
+            parent = parent.parent
+        return path
+
+    def set_node_number_by_height( self, num ):
+        queue = deque()
+        queue.append( self )
+        while( len(queue) > 0 ):
+            node         = queue.popleft()
+            node.nodenum = num
+            num         += 1
+            for c in node.children:
+                queue.append(c)
+    
+    def clone_sub_tree_from( self, src ):
+        self.data     = copy.deepcopy(src.data)
+        self.nodenum  = 0
+        self.children = []
+        self._clone_children_from( src )
         
-    def set_child(self, child ):
-        self.child = child
-    
-    def set_wgt(self, wgt ):
-        self.wgt = wgt
-        
-    def cmp(self,other):
-        if ( other != None ):
-            return numerically_compare_versions(self.version, other.version)
-        return NotImplemented
-
-    def __str__(self):
-        return self.fullname
-        
-    def _repr__(self):
-        return self.fullname
-        
-    def print_all(self):
-        print( "{}/{}: P={}, C={}, wgt={}. Branches={}, Merges={}, MWgts={}".format( self.name, self.version, self.parent, self.child, self.wgt, self.branches, self.mergedto, self.merge_wgts ) )
-
-        self.name       = ''
-        self.version    = ''
-        self.branches   = []
-        self.child      = None
-        self.mergedto   = []
-        self.merge_wgts = []
-        self.parent     = None
-        self.stepparent = None
-        self.wgt        = None
-        
-
-                 
-#------------------------------------------------------------------------------
-now   = 0
-local = None
-
-def mark_time( current_time = False ):
-    global now, local
-    if ( not current_time ):
-        current_time = time.time()
-        
-    now       = int( current_time ) 
-    local     = time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime(now))
-    return now, local
-
-def get_marked_time():
-    global now, local
-    return now, local
-    
-    
-#------------------------------------------------------------------------------
-def update_journal_publish( journal_file, user, summary_comment, comment_file, version, branch_name, exit_on_error=True ):
-    return _update_journal( journal_file, comment_file, _create_journal_publish_marker( summary_comment, user, version, branch_name ), exit_on_error  )
- 
-    
-def update_journal_promote( journal_file, user, summary_comment, comment_file, version, branch_name, from_package_nbv, exit_on_error=True  ):
-    return _update_journal( journal_file, comment_file, _create_journal_promote_marker( summary_comment, user, version, branch_name, from_package_nbv), exit_on_error  )
- 
-    
-def update_journal_deprecate( journal_file, user, summary_comment, comment_file, version, branch_name, exit_on_error=True  ):
-    return _update_journal( journal_file, comment_file, _create_journal_deprecate_marker( summary_comment, user, version, branch_name), exit_on_error  )
-    
-
-def update_journal_do_not_use( journal_file, user, summary_comment, comment_file, version, branch_name, exit_on_error=True  ):
-    return _update_journal( journal_file, comment_file, _create_journal_do_not_use_marker( summary_comment, user, version, branch_name), exit_on_error  )
-    
-    
-
-def _update_journal( journal_file, comment_file, marker_string, exit_on_error=True ):
-    try:
-        f = open( journal_file, "a" )
-        f.write( marker_string + "\n" )
-        if ( comment_file ):
-            append_to_file( f, comment_file )
-        f.write( "\n\n" )
-        f.close()
-        
-    except Exception as ex:
-        if ( exit_on_error ):
-            exit( "ERROR: {}".format(ex) )        
-        return ex
-
-    return None        
-        
-def _create_journal_publish_marker( summary, user, version, branch_name ):
-    now, local = get_marked_time()
-    return "{}; {}; {}; PUBLISH; {}; {}; {}; {}".format( '~' * 5, now, local, user, version, branch_name, summary )
-
-def _create_journal_promote_marker( summary, user, version, branch_name, from_package_nbv ):
-    now, local = get_marked_time()
-    return "{}; {}; {}; PROMOTE; {}; {}; {}; {}".format( '~' * 5, now, local, user, version, branch_name, from_package_nbv )
-
-def _create_journal_do_not_use_marker( summary, user, version, branch_name ):
-    now, local = get_marked_time()
-    return "{}; {}; {}; DO_NOT_USE; {}; {}; {}; {}".format( '~' * 5, now, local, user, version, branch_name, summary )
-
-def _create_journal_deprecate_marker( summary, user, version, branch_name ):
-    now, local = get_marked_time()
-    return "{}; {}; {}; DEPRECATE; {}; {}; {}; {}".format( '~' * 5, now, local, user, version, branch_name, summary )
+            
+    def _clone_children_from( self, src ):
+        for x in src.children:
+            newnode = Node(None)
+            self.add_child_node( newnode )
+            newnode.clone_sub_tree_from( x )
 
 
-#------------------------------------------------------------------------------
-def read_journal_file( file_name, fh=None ):
-    # Open local file
-    if ( fh == None ):
-        try:
-            fh = open( file_name, "r" )
-        except:
-            exit( "ERROR: File - {} - does not exist or is not a valid file name.".format( file_name ) )
-        
-        print_verbose( "Reading file: " + file_name )
-                
-    # Provided a file handle (e.g. reading the file from a tar file)
-    else:
-        utils.print_verbose( "Reading file: "  + file_name  )
-
- 
-    # Scan file and load markers
-    publish_list     = []
-    promote_list     = []   
-    do_not_use_list  = []
-    deprecate_list   = []
-    linenum          = 0
-    for line in fh:
-        # skip ALL non-marker lines
-        linenum += 1
-        if ( not line.startswith('~' * 5) ):
-            continue    
-         
-        # Break into fields
-        tokens = line.split(';')
-        tokens = [x.strip() for x in tokens]
-        if ( tokens[3] == "PUBLISH" ):
-            publish_list.append( tokens[1:] )
-        elif ( tokens[3] == "DO_NOT_USE" ):
-            do_not_use_list.append( tokens[1:] )
-        elif ( tokens[3] == "DEPRECATE" ):
-            deprecate_list.append( tokens[1:] )
-        elif ( tokens[3] == "PROMOTE" ):
-            promote_list.append( tokens[1:] )
-        else:
-            print_warning( "Invalid Journal marker at line {} [{}].".format( linenum, line ) )
- 
-    # clean-up
-    fh.close()    
-
-    # return markers
-    markers = {}
-    markers['publish']    = publish_list
-    markers['promote']    = promote_list
-    markers['do_not_use'] = do_not_use_list
-    markers['deprecate']  = deprecate_list
-    return markers
-
-    
-def extract_pbv_from_journal( journal, entry_type, pkgname ):
-    entries  = journal[entry_type]
-    pbv_list = []    
-    for e in entries:
-        pbv_list.append( (pkgname, e[5], e[4]) )
-
-    return pbv_list    
-             
-
-#------------------------------------------------------------------------------
-def workspace_namespaces_as_list( wrkspace ):
-    pkgs = os.listdir( wrkspace )
-    
-    # Attempt to filter out all non-package directories
-    remove_from_list( OUTCAST_XINC_DIRNAME(), pkgs )
-    remove_from_list( OUTCAST_XPKGS_DIRNAME(), pkgs )
-    for p in pkgs:
-        if ( not p[0:1].isalpha() ):
-            pkgs.remove(p)
-
-    # Create a super list of namespaces
-    all     = []
-    pkgsall = []
-    for p in pkgs:
-        ns = read_namespaces_local( wrkspace, p )
-        if ( len(ns) > 0 ):
-            all.extend( ns )
-            pkgsall.append( (p,ns) )
-
-    return (all, pkgsall)
-    
-    
-def read_namespaces_local( wrkspace, pkgname ):
-    f = os.path.join( wrkspace, pkgname, 'top', 'pkg.namespaces' )
-    if ( not os.path.isfile( f ) ):
-        return []
-        
-    try:
-        fd = open( f, 'r' )
-        ns = _read_namespaces( fd )
-        fd.close()
-        
-    except Exception as ex:
-        exit( "ERROR: Unable to open/read pkg.namespaces file: {})".format(f,ex) )
-
-    return ns
-    
-        
-def read_namespaces_top( uverse, pkgnbv ):
-    
-    # Open top file
-    f = os.path.join( uverse, pkgnbv + '.top' )
-    try:
-        tar = tarfile.open( f )
-        fh  = tar.extractfile( 'top/pkg.namespaces' )
-    
-    except KeyError:
-        print_warning( "No pkg.namespace file in package: {}".format( f ) )
-        tar.close()
-        return []
-        
-    except Exception as ex:
-        exit("ERROR: Trying to locate/read Package Top File: {}".format(f) )
-    
-    # Read the namespaces file
-    ns  = _read_namespaces( fh )
-    tar.close()
-    return ns
 
 
-def _read_namespaces( fh ):
-    namespaces = []
-    for line in fh:
-        line = line.strip()
-        namespaces.append( line )    
-    
-    return namespaces
-        

@@ -1,56 +1,46 @@
 """ Global variables """
 
-    
-# Globals
-#_NQBP_PRJ_DIR   = ''
+_package_root = ''
 
 #
 def ORC_VERSION():
-    return "v0.0.1-alpha"
+    return "v2.0.1-alpha"
     
 def EVIE_VERSION():
     return ORC_VERSION()
     
-def CERES_VERSION():
-    return ORC_VERSION()
-    
-def BOB_VERSION():
-    return ORC_VERSION()
-
-def CHUCK_VERSION():
-    return ORC_VERSION()
-
-def OUTCAST_XPKGS_DIRNAME():
-    return 'xpkgs' 
-            
-def OUTCAST_XINC_DIRNAME():
-    return 'xinc' 
-            
-def OUTCAST_PKGS_ROOT():
-    return 'OUTCAST_PKGS_ROOT'
+# SCM for adopted packages
+def OUTCAST_SCM_ADOPTED_TOOL():
+    return 'OUTCAST_SCM_ADOPTED_TOOL'
    
-def OUTCAST_PKGS_UVERSE():
-    return 'OUTCAST_PKGS_UVERSE'
+# SCM for primary/local package
+def OUTCAST_SCM_PRIMARY_TOOL():
+    return 'OUTCAST_SCM_PRIMARY_TOOL'
 
-def OUTCAST_USER_NAME():
-    return 'USERNAME'
+def OVERLAY_PKGS_DIR():
+    return 'pkgs.overlaid'
 
-def OUTCAST_UVERSE_TYPE():
-    return 'OUTCAST_UVERSE_TYPE'
-   
-def OUTCAST_SCM_TOOL():
-    return 'OUTCAST_SCM_TOOL'
-   
-def OUTCAST_LOCAL_PKG_SUFFIX():
-    return "**Local**"
-          
-def OUTCAST_TOP_DIR():
-    return "top"
-    
-def OUTCAST_EXPORT_HEADERS_FNAME():
-    return "export_headers.lst"
-    
-          
+def PACKAGE_INFO_DIR():
+    return 'pkg.info'
+
+def PACKAGE_FILE():
+    return 'package.json'
+
+def PKG_DIRS_FILE():
+    return 'pkg-dirs.lst'
+
+def IGNORE_DIRS_FILE():
+    return 'ignore-dirs.lst'
+
+def TEMP_DIR_NAME():
+    return '__temp_delete_me__'
+
+def PACKAGE_ROOT(set=None):
+    global _package_root
+    if ( set != None ):
+        _package_root = set
+    return _package_root
+
 #
 #def NQBP_PRJ_DIR( newval=None ):
 #    global _NQBP_PRJ_DIR
