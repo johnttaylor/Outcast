@@ -9473,8 +9473,8 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div created="20180714153847444" modified="20211127204833822" title="$:/state/toc/Contents-Directories &amp; Files--242358753">
 <pre>open</pre>
 </div>
-<div created="20180713005402899" modified="20180713005402899" title="$:/state/toc/Contents-Glossary--1025088837">
-<pre>open</pre>
+<div created="20180713005402899" modified="20211128181759457" title="$:/state/toc/Contents-Glossary--1025088837">
+<pre>close</pre>
 </div>
 <div created="20211127202317857" modified="20211128181458432" title="$:/state/toc/Contents-Glossary--242358753">
 <pre>close</pre>
@@ -9993,7 +9993,7 @@ The ''Mono-Consuming-Poly Repo (MCP)'' strategy is a //my project first// approa
 
 *The Overlay package's unit tests are buildable/executable within the Primary package's repository without modifications.</pre>
 </div>
-<div created="20211009212456792" modified="20211128181611653" tags="Contents" title="Overview">
+<div created="20211009212456792" modified="20211128181658999" tags="Contents" title="Overview">
 <pre>Outcast is a proof of concept for implementing a hybrid [[Mono-Consuming-Poly Repo (MCP)|Mono-Consuming-Poly Repo (MCP)]] paradigm to provide a solution to the problem: ''//how to manage, in a team environment, a scalable reusable code base?//''
 
 A [[Mono Repo|https://en.wikipedia.org/wiki/Monorepo]] paradigm is a software development strategy where code for many projects is stored in the same repository. A Poly Repo paradigm separates different projects, libraries, sub-systems, etc. into individual independent repositories  (e.g. using `git submodules`).  There are pros and cons to both approaches (just google //mono vs multi repo//).  However, in my experience neither of these approaches provided a solution that is both scalable and low overhead.
@@ -10002,7 +10002,7 @@ The ''Mono-Consuming-Poly Repo (MCP)'' strategy is a //my project first// approa
 
 Outcast assumes the following logical relationship with respect to reusing packages and SCM repositories.  The ''primary'' package is original content of the repository.  The ''adopted'' packages are copies of other repositories' primary package.
 
-[img[./documentation/repo-package-relationship.svg]]
+[img[./documentation/repo-package-relationships.svg]]
 
 
 As with the original Outcast project, Outcast 2.0's first step is/was to create a set of tools as a proof-of-concept to realize the day-to-day workflow for developers to create and consume reusable code; and for that workflow to be scalable into large team environment.  

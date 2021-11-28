@@ -126,7 +126,7 @@ def run( common_args, cmd_argv ):
 
     # Ensure the 'dirs list' is up to date
     if ( not args['--nodirs'] and args['<semver>'] ):
-        if ( os.path.isfile( dirs_file ) and os.path.isfile( ignore_file ) ):
+        if ( os.path.isfile( ignore_file ) ):
             owndirs = utils.get_owned_dirs( PACKAGE_ROOT() )
             utils.save_dirs_list_file( owndirs )
 

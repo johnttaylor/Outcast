@@ -464,6 +464,7 @@ def json_get_current_version( json_dict ):
 
 # Returns the current published version
 def json_get_current_semver( json_dict ):
+    print(json_dict)
     return json_dict['publish']['current']['version']
 
 # Returns the published history
@@ -801,10 +802,22 @@ class Node(object):
         return self.data[1]
 
     def get_pkgname( self ):
-        return json_get_package_name( self.data[0] ) if self.data[0] != None else self.data[2]['pkgname']
+        if ( self.parent == None ):
+            if ( self.data[0] != None and self.data[0] != None ):
+                return json_get_package_name( self.data[0] ) 
+            else:
+                return "<unknown>"
+
+        return self.data[2]['pkgname']
 
     def get_semver( self ):
-        return json_get_current_semver( self.data[0] ) if self.data[0] != None else self.data[2]['version']['semanticVersion']
+        if ( self.parent == None ):
+            if ( self.data[0] != None and self.data[0]['publish']['current'] != None ):
+                return json_get_current_semver( self.data[0] ) 
+            else:
+                return "<unknown>"
+
+        return self.data[2]['version']['semanticVersion']
     
     def get_path_to_me( self ):
         path = deque()
