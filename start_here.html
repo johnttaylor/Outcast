@@ -321,6 +321,8 @@ Error message and password prompt
 
 <li>Overview</li>
 
+<li>Owned Directories</li>
+
 <li>Package Dependencies</li>
 
 <li>Package Granularity</li>
@@ -9474,17 +9476,17 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div created="20180713005402899" modified="20180713005402899" title="$:/state/toc/Contents-Glossary--1025088837">
 <pre>open</pre>
 </div>
-<div created="20211127202317857" modified="20211128174049793" title="$:/state/toc/Contents-Glossary--242358753">
-<pre>open</pre>
+<div created="20211127202317857" modified="20211128181458432" title="$:/state/toc/Contents-Glossary--242358753">
+<pre>close</pre>
 </div>
 <div created="20211127205405612" modified="20211127205405612" title="$:/state/toc/Contents-Other--242358753">
 <pre>open</pre>
 </div>
-<div created="20211010132020521" modified="20211128173944810" title="$:/state/toc/Contents-Overview--242358753">
-<pre>open</pre>
+<div created="20211010132020521" modified="20211128181455238" title="$:/state/toc/Contents-Overview--242358753">
+<pre>close</pre>
 </div>
-<div created="20211011193515091" modified="20211128170635239" title="$:/state/toc/Contents-Proof-of-Concept--242358753">
-<pre>open</pre>
+<div created="20211011193515091" modified="20211128181500013" title="$:/state/toc/Contents-Proof-of-Concept--242358753">
+<pre>close</pre>
 </div>
 <div created="20211011193520835" modified="20211128150231061" title="$:/state/toc/Contents-References--242358753">
 <pre>close</pre>
@@ -9498,7 +9500,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div created="20211128150209680" modified="20211128150209680" title="$:/state/toc/Contents/Proof-of-Concept-Tools--242358753">
 <pre>open</pre>
 </div>
-<div list="Tools Overview" title="$:/StoryList">
+<div list="Overview" title="$:/StoryList">
 <pre></pre>
 </div>
 <div created="20211128173334203" modified="20211128173358036" title="$:/temp/advancedsearch">
@@ -9517,7 +9519,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
         },
         &quot;$:/info/url/full&quot;: {
             &quot;title&quot;: &quot;$:/info/url/full&quot;,
-            &quot;text&quot;: &quot;file:///C:/_workspaces/Outcast/start_here-2.0.html&quot;
+            &quot;text&quot;: &quot;file:///C:/_workspaces/Outcast/start_here.html&quot;
         },
         &quot;$:/info/url/host&quot;: {
             &quot;title&quot;: &quot;$:/info/url/host&quot;,
@@ -9537,7 +9539,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
         },
         &quot;$:/info/url/pathname&quot;: {
             &quot;title&quot;: &quot;$:/info/url/pathname&quot;,
-            &quot;text&quot;: &quot;/C:/_workspaces/Outcast/start_here-2.0.html&quot;
+            &quot;text&quot;: &quot;/C:/_workspaces/Outcast/start_here.html&quot;
         },
         &quot;$:/info/url/search&quot;: {
             &quot;title&quot;: &quot;$:/info/url/search&quot;,
@@ -9981,16 +9983,17 @@ The ''Mono-Consuming-Poly Repo (MCP)'' strategy is a //my project first// approa
 |[[Stable Dependencies Principle|file:./articles/stability.pdf]] |//THE DEPENDENCIES BETWEEN PACKAGES IN A DESIGN SHOULD BE IN THE DIRECTION OF THE STABILITY OF THE PACKAGES. A PACKAGE SHOULD ONLY DEPEND UPON PACKAGES THAT ARE MORE STABLE THAT IT IS.// |
 |[[Principles and Patterns|file:./articles/p_and_p.pdf]] |Summary of OO Principles and Patterns |</pre>
 </div>
-<div created="20211128172837987" modified="20211128173437194" tags="Glossary" title="OverlayPackage">
+<div created="20211128172837987" modified="20211128181350267" tags="Glossary" title="OverlayPackage">
 <pre>An Overlay Package have their primary source tree overlaid on top of  the Primary Package's source tree when the Overlay package is adopted.  Overlay Packages provides the most scalability because:
 
 * Only the Overlay package's primary content is copied when adopted.  This prevents multiple instance of the same packaged being adopted when there are transitive dependencies.
+** Overlay Packages have the concept of [[Owned Directories]].  It is the //owned// directories that are copied when the package is adopted.
 
 *There is single/common directory structure for the build scripts/makefile.  This means that unique compiler header search path defintions are ''not'' required for each adopted package.
 
 *The Overlay package's unit tests are buildable/executable within the Primary package's repository without modifications.</pre>
 </div>
-<div created="20211009212456792" modified="20211128173932559" tags="Contents" title="Overview">
+<div created="20211009212456792" modified="20211128181611653" tags="Contents" title="Overview">
 <pre>Outcast is a proof of concept for implementing a hybrid [[Mono-Consuming-Poly Repo (MCP)|Mono-Consuming-Poly Repo (MCP)]] paradigm to provide a solution to the problem: ''//how to manage, in a team environment, a scalable reusable code base?//''
 
 A [[Mono Repo|https://en.wikipedia.org/wiki/Monorepo]] paradigm is a software development strategy where code for many projects is stored in the same repository. A Poly Repo paradigm separates different projects, libraries, sub-systems, etc. into individual independent repositories  (e.g. using `git submodules`).  There are pros and cons to both approaches (just google //mono vs multi repo//).  However, in my experience neither of these approaches provided a solution that is both scalable and low overhead.
@@ -10015,6 +10018,50 @@ The Outcast 2.0 scripts and tools are contained in the [[Outcast repository|http
 &lt;/h3&gt;
 
 {{LeftMenu}}</pre>
+</div>
+<div created="20211128181001686" modified="20211128181230449" tags="Glossary" title="Owned Directories">
+<pre>Overlay Packages have the concept of //''owned''// directories.  Within a give source tree each directory is //owned// by a single package.  //owned// directories are relative to  a //primary// directory in SCM repository.  //Primary// directory are required to be in the root directory of the repository.  
+
+For a package to //own// a directory the following criteria must be met:
+
+# The directory exists under a //primary// directory in the repository root directory.
+# The directory is not currently owned by an adopted Overlay package
+# At least one file exists in the directory.
+
+The following snippet is example of //owned// directories under the `src/` primary directory in the //primary// package `colony.core`.
+
+```
+
+C:\_workspaces\zoe\colony.core		// Primary Package
++---src					// Primary directory
+|   +---Bsp				// owned by colony.bsp
+|   |   |   Api.h
+|   |   |   Execution.h
+|   |   |   README.txt
+|   |   |   WatchDog.h
+|   |   |
+|   |   +---Renesas			// owned by colony.bsp.renesas.rx
+|   |   |   |   README.txt
+|   |   |   |
+|   |   |   \---Rx			// owned by colony.bsp.renesas.rx
+|   |   |       |   README.txt
+|   |   |       |
+|   |   |       +---u62n		// owned by colony.bsp.renesas.rx
+|   |   |       |   |   cmp_timers.c
+|   |   |       |   |   cmp_timers.h
+|   |   |       |   |   hal_mappings_.h
+|   |   |       |   |   iodefine.h
+|   |   |
+|   |   +---UserSpace			// owned by colony.core
+|   |   |       Api.cpp
+|   |   |       Api.h
+|   |   |       driver_hal_mappings_.h
+|   |   |       README.txt
+|   |   |
+|   |   \---_0test			// owned by colony.bsp
+|   |           Api.cpp
+```
+</pre>
 </div>
 <div created="20150227030637064" modified="20211128170532860" tags="Proof-of-Concept Glossary Overview" title="Package Dependencies">
 <pre>Packages can and do depend on other Packages.  When consuming/using a package - you become dependent not only that specific package - but all of it dependencies.  This creates dependency graphs which can be potentially quite complex and/or deep. Part of the Outcast concept to manage - in a user friendly manner - the dependency trees of Packages.
