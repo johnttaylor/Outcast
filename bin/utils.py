@@ -242,6 +242,13 @@ def write_package_file( json_dictionary ):
     if ( not os.path.isdir( PACKAGE_INFO_DIR() ) ):
         mkdirs( PACKAGE_INFO_DIR() )
 
+    # Remove 'temporary' key/value pairs
+    for cats, depList in json_dictionary['dependencies'].items():
+        for dep in depList:
+            if ( 'depType' in dep ):
+                del dep['depType']
+
+    # Sort the dictionary for consistent ordering in the physical file
     od = collections.OrderedDict(sorted(json_dictionary.items()))
     f  = os.path.join(  PACKAGE_INFO_DIR(),PACKAGE_FILE() )
     data = json.dumps( od, indent=2 )
