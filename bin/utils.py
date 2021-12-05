@@ -464,7 +464,6 @@ def json_get_current_version( json_dict ):
 
 # Returns the current published version
 def json_get_current_semver( json_dict ):
-    print(json_dict)
     return json_dict['publish']['current']['version']
 
 # Returns the published history
