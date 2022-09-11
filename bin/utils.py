@@ -255,13 +255,16 @@ def write_package_file( json_dictionary ):
     with open( f, "w+" ) as file:
         file.write( data )
 
-def cat_package_file( indent=2, path=PACKAGE_INFO_DIR(), file=PACKAGE_FILE() ):
+def cat_package_file( indent=2, path=PACKAGE_INFO_DIR(), file=PACKAGE_FILE(), verbose=False ):
     f = os.path.join(  path, file )
 
     try:
         with open(f) as f:
             json_dict =  json.load( f )
             od = collections.OrderedDict(sorted(json_dict.items()))
+            pub = od['publish']
+            if ( verbose == False ):
+                od['publish'] = filter_changes_in_publish_dict(pub)
             print( json.dumps( od, indent=indent ) )
             return json_dict
     except Exception as e:
@@ -422,13 +425,22 @@ def json_copy_info( json_dict_in ):
     return dict_out
 
 # create version entry.  If NO date is provided than the current time is used
-def json_create_version_entry( comment, semver, date=None ):
+def json_create_version_entry( comment, semver, changefile=None, date=None ):
     now = int(time.time())
     t   = time.gmtime(now)
     if ( date != None ):
         t   = time.strptime( date )
         now = calendar.timegm( t )
-    entry  = { "comment" : comment, "version" : semver, "date" : time.asctime(t), "timestamp": now }
+    changes = None
+    if ( changefile != None ):
+        try:
+            with open(changefile) as f:
+                changes = f.read()
+            changes = json.dumps( changes )
+        except Exception as e:
+            sys.exit(f"ERROR: Trying to read {changefile}. {e}." )
+
+    entry  = { "comment" : comment, "version" : semver, "date" : time.asctime(t), "timestamp": now, "changes": changes }
     return entry
 
 # update the 'current' published version
@@ -447,7 +459,7 @@ def json_add_new_version( json_dict, ver_entry, save_pkg=True ):
     json_update_current_version( json_dict, ver_entry, save_pkg )
 
 # edits an existing history entry
-def json_update_history_version( json_dict, idx, comment, semver, save_pkg=True  ):
+def json_update_history_version( json_dict, idx, comment, semver, changefile=None, save_pkg=True ):
     # validate the index
     idx = int(idx)
     if ( idx >= len(json_dict['publish']['history']) or idx <  0 ):
@@ -455,11 +467,31 @@ def json_update_history_version( json_dict, idx, comment, semver, save_pkg=True 
 
     # Use the existing timestamp - but with new comments/ver
     e = json_dict['publish']['history'][idx]
-    updated = json_create_version_entry( comment, semver, e['date'] )
+    updated = json_create_version_entry( comment, semver, changefile, e['date'] )
     json_dict['publish']['history'][idx] = updated
 
     if ( save_pkg ):
         write_package_file( json_dict )
+
+# Returns a dictionary with the version entry's 'changes' value replaced with '...' (this is because the value can be VERY large and contain JSON escape characters)
+def filter_changes_in_publish_dict( publish_dict ):
+    if ( 'changes' in publish_dict['current'] and publish_dict['current']['changes'] != None ):
+        publish_dict['current']['changes'] = "..."
+    for idx in range(0,len(publish_dict['history'])):
+        if ( 'changes' in publish_dict['history'][idx] and publish_dict['history'][idx]['changes'] != None):
+            publish_dict['history'][idx]['changes'] = "..."
+    
+    return publish_dict
+    
+# Outputs the version entry's 'changes' key/value WITHOUT any JSON escape characters
+def show_version_changes( version_entry_dict, verbose=True  ):
+    if ( verbose ):
+        print( f"# VERSION: {version_entry_dict['version']}, {version_entry_dict['date']}. {version_entry_dict['comment']}" )
+    if ( 'changes' in version_entry_dict ):
+        entry = version_entry_dict['changes']
+        if ( entry != None ):
+            print( json.loads(entry) )
+
 
 # Returns the Publish dictionary
 def json_get_published( json_dict ):

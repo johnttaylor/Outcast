@@ -3,23 +3,35 @@
 Publishes the Primary Package
 ===============================================================================
 usage: orc [common-opts] publish [options] <semver> <comments>
+       orc [common-opts] publish [options] ls 
        orc [common-opts] publish [options] help
        orc [common-opts] publish [options] 
 
 Arguments:
-    <semver>        The Semantic version information for the Published version
-    <comments>      Publish comments
+    new             Publishs a new version of the package
+    <semver>        The Semantic version information for the Published version.
+    <comments>      Publish comments.
+    ls              Outputs the 'change file' contents.  The default operation 
+                    is to output the changes forthe latest published version.
     help            Display the recommended steps/process for publishing a
                     package
 
 Options:
+    --changes FILE  Specifies a text file that contained details about 
+                    individual changes.
     --edit          Updates the 'current' publish information in place, i.e.
                     does not create a new version.  The date/time fields are
                     NOT updated.
-    --edithist N    Updates the 'N' entry in the History array.  N is zero
-                    based index. The date/time fields are NOT updated.
+    --edithist      Updates a version in the History array.  Which version is
+                    specified by the '--hist' option.
+    --hist N        Selects the 'N' entry in the History array. N is zero
+                    based index. This option can be used editing a history
+                    entry as well as when displaying changes.
     -w              Suppress warning about missing files
     --nodirs        Skip updating the pkg-dirs.lst when publishing
+    -a              Displays the 'changes' for all versions
+    --
+    -v              Enable verbose output
     -h, --help      Display help for this command
 
 Common Options:
@@ -78,7 +90,7 @@ help_text = \
   9  Complete the pull request process and merge the PR into its parent
      branch.
 
-[10] If the parent branch is not a 'release' branch, then propagate  the merged
+[10] If the parent branch is not a 'release' branch, then propagate the merged
      changes to the 'release' branch
 
  11  Create a Tag/label - with the same semantic version information from 
@@ -105,19 +117,42 @@ def run( common_args, cmd_argv ):
     # Get the package data
     json_dict = utils.load_package_file()
 
+    # Display changes
+    if ( args['ls'] ):
+        p = utils.json_get_published( json_dict )
+
+        # Display all changes
+        if ( args['-a'] ):
+            utils.show_version_changes( p['current'], args['-v'] )
+            for idx in range(0,len(p['history'])):
+                utils.show_version_changes( p['history'][idx], args['-v'] )
+
+        # Display the current version's changes
+        elif ( args['--hist'] == None ):
+            utils.show_version_changes( p['current'], args['-v'] )
+            
+        # Display the a history entry's changes
+        elif ( args['--hist'] != None ):
+            idx = int(args['--hist'])
+            if ( idx < len(p['history']) ):
+                utils.show_version_changes( p['history'][idx], args['-v'] )
+
+        sys.exit(0)
+
+
     # Edit in place
     if ( args['--edit'] ):
         prev = utils.json_get_current_version( json_dict )
-        v = utils.json_create_version_entry( args['<comments>'], args['<semver>'], prev['date'] )
+        v = utils.json_create_version_entry( args['<comments>'], args['<semver>'], args['--changes'], prev['date'] )
         utils.json_update_current_version( json_dict, v )
 
     # Edit a history entry
     elif ( args['--edithist'] ):
-        utils.json_update_history_version( json_dict, args['--edithist'],  args['<comments>'], args['<semver>'] )
+        utils.json_update_history_version( json_dict, args['--hist'],  args['<comments>'], args['<semver>'], args['--changes'] )
 
     # Create new entry
     elif ( args['<semver>'] ):
-        v = utils.json_create_version_entry( args['<comments>'], args['<semver>'] )
+        v = utils.json_create_version_entry( args['<comments>'], args['<semver>'], args['--changes'] )
         utils.json_add_new_version( json_dict, v )
         
     # Important files...
@@ -132,6 +167,8 @@ def run( common_args, cmd_argv ):
 
     # display publish info
     p = utils.json_get_published( json_dict )
+    if ( args['-v'] == False ):
+        p = utils.filter_changes_in_publish_dict(p)
     print( json.dumps(p, indent=2) )
 
     # Display warnings

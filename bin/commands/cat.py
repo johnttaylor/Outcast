@@ -11,6 +11,7 @@ Arguments:
 Options:
     --indent NUM        Number of spaces when indenting JSON output.
                         [Default: 2]
+    -v                  Enable verbose output
     -h, --help          Display help for this command
 
 Common Options:
@@ -41,7 +42,7 @@ def run( common_args, cmd_argv ):
 
     # Display my package info
     if ( not args['<adoptedpkg>'] ):
-        utils.cat_package_file(int(args['--indent']))
+        utils.cat_package_file(int(args['--indent']), verbose=args['-v'])
 
     # Display an adopted package
     else:
@@ -53,13 +54,13 @@ def run( common_args, cmd_argv ):
 
         # OVERLAY package
         if ( pkgobj['pkgtype'] == 'overlay' ):
-            utils.cat_package_file( int(args['--indent']), path=os.path.join( OVERLAY_PKGS_DIR(), args['<adoptedpkg>'], PACKAGE_INFO_DIR() ) )
+            utils.cat_package_file( int(args['--indent']), path=os.path.join( OVERLAY_PKGS_DIR(), args['<adoptedpkg>'], PACKAGE_INFO_DIR() ), verbose=args['-v'] )
 
         # Readonly/Foreign Packages
         else:
             if ( pkgobj['parentDir'] == None ):
                 sys.exit( f"ERROR: the {PACKAGE_FILE()} file is corrupt. There is no parent directory for the package: {args['<adoptedpkg>']}" )
-            json_dict = utils.cat_package_file( int(args['--indent']), path=os.path.join( pkgobj['parentDir'], args['<adoptedpkg>'], PACKAGE_INFO_DIR() ) )
+            json_dict = utils.cat_package_file( int(args['--indent']), path=os.path.join( pkgobj['parentDir'], args['<adoptedpkg>'], PACKAGE_INFO_DIR() ), verbose=args['-v'] )
             if ( json_dict == None ):
                 sys.exit( f"ERROR: No package information is available for the Readonly/Foreign package: {args['<adoptedpkg>']}" )
 
