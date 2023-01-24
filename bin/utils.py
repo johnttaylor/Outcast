@@ -475,7 +475,7 @@ def json_update_history_version( json_dict, idx, comment, semver, changefile=Non
 
 # Returns a dictionary with the version entry's 'changes' value replaced with '...' (this is because the value can be VERY large and contain JSON escape characters)
 def filter_changes_in_publish_dict( publish_dict ):
-    if ( 'changes' in publish_dict['current'] and publish_dict['current']['changes'] != None ):
+    if ( publish_dict['current'] != None and 'changes' in publish_dict['current'] and publish_dict['current']['changes'] != None ):
         publish_dict['current']['changes'] = "..."
     for idx in range(0,len(publish_dict['history'])):
         if ( 'changes' in publish_dict['history'][idx] and publish_dict['history'][idx]['changes'] != None):
@@ -487,7 +487,7 @@ def filter_changes_in_publish_dict( publish_dict ):
 def show_version_changes( version_entry_dict, verbose=True  ):
     if ( verbose ):
         print( f"# VERSION: {version_entry_dict['version']}, {version_entry_dict['date']}. {version_entry_dict['comment']}" )
-    if ( 'changes' in version_entry_dict ):
+    if ( version_entry_dict != None and 'changes' in version_entry_dict ):
         entry = version_entry_dict['changes']
         if ( entry != None ):
             print( json.loads(entry) )
@@ -733,17 +733,22 @@ def build_vernum( m, n, p, pre=None ):
 
 def parse_vernum( string ):
     pre = None
-    t   = string.split('.')
-    if ( len(t) < 3 or len(t) > 3 ):
-        exit( "ERROR: Malformed version number: [{}].".format( string ) )
+
+    # Trap missing semantic info in the package info file(s)
+    if ( string == None ):
+        t= (0,0,0)
+    else:
+        t   = string.split('.')
+        if ( len(t) < 3 or len(t) > 3 ):
+            exit( "ERROR: Malformed version number: [{}].".format( string ) )
         
-    # Parse pre-release (if it exists)
-    t2 = t[2].split('-')
-    if ( len(t2) == 2 ):
-        pre  = t2[1]
-        t[2] = t2[0]
-    elif ( len(t2) > 2 ):
-        exit( "ERROR: Malformed version number (prerelease id): [{}]".format( string ) )
+        # Parse pre-release (if it exists)
+        t2 = t[2].split('-')
+        if ( len(t2) == 2 ):
+            pre  = t2[1]
+            t[2] = t2[0]
+        elif ( len(t2) > 2 ):
+            exit( "ERROR: Malformed version number (prerelease id): [{}]".format( string ) )
     
     
     return (t[0], t[1], t[2], pre)

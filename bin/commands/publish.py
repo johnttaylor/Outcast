@@ -17,7 +17,7 @@ Arguments:
                     package
 
 Options:
-    --changes FILE  Specifies a text file that contained details about 
+    -c FILE         Specifies a text file that contained details about 
                     individual changes.
     --edit          Updates the 'current' publish information in place, i.e.
                     does not create a new version.  The date/time fields are
@@ -143,16 +143,16 @@ def run( common_args, cmd_argv ):
     # Edit in place
     if ( args['--edit'] ):
         prev = utils.json_get_current_version( json_dict )
-        v = utils.json_create_version_entry( args['<comments>'], args['<semver>'], args['--changes'], prev['date'] )
+        v = utils.json_create_version_entry( args['<comments>'], args['<semver>'], args['-c'], prev['date'] )
         utils.json_update_current_version( json_dict, v )
 
     # Edit a history entry
     elif ( args['--edithist'] ):
-        utils.json_update_history_version( json_dict, args['--hist'],  args['<comments>'], args['<semver>'], args['--changes'] )
+        utils.json_update_history_version( json_dict, args['--hist'],  args['<comments>'], args['<semver>'], args['-c'] )
 
     # Create new entry
     elif ( args['<semver>'] ):
-        v = utils.json_create_version_entry( args['<comments>'], args['<semver>'], args['--changes'] )
+        v = utils.json_create_version_entry( args['<comments>'], args['<semver>'], args['-c'] )
         utils.json_add_new_version( json_dict, v )
         
     # Important files...
