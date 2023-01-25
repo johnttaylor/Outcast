@@ -199,17 +199,34 @@ def copy_files( srcdir, dstdir ):
 
 # Deletes all of the files in a directory AND deletes the directory if it is empty after deleting the files
 def delete_directory_files( dir_to_delete ):
-    src_files = os.listdir( standardize_dir_sep( dir_to_delete) )
-    for file_name in src_files:
-        full_file_name = os.path.join(dir_to_delete, file_name)
-        if os.path.isfile(full_file_name):
-            os.remove( full_file_name )
+    d = standardize_dir_sep(dir_to_delete)
+    if ( os.path.exists( d ) ):
+        src_files = os.listdir( standardize_dir_sep(dir_to_delete) )
+        for file_name in src_files:
+            full_file_name = os.path.join(dir_to_delete, file_name)
+            if os.path.isfile(full_file_name):
+                try:
+                    os.remove( full_file_name )
+                except:
+                    pass
 
-    # Delete the dir if it is now empty
-    try:
-        os.rmdir( dir_to_delete )
-    except:
-        pass
+        # Delete the dir if it is now empty
+        try:
+            os.rmdir( dir_to_delete )
+        except:
+            pass
+
+# Deletes the specified directory tree - EXCEPT for the specific child directory
+def delete_tree_except( dirtree_to_delete, child_to_spare ):
+    children = os.listdir( standardize_dir_sep(dirtree_to_delete) )
+    for entry in children:
+        if ( entry != child_to_spare ):
+            full_name = os.path.join(dirtree_to_delete, entry)
+            if os.path.isfile(full_name):
+                os.remove( full_name )
+            if os.path.isdir(full_name):
+                remove_tree( full_name )
+                
 
 #-----------------------------------------------------------------------------
 # return None if not able to load the file
@@ -285,10 +302,10 @@ def json_get_dep_package( dep_list, package_to_find ):
             sys.exit( f"ERROR: Package file (dependencies) is corrupt {e}" )
     return None, None
 
-def json_create_dep_entry( pkgname, pkgtype, parentdir, date_adopted, ver_sem, ver_branch, ver_id, repo_name, repo_type, repo_origin ):
+def json_create_dep_entry( pkgname, pkgtype, parentdir, date_adopted, ver_sem, ver_branch, ver_id, repo_name, repo_type, repo_origin, virtual=False ):
     ver_dict  = { "semanticVersion" : ver_sem, "branch" : ver_branch, "tag" : ver_id }
     repo_dict = { "name" : repo_name, "type": repo_type, "origin" : repo_origin }
-    dep_dict  = { "pkgname" : pkgname, "pkgtype" : pkgtype, "adoptedDate": date_adopted, "parentDir" : parentdir, "version" : ver_dict, "repo": repo_dict }
+    dep_dict  = { "pkgname" : pkgname, "pkgtype" : pkgtype, "virtualAdoption": virtual, "adoptedDate": date_adopted, "parentDir" : parentdir, "version" : ver_dict, "repo": repo_dict }
     return dep_dict
 
 def json_update_package_file_with_new_dep_entry( json_dict, new_dep_entry, is_weak_dep=False ):

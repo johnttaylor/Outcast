@@ -50,7 +50,7 @@ def run( common_args, cmd_argv ):
     # Sort the list
     pkgs = sorted( pkgs, key = lambda i: i['pkgname'] )
     if ( not args['-x'] ):
-        header  = "PkgName          D PkType    AdoptedDate               ParentDir        "
+        header  = "PkgName          DV PkType    AdoptedDate               ParentDir        "
         rheader = "RepoName         RepoType RepoOrigin                               "
         vheader = "SemVer   Branch           Tag"
         if ( args['-l'] or args['-r'] ):
@@ -62,7 +62,10 @@ def run( common_args, cmd_argv ):
     # display the list
     for p in pkgs:
         if ( fnmatch.fnmatch(p['pkgname'], args['<wildcard>']) ):
-            info = f"{p['pkgname']:<16} {p['depType']} {p['pkgtype']:<8}  {p['adoptedDate']}  {utils.json_get_dep_parentdir(p):<16}"
+            virtual = ' '
+            if ( 'virtualAdoption' in p ):
+                virtual = '*'
+            info = f"{p['pkgname']:<16} {p['depType']}{virtual} {p['pkgtype']:<8}  {p['adoptedDate']}  {utils.json_get_dep_parentdir(p):<16}"
         
             # Repo info
             if ( args['-l'] or args['-r'] ):

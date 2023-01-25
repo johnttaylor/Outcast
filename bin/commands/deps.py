@@ -113,7 +113,7 @@ def run( common_args, cmd_argv ):
             if ( len(noncompat) > 0 ):
                 exit_code = 1
 
-        print("All dependency checks completed." )
+        print(f"All dependency checks completed (errors={'YES' if exit_code != 0 else 'no'})." )
         sys.exit( exit_code )
 
 

@@ -113,6 +113,7 @@ def run( common_args, cmd_argv ):
 
         # Display parting message 
         print(f"Overlay package - {pkg} - removed" )
+        utils.display_scm_message( 'rm', 'get-success-msg', common_args['--scm'] )
 
 
     # Unsupported package type

@@ -23,6 +23,11 @@ Options:
     --weak           Adopt the package as 'weak' dependencies.  The default is
                      to adopt as an 'strong' dependency. A 'weak' dependency 
                      is not progated when determining transitive dependencies.
+    --virtual        The adoption is 'virtual' so as to satify dependencies, but
+                     no actual files (other than package meta data) is brought
+                     in to the repo. This is usefully when you are adopting a
+                     package that has 'baggage' you are not planning to use but
+                     don't want to deal is failed dependencies checks.
     --semver VER     Specifies the semantic version info for the package
                      being adopted. This information is not required, but
                      recommended if it is available. NOTE: If the package being
@@ -111,7 +116,7 @@ def run( common_args, cmd_argv ):
         # update the package.json file
         dst_pkg_info    = os.path.join( args['<dst>'], pkg, PACKAGE_INFO_DIR() )
         incoming_semver = utils.get_adopted_semver( dst_pkg_info, args['--semver'], pkg, not args['--nowarn'] )
-        d = utils.json_create_dep_entry( pkg, "foreign", args['<dst>'], dt_string, incoming_semver, args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
+        d = utils.json_create_dep_entry( pkg, "foreign", args['<dst>'], dt_string, incoming_semver, args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'], args['--virtual'] )
 
         # Verify there is package file for package being adopted
         if ( check_for_package_file( d, args ) ):
@@ -131,6 +136,10 @@ def run( common_args, cmd_argv ):
         # Save changes
         utils.json_update_package_file_with_new_dep_entry( json_dict, d, args['--weak'] )
         
+        # Delete unwanted files 
+        if ( args['--virtual'] ):
+            utils.delete_tree_except( os.path.join( args['<dst>'], pkg ), PACKAGE_INFO_DIR() )
+
         # Display parting message (if there is one)
         utils.display_scm_message( 'copy', 'get-success-msg', common_args['--scm'] )
 
@@ -146,7 +155,7 @@ def run( common_args, cmd_argv ):
         # update the package.json file
         dst_pkg_info    = os.path.join( args['<dst>'], pkg, PACKAGE_INFO_DIR() )
         incoming_semver = utils.get_adopted_semver( dst_pkg_info, args['--semver'], pkg, not args['--nowarn'] )
-        d = utils.json_create_dep_entry( pkg, "readonly", args['<dst>'], dt_string, incoming_semver, args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
+        d = utils.json_create_dep_entry( pkg, "readonly", args['<dst>'], dt_string, incoming_semver, args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'], args['--virtual'] )
 
         # Verify there is package file for package being adopted
         if ( check_for_package_file( d, args ) ):
@@ -166,6 +175,12 @@ def run( common_args, cmd_argv ):
 
         # Save changes
         utils.json_update_package_file_with_new_dep_entry( json_dict, d, args['--weak'] )
+
+        # Delete unwanted files 
+        if ( args['--virtual'] ):
+            utils.delete_tree_except( os.path.join( args['<dst>'], pkg ), PACKAGE_INFO_DIR() )
+            print("Virtual Adoption completed." )
+            utils.display_scm_message( 'umount', 'get-success-msg', common_args['--scm'] )
 
         # Mark files as readonly
         utils.set_tree_readonly( dstpkg )
@@ -203,7 +218,7 @@ def run( common_args, cmd_argv ):
 
         # Create the dependency entry for the adopted package
         incoming_semver = utils.get_adopted_semver( dst_pkg_info, args['--semver'], pkg, not args['--nowarn'] )
-        d = utils.json_create_dep_entry( pkg, "overlay", args['<dst>'], dt_string, incoming_semver, args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'] )
+        d = utils.json_create_dep_entry( pkg, "overlay", args['<dst>'], dt_string, incoming_semver, args['-b'], args['<id>'], args['<repo>'], common_args['--scm'], args['<origin>'], args['--virtual'] )
 
         # Check for cyclical deps
         if ( check_cyclical_deps( json_dict, d, args) == False ):
@@ -212,23 +227,27 @@ def run( common_args, cmd_argv ):
             sys.exit("Adoption was 'reverted'")
 
 
-        # Copy the adoptee's extra info directories
-        utils.copy_extra_dirs( dst_pkg, src_pkg )
+        if ( not args['--virtual'] ):
+            # Copy the adoptee's extra info directories
+            utils.copy_extra_dirs( dst_pkg, src_pkg )
 
-        # Get list of directories to copy/overlay
-        dirs = utils.get_adoptee_owned_dirs( os.path.join( tmpdst, pkg, PACKAGE_INFO_DIR()), tmpdst )
-        if ( dirs != None ):
-            for dir in dirs:
-                src = os.path.join( src_pkg, dir )
-                dst = os.path.join( PACKAGE_ROOT(), dir )
-                utils.copy_files( src, dst )
+            # Get list of directories to copy/overlay
+            dirs = utils.get_adoptee_owned_dirs( os.path.join( tmpdst, pkg, PACKAGE_INFO_DIR()), tmpdst )
+            if ( dirs != None ):
+                for dir in dirs:
+                    src = os.path.join( src_pkg, dir )
+                    dst = os.path.join( PACKAGE_ROOT(), dir )
+                    utils.copy_files( src, dst )
 
         # Clean-up
         utils.remove_tree( tmpdst )
         
         # Save changes
         utils.json_update_package_file_with_new_dep_entry( json_dict, d, args['--weak'] )
-        print( f"Package - {pkg} - adopted as an OVERLAY package. Remember to add the new files to your SCM" )
+        if ( not args['--virtual'] ):
+            print( f"Package - {pkg} - adopted as an OVERLAY package. Remember to add the new files to your SCM" )
+        else:
+            print( f"Package - {pkg} - adopted as a virtual OVERLAY package. Remember to commit changes to your SCM" )
 
 
 def check_cyclical_deps( json_dict, dep_pkg, args):
