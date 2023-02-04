@@ -63,7 +63,7 @@ def run( common_args, cmd_argv ):
     for p in pkgs:
         if ( fnmatch.fnmatch(p['pkgname'], args['<wildcard>']) ):
             virtual = ' '
-            if ( 'virtualAdoption' in p ):
+            if ( 'virtualAdoption' in p and p['virtualAdoption'] == True ):
                 virtual = '*'
             info = f"{p['pkgname']:<16} {p['depType']}{virtual} {p['pkgtype']:<8}  {p['adoptedDate']}  {utils.json_get_dep_parentdir(p):<16}"
         

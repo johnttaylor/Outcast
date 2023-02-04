@@ -4,6 +4,7 @@ Manages the package's 'Owned' dirs
 ===============================================================================
 usage: orc [common-opts] dirs [-s|-o]
        orc [common-opts] dirs [options] ls
+       orc [common-opts] dirs [options] pls
        orc [common-opts] dirs [options] xls
        orc [common-opts] dirs [options] set <primary>...
        orc [common-opts] dirs [options] rm  <primary>...
@@ -12,6 +13,7 @@ usage: orc [common-opts] dirs [-s|-o]
 
 Arguments:
     ls                  Calculates the package's owned directories
+    pls                 Dislays the list of 'primary' directories
     xls                 Displays the list of 'extra' (when being adopted)
                         directories
     set                 Sets (in the package.json file) top-level 'primary' 
@@ -182,6 +184,14 @@ def run( common_args, cmd_argv ):
     if ( args['xls'] ):
         package_json = utils.load_package_file();
         pdirs = utils.json_get_package_extra_dirs(package_json) 
+        for d in pdirs:
+            print(d)
+        sys.exit(0)
+
+    # List extra directories
+    if ( args['pls'] ):
+        package_json = utils.load_package_file();
+        pdirs = utils.json_get_package_primary_dirs(package_json) 
         for d in pdirs:
             print(d)
         sys.exit(0)

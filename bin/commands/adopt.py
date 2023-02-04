@@ -27,7 +27,8 @@ Options:
                      no actual files (other than package meta data) is brought
                      in to the repo. This is usefully when you are adopting a
                      package that has 'baggage' you are not planning to use but
-                     don't want to deal is failed dependencies checks.
+                     don't want to deal with failed dependencies checks. 
+                     Note: this option forces the --weak option to be set.
     --semver VER     Specifies the semantic version info for the package
                      being adopted. This information is not required, but
                      recommended if it is available. NOTE: If the package being
@@ -103,6 +104,10 @@ def run( common_args, cmd_argv ):
         dstpkg = os.path.join( args['<dst>'], pkg)
         if ( os.path.exists( dstpkg ) ):
             sys.exit( f"ERROR: The destination - {dstpkg} - already exists" )
+
+    # The virtual adoption option forces a weak dependency
+    if ( args['--virtual'] ):
+        args['--weak'] = True
 
     #
     # Adopt: Foreign
