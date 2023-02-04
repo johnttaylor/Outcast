@@ -64,6 +64,10 @@ def run( common_args, cmd_argv ):
         if ( pkgobj == None ):
             sys.exit( f"Cannot find the package - {args['<adoptedpkg>'] } - in the list of adopted packages" );
        
+        # A Virtual adopted package can NOT be made a strong dependency
+        if ( deptype == 'weak' and 'virtualAdoption' in json_dict['dependencies']['weak'][pkgidx] and json_dict['dependencies']['weak'][pkgidx]['virtualAdoption'] == True ):
+            sys.exit(f"Package - {args['<adoptedpkg>']} - is virtual adopted and can NOT be a strong dependency" )
+
         # Remove then add the package from the deps list
         now_is_weak = True if deptype == 'strong' else False
         json_dict['dependencies'][deptype].pop(pkgidx)
