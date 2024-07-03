@@ -169,6 +169,7 @@ def run( common_args, cmd_argv ):
     p = utils.json_get_published( json_dict )
     if ( args['-v'] == False ):
         p = utils.filter_changes_in_publish_dict(p)
+    p = utils.flip_history_order(p)
     print( json.dumps(p, indent=2) )
 
     # Display warnings

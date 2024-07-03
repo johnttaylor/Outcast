@@ -500,6 +500,12 @@ def filter_changes_in_publish_dict( publish_dict ):
     
     return publish_dict
     
+# Orders the the list - so the latest change is last
+def flip_history_order( publish_dict ):
+    new_order = publish_dict['history'][::-1]
+    publish_dict['history'] = new_order
+    return publish_dict
+
 # Outputs the version entry's 'changes' key/value WITHOUT any JSON escape characters
 def show_version_changes( version_entry_dict, verbose=True  ):
     if ( verbose ):

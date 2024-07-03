@@ -5,12 +5,15 @@ Adopts the specified Repo/Package package
 usage: orc [common-opts] adopt [options] readonly <dst> <repo> <origin> <id>
        orc [common-opts] adopt [options] foreign  <dst> <repo> <origin> <id>               
        orc [common-opts] adopt [options] overlay  <repo> <origin> <id>
+       orc [common-opts] adopt [options] refresh  <repo> <id>
        orc [common-opts] adopt [options] clean 
 
 Arguments:
     readonly         Adopts the specified package as a readonly package
     foreign          Adopts the specified package as a foreign package
     overlay          Adopts the specified package as a overlay package
+    refresh          Updates the repo the specific new <id>, i.e. it performs
+                     an 'orc rm <repo>' and 'orc adopt' commands.
     clean            Cleans up after a fail adoption of a OVERLAY package.
     <dst>            Parent directory for where the adopted package is placed. 
                      The directory is specified as a relative path to the root
@@ -22,19 +25,20 @@ Arguments:
 Options:
     --weak           Adopt the package as 'weak' dependencies.  The default is
                      to adopt as an 'strong' dependency. A 'weak' dependency 
-                     is not progated when determining transitive dependencies.
-    --virtual        The adoption is 'virtual' so as to satify dependencies, but
-                     no actual files (other than package meta data) is brought
-                     in to the repo. This is usefully when you are adopting a
-                     package that has 'baggage' you are not planning to use but
-                     don't want to deal with failed dependencies checks. 
-                     Note: this option forces the --weak option to be set.
+                     is not propagated when determining transitive dependencies.
+    --virtual        The adoption is 'virtual' so as to satisfy dependencies, 
+                     but no actual files (other than package meta data) is 
+                     brought in to the repo. This is usefully when you are 
+                     adopting a package that has 'baggage' you are not planning 
+                     to use but don't want to deal with failed dependencies 
+                     checks. Note: this option forces the --weak option to be 
+                     set.
     --semver VER     Specifies the semantic version info for the package
                      being adopted. This information is not required, but
                      recommended if it is available. NOTE: If the package being
                      adopted has an Outcast package.json file - then the adopt
                      command will attempt to use the adoptee's published
-                     semantic vesion info.
+                     semantic version info.
     -p PKGNAME       Specifies the Package name if different from the <repo> 
                      name
     -b BRANCH        Specifies the source branch in <repo>.  The use/need
@@ -96,15 +100,41 @@ def run( common_args, cmd_argv ):
     # check for already adopted
     json_dict = utils.load_package_file()
     pkgobj, deptype, pkgidx = utils.json_find_dependency( json_dict, pkg )
-    if ( pkgobj != None ):
+    if ( pkgobj != None and not args["refresh"]):
         sys.exit( f'Package {pkg} already has been adopted as {deptype} dependency' );
         
     # double check if the package has already been adopted (i.e. there was manual edits to the package.json file)
-    if ( not args['overlay'] ):
+    dstpkg = ''
+    if ( not args['overlay'] and not args["refresh"]):
         dstpkg = os.path.join( args['<dst>'], pkg)
         if ( os.path.exists( dstpkg ) ):
             sys.exit( f"ERROR: The destination - {dstpkg} - already exists" )
 
+    # Refresh operation -->get the current repo's 'type' and 'origin'
+    if ( args["refresh"] ):
+        if ( pkgobj == None ):
+            sys.exit( f'ERROR: Refresh - package {pkg} does NOT exist' );
+
+        # Remove the current package version
+        cmd = f"orc.py {vopt} --primary-scm {common_args['--primary-scm']} --scm {common_args['--scm']} rm {pkg}"
+        t   = utils.run_shell( cmd, common_args['-v'] )
+        utils.check_results( t, f"ERROR: Failed to remove original package: {args['<repo>']}" )
+        json_dict = utils.load_package_file()
+     
+        # setup for adopting a newer/different version
+        args['readonly']        = None
+        args['foreign']         = None
+        args['overlay']         = None
+        args['refresh']         = None
+        args[pkgobj['pkgtype']] = True
+        args['<origin>']        = pkgobj['repo']['origin']
+        args['--weak']          = True if deptype == 'weak' else False
+        try:                    
+            args['--virtual']   = pkgobj['virtualAdoption']  # older 'adoptions' do not have the 'virtualAdoption' KVP
+        except:
+            args['--virtual']   = False
+        args['<dst>']           = None if pkgobj['pkgtype'] == 'overlay' else pkgobj['parentDir']
+        
     # The virtual adoption option forces a weak dependency
     if ( args['--virtual'] ):
         args['--weak'] = True
@@ -114,7 +144,10 @@ def run( common_args, cmd_argv ):
     # 
     if ( args['foreign'] ):
         # Copy the FO package
-        cmd = f"evie.py {vopt} --scm {common_args['--scm']} copy -p {pkg} {branch_opt} {args['<dst>']} {args['<repo>']} {args['<origin>']} {args['<id>']}"
+        # Note: do a brute force clone/copy of the repo because it has 'better commit' semantics (i.e. works with pending commit changes) for the repo doing the adopting
+        #cmd = f"evie.py {vopt} --scm {common_args['--scm']} copy -p {pkg} {branch_opt} {args['<dst>']} {args['<repo>']} {args['<origin>']} {args['<id>']}"
+        cmd = f"evie.py {vopt} --scm {common_args['--scm']} copy --force -p {pkg} {branch_opt} {args['<dst>']} {args['<repo>']} {args['<origin>']} {args['<id>']}"
+      
         t   = utils.run_shell( cmd, common_args['-v'] )
         utils.check_results( t, f"ERROR: Failed to make a copy of the repo: {args['<repo>']}", 'copy', 'get-error-msg', common_args['--scm']  )
 
@@ -144,18 +177,24 @@ def run( common_args, cmd_argv ):
         # Delete unwanted files 
         if ( args['--virtual'] ):
             utils.delete_tree_except( os.path.join( args['<dst>'], pkg ), PACKAGE_INFO_DIR() )
+            print( f"Package - {pkg} - adopted as a virtual FOREIGN package. Remember to commit changes to your SCM" )
+        else:
+            print( f"Package - {pkg} - adopted as an FOREIGN package. Remember to add the new files to your SCM" )
 
         # Display parting message (if there is one)
-        utils.display_scm_message( 'copy', 'get-success-msg', common_args['--scm'] )
+        #utils.display_scm_message( 'copy', 'get-success-msg', common_args['--scm'] )
 
     #
     # Adopt: ReadOnly 
     # 
     elif ( args['readonly'] ):
         # Mount the RO package
-        cmd = f"evie.py {vopt} --scm {common_args['--scm']} mount -p {pkg} {branch_opt} {args['<dst>']} {args['<repo>']} {args['<origin>']} {args['<id>']}"
+        # Note: do a brute force clone/copy of the repo because it has 'better commit' semantics (i.e. works with pending commit changes) for the repo doing the adopting
+        #cmd = f"evie.py {vopt} --scm {common_args['--scm']} mount -p {pkg} {branch_opt} {args['<dst>']} {args['<repo>']} {args['<origin>']} {args['<id>']}"
+        cmd = f"evie.py {vopt} --scm {common_args['--scm']} copy --force -p {pkg} {branch_opt} {args['<dst>']} {args['<repo>']} {args['<origin>']} {args['<id>']}"
         t   = utils.run_shell( cmd, common_args['-v'] )
-        utils.check_results( t, f"ERROR: Failed to mount the repo: {args['<repo>']}", 'mount', 'get-error-msg', common_args['--scm'] )
+        #utils.check_results( t, f"ERROR: Failed to mount the repo: {args['<repo>']}", 'mount', 'get-error-msg', common_args['--scm'] )
+        utils.check_results( t, f"ERROR: Failed to make a copy of the repo: {args['<repo>']}", 'copy', 'get-error-msg', common_args['--scm']  )
 
         # update the package.json file
         dst_pkg_info    = os.path.join( args['<dst>'], pkg, PACKAGE_INFO_DIR() )
@@ -185,13 +224,14 @@ def run( common_args, cmd_argv ):
         if ( args['--virtual'] ):
             utils.delete_tree_except( os.path.join( args['<dst>'], pkg ), PACKAGE_INFO_DIR() )
             print("Virtual Adoption completed." )
-            utils.display_scm_message( 'umount', 'get-success-msg', common_args['--scm'] )
+            #utils.display_scm_message( 'umount', 'get-success-msg', common_args['--scm'] )
 
         # Mark files as readonly
         utils.set_tree_readonly( dstpkg )
 
         # Display parting message (if there is one)
-        utils.display_scm_message( 'mount', 'get-success-msg', common_args['--scm'] )
+        #utils.display_scm_message( 'mount', 'get-success-msg', common_args['--scm'] )
+        print( f"Package - {pkg} - adopted as an READONLY package. Remember to add the new files to your SCM" )
         
     #
     # Adopt: overlay
