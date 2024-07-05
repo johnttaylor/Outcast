@@ -7,6 +7,9 @@ import json
 import collections
 from gitignore_parser import parse_gitignore
 from collections import deque
+from collections import defaultdict
+import filecmp
+
 #import platform, tarfile
 #from collections import deque
 
@@ -920,3 +923,84 @@ class Node(object):
 
 
 
+#-----------------------------------------------------------------------------
+class CompareDirs(object):
+    def __init__(self, recurse=False, quick=True ):
+        self._recurse        = recurse
+        self._quick          = quick
+        self.same_files      = defaultdict(list)
+        self.diff_files      = defaultdict(list)
+        self.leftonly_files  = defaultdict(list)
+        self.rightonly_files = defaultdict(list)
+        self.other_files     = defaultdict(list)
+
+    def print_summary( self ):
+        print( f"Same files:        {len([array for key, array in self.same_files.items() if array])}" )
+        print( f"Different files:   {len([array for key, array in self.diff_files.items() if array])}" )
+        print( f"Local only files:  {len([array for key, array in self.leftonly_files.items() if array])}" )
+        print( f"Remote only files: {len([array for key, array in self.rightonly_files.items() if array])}" )
+        print( f"Unknown/Errors:    {len([array for key, array in self.other_files.items() if array])}" )
+        print("")
+        
+    def print_files( self, label, files_dict, strip_prefix=None, sep='\t' ):
+        for dirs, files in files_dict.items():
+            for f in files:
+                d = dirs[0].strip()
+                if ( strip_prefix != None ):
+                    d = d.removeprefix(strip_prefix)
+                full = os.path.join( d, f )
+                print( f"{label}{sep}{full}" )
+                
+    def compare_directory( self, dir1, dir2 ):
+        if ( not os.path.isdir(dir1) ):
+            sys.exit(f"ERROR: Left {dir1} is not a directory")
+        if ( not os.path.isdir(dir2) ):
+            sys.exit(f"ERROR: Right {dir2} is not a directory")
+
+        # Create a directory comparision object and then process the results
+        dircmp = filecmp.dircmp( dir1, dir2 )
+        self._process_compare_results( dircmp )
+    
+    def find_difference_file( self, common_file ):
+        for dirs, files in self.diff_files.items():
+            for f in files:
+                d1 = dirs[0].strip()
+                d2 = dirs[1].strip()
+                full1 = os.path.join( d1, f )
+                full2 = os.path.join( d2, f )
+                if ( common_file in full1 ):
+                    return full1, full2
+        return None
+        
+    def _process_compare_results( self, dircmp ):
+        dirs = (dircmp.left, dircmp.right)
+
+        # compare the files in the directory
+        match, mismatch, errors = filecmp.cmpfiles( dircmp.left, dircmp.right, dircmp.common_files, self._quick )
+        self.same_files[dirs].extend(match)
+        self.diff_files[dirs].extend(mismatch)
+        self.other_files[dirs].extend(errors)
+        
+        # Recursively walk the child directories (when requested)
+        if ( self._recurse ):
+            # Walk child directories that are only under 'dir1'
+            for n in dircmp.left_only:
+                path = os.path.join(dircmp.left, n)
+                if os.path.isdir(path):
+                    for dirpath, dirnames, filenames in os.walk(path):
+                        self.leftonly_files[(dirpath, "")].extend(filenames)
+                else:
+                    self.leftonly_files[dirs].append(n)
+                    
+            # Walk child directories that are only under 'dir2'
+            for n in dircmp.right_only:
+                path = os.path.join(dircmp.right, n)
+                if os.path.isdir(path):
+                    for dirpath, dirnames, filenames in os.walk(path):
+                        self.rightonly_files[(dirpath, "")].extend(filenames)
+                else:
+                    self.rightonly_files[dirs].append(n)                                
+                    
+            # Walk child directories that are common to both 'dir1' and 'dir2;
+            for subdir in dircmp.subdirs.values():
+                self._process_compare_results(subdir)                    
