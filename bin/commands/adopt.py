@@ -5,14 +5,14 @@ Adopts the specified Repo/Package package
 usage: orc [common-opts] adopt [options] readonly <dst> <repo> <origin> <id>
        orc [common-opts] adopt [options] foreign  <dst> <repo> <origin> <id>               
        orc [common-opts] adopt [options] overlay  <repo> <origin> <id>
-       orc [common-opts] adopt [options] refresh  <repo> <id>
+       orc [common-opts] adopt [options] update  <repo> <id>
        orc [common-opts] adopt [options] clean 
 
 Arguments:
     readonly         Adopts the specified package as a readonly package
     foreign          Adopts the specified package as a foreign package
     overlay          Adopts the specified package as a overlay package
-    refresh          Updates the repo the specific new <id>, i.e. it performs
+    update           Updates the repo to the specific new <id>, i.e. it performs
                      an 'orc rm <repo>' and 'orc adopt' commands.
     clean            Cleans up after a fail adoption of a OVERLAY package.
     <dst>            Parent directory for where the adopted package is placed. 
@@ -100,18 +100,18 @@ def run( common_args, cmd_argv ):
     # check for already adopted
     json_dict = utils.load_package_file()
     pkgobj, deptype, pkgidx = utils.json_find_dependency( json_dict, pkg )
-    if ( pkgobj != None and not args["refresh"]):
+    if ( pkgobj != None and not args["update"]):
         sys.exit( f'Package {pkg} already has been adopted as {deptype} dependency' );
         
     # double check if the package has already been adopted (i.e. there was manual edits to the package.json file)
     dstpkg = ''
-    if ( not args['overlay'] and not args["refresh"]):
+    if ( not args['overlay'] and not args["update"]):
         dstpkg = os.path.join( args['<dst>'], pkg)
         if ( os.path.exists( dstpkg ) ):
             sys.exit( f"ERROR: The destination - {dstpkg} - already exists" )
 
     # Refresh operation -->get the current repo's 'type' and 'origin'
-    if ( args["refresh"] ):
+    if ( args["update"] ):
         if ( pkgobj == None ):
             sys.exit( f'ERROR: Refresh - package {pkg} does NOT exist' );
 
@@ -125,7 +125,7 @@ def run( common_args, cmd_argv ):
         args['readonly']        = None
         args['foreign']         = None
         args['overlay']         = None
-        args['refresh']         = None
+        args['update']         = None
         args[pkgobj['pkgtype']] = True
         args['<origin>']        = pkgobj['repo']['origin']
         args['--weak']          = True if deptype == 'weak' else False

@@ -935,27 +935,48 @@ class CompareDirs(object):
         self.other_files     = defaultdict(list)
 
     def print_summary( self ):
-        print( f"Same files:        {len([array for key, array in self.same_files.items() if array])}" )
-        print( f"Different files:   {len([array for key, array in self.diff_files.items() if array])}" )
-        print( f"Local only files:  {len([array for key, array in self.leftonly_files.items() if array])}" )
-        print( f"Remote only files: {len([array for key, array in self.rightonly_files.items() if array])}" )
-        print( f"Unknown/Errors:    {len([array for key, array in self.other_files.items() if array])}" )
+        print( f"Same files:        {self._num_valid_items( self.same_files)}" )
+        print( f"Different files:   {self._num_valid_items( self.diff_files)}" )
+        print( f"Local only files:  {self._num_valid_items( self.leftonly_files)}" )
+        print( f"Remote only files: {self._num_valid_items( self.rightonly_files)}" )
+        print( f"Unknown/Errors:    {self._num_valid_items( self.other_files)}" )
         print("")
         
-    def print_files( self, label, files_dict, strip_prefix=None, sep='\t' ):
+    
+    def print_diff_files( self, label, strip_prefix=None, sep='\t' ):
+        self._print_files( label, self.diff_files, 0, strip_prefix, sep )
+        
+    def print_left_files( self, label, strip_prefix=None, sep='\t' ):
+        self._print_files( label, self.leftonly_files, 0, strip_prefix, sep )
+                
+    def print_right_files( self, label, strip_prefix=None, sep='\t' ):
+        self._print_files( label, self.rightonly_files, 1, strip_prefix, sep )
+
+    def print_error_files( self, label, strip_prefix=None, sep='\t' ):
+        for dirs, files in self.other_files.items():
+            for f in files:
+                d1 = dirs[0].strip()
+                if ( strip_prefix != None ):
+                    d1 = d1.removeprefix(strip_prefix)
+                full = os.path.join( d1, f )
+                print( f"{label}{sep}{full}{sep}{dirs[1].strip()}" )
+
+    def _print_files( self, label, files_dict, dirIdx, strip_prefix=None, sep='\t' ):
         for dirs, files in files_dict.items():
             for f in files:
-                d = dirs[0].strip()
+                d = dirs[dirIdx].strip()
                 if ( strip_prefix != None ):
                     d = d.removeprefix(strip_prefix)
                 full = os.path.join( d, f )
                 print( f"{label}{sep}{full}" )
-                
+                    
     def compare_directory( self, dir1, dir2 ):
         if ( not os.path.isdir(dir1) ):
-            sys.exit(f"ERROR: Left {dir1} is not a directory")
+            print(f"WARNING: Left {dir1} is not a directory")
+            return
         if ( not os.path.isdir(dir2) ):
-            sys.exit(f"ERROR: Right {dir2} is not a directory")
+            print(f"WARNING: Right {dir2} is not a directory")
+            return
 
         # Create a directory comparision object and then process the results
         dircmp = filecmp.dircmp( dir1, dir2 )
@@ -974,33 +995,43 @@ class CompareDirs(object):
         
     def _process_compare_results( self, dircmp ):
         dirs = (dircmp.left, dircmp.right)
-
+        
         # compare the files in the directory
         match, mismatch, errors = filecmp.cmpfiles( dircmp.left, dircmp.right, dircmp.common_files, self._quick )
         self.same_files[dirs].extend(match)
         self.diff_files[dirs].extend(mismatch)
         self.other_files[dirs].extend(errors)
         
-        # Recursively walk the child directories (when requested)
-        if ( self._recurse ):
-            # Walk child directories that are only under 'dir1'
-            for n in dircmp.left_only:
-                path = os.path.join(dircmp.left, n)
-                if os.path.isdir(path):
+        # Populate the left only list (but don't recurse unless requested )
+        for n in dircmp.left_only:
+            path = os.path.join(dircmp.left, n)
+            if ( os.path.isdir(path) ):
+                if ( self._recurse ):
                     for dirpath, dirnames, filenames in os.walk(path):
                         self.leftonly_files[(dirpath, "")].extend(filenames)
-                else:
-                    self.leftonly_files[dirs].append(n)
-                    
-            # Walk child directories that are only under 'dir2'
-            for n in dircmp.right_only:
-                path = os.path.join(dircmp.right, n)
-                if os.path.isdir(path):
+            else:
+                self.leftonly_files[dirs].append(n)
+                
+        # Populate the right only list (but don't recurse unless requested )
+        for n in dircmp.right_only:
+            path = os.path.join(dircmp.right, n)
+            if ( os.path.isdir(path) ):
+                if ( self._recurse ):
                     for dirpath, dirnames, filenames in os.walk(path):
                         self.rightonly_files[(dirpath, "")].extend(filenames)
-                else:
-                    self.rightonly_files[dirs].append(n)                                
+            else:
+                self.rightonly_files[dirs].append(n)                                
                     
+        # Recursively walk the child directories (when requested)
+        if ( self._recurse ):
             # Walk child directories that are common to both 'dir1' and 'dir2;
             for subdir in dircmp.subdirs.values():
                 self._process_compare_results(subdir)                    
+                
+    def _num_valid_items( self, dict ):
+        n = 0;
+        for dirs,files in dict.items():
+            for f in files:
+                n = n + 1
+        return n
+                

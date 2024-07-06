@@ -26,8 +26,8 @@ Arguments:
                      
     
 Options:
-    -f               Force a 'full' file comparison vs the default is to
-                     just compare the file attributes to determine if two files
+    -f               Force a 'quick' file comparison vs the default of
+                     comparing the file contents (i.e. uses the file attributes)
                      are different (slower compare).
     -p PKGNAME       Specifies the Remote Package name if different from the 
                      <repo> name
@@ -41,7 +41,10 @@ Options:
 Common Options:
     See 'orc --help'
     
-    
+Notes:
+    1. Capturing the initial remote snapshot of package can be time consuming,
+       i.e. it has to pull down the entire remote repo.
+           
 Examples:
     # Compares the adopted colony.core pkg to the remote version OUTCAST2-main-4.4.0
     orc.py diff summary colony.core OUTCAST2-main-4.4.0
@@ -86,7 +89,7 @@ def run( common_args, cmd_argv ):
         branch_opt = '-b ' + args['-b']
 
     # Remote package snapshot
-    rpkg_dir  = os.path.join( PACKAGE_ROOT(), PACKAGE_INFO_DIR(), TEMP_DIFF_DIR_NAME() )
+    rpkg_dir  = os.path.join( PACKAGE_ROOT(), TEMP_DIFF_DIR_NAME() )
     rpkg_info = have_remote_package( rpkg_dir )
     
     # Show option
@@ -113,12 +116,16 @@ def run( common_args, cmd_argv ):
         remote_origin = args['-o']
         
     # Reuse existing snapshot
+    have_snapshot = False
     if ( not args["<id>"] ):
         if ( rpkg_info == None ):
            sys.exit( "ERROR: No currently download remote pkg - you specify a remote <id>")
-    
+        if ( rpkg_info['pkgname'] == pkgobj['pkgname'] ):
+            have_snapshot = True    
+        
     # Get a local snapshot
-    else:
+    if ( not have_snapshot ):
+        # Have snapshot - but is the 'wrong' package
         utils.remove_tree(rpkg_dir)
         #cmd = f"evie.py {vopt} --scm {common_args['--scm']} copy --force -p {pkg} {branch_opt} {tmpdst} {args['<repo>']} {args['<origin>']} {args['<id>']}"
         
@@ -142,23 +149,25 @@ def run( common_args, cmd_argv ):
 
     # Summary
     if ( args['summary'] ):
-        #if ( rpkg_info['pkgtype'] == 'overlay' ):
-        #    summary_overlay( pkgobj, rpkg_info, rpkg_dir )
-        #else:            
-            summary_not_overlay( pkgobj, rpkg_info, rpkg_dir )
+        if ( rpkg_info['pkgtype'] == 'overlay' ):
+            summary_overlay( pkgobj, rpkg_info, rpkg_dir, args['-f'] )
+        else:            
+            summary_not_overlay( pkgobj, rpkg_info, rpkg_dir, args['-f'] )
         
     # File compare
     if ( args['file'] ):
-        print_unified_diff( pkgobj, rpkg_info, rpkg_dir, args['<fname>'], int(args['-n']))
+        print_unified_diff( pkgobj, rpkg_info, rpkg_dir, args['<fname>'], int(args['-n'], args['-f']))
+        
+        
 #------------------------------------------------------------------------------
-def print_unified_diff( pkgobj, rpkg_info, rpkg_dir, local_file, ncontext ):
+def print_unified_diff( pkgobj, rpkg_info, rpkg_dir, local_file, ncontext, quick=True ):
     # Validate the specified file exists
     leftfname = os.path.join( PACKAGE_ROOT(), local_file )
     if ( not os.path.isfile(leftfname) ):
         sys.exit( f"ERROR: Invalid file name: {leftfname}")
 
-    # Perform the comparision
-    cmp = compare( pkgobj, rpkg_dir )
+    # Perform the comparison
+    cmp = generate_compare_data( pkgobj, rpkg_info, rpkg_dir, quick )        
     
     # Find the 'file' in the different list
     result = cmp.find_difference_file( leftfname )
@@ -185,27 +194,44 @@ def print_unified_diff( pkgobj, rpkg_info, rpkg_dir, local_file, ncontext ):
     for l in dif:
         print( l )        
     
-def summary_overlay( pkgobj, rpkg_info, rpkg_dir ):
-    pass
-
-def summary_not_overlay( pkgobj, rpkg_info, rpkg_dir ):
-    cmp = compare( pkgobj, rpkg_dir )
-
-    #cmp.print_files( "same", cmp.same_files, strip_prefix="xsrc/nqbp2\\" )
-    prefix = PACKAGE_ROOT() + os.sep
-    cmp.print_files( "diff", cmp.diff_files, strip_prefix=prefix )
-    cmp.print_files( "left", cmp.leftonly_files, strip_prefix=prefix )
-    cmp.print_files( "right", cmp.rightonly_files, strip_prefix=prefix )
-    cmp.print_files( "error", cmp.other_files, strip_prefix=prefix )
-    cmp.print_summary()
-
-def compare( pkgobj, rpkg_dir ):
-    cmp = utils.CompareDirs(recurse=True, quick=False )
-    leftdir  = os.path.join( PACKAGE_ROOT(), pkgobj["parentDir"], pkgobj['repo']['name'])
+def generate_compare_data( pkgobj, rpkg_info, rpkg_dir, quick=True ):
+    # Overlay package
+    if (pkgobj['pkgtype'] == 'overlay' ):
+        # Get the list of overlayed directories
+        odirs = utils.load_overlaid_dirs_list_file( pkgobj['pkgname'])
+        
+        # Compare overlay dirs
+        cmp = utils.CompareDirs(recurse=False, quick=quick )
+        for d in odirs:
+            leftdir  = os.path.join( PACKAGE_ROOT(), d )
+            rightdir = os.path.join( rpkg_dir, pkgobj['repo']['name'], d )
+            cmp.compare_directory( leftdir, rightdir)
+        return cmp
+            
+    # All other package types
+    cmp = utils.CompareDirs(recurse=True, quick=quick  )
+    leftdir  = os.path.join( PACKAGE_ROOT(), pkgobj['parentDir'], pkgobj['repo']['name'])
     rightdir = os.path.join( rpkg_dir, pkgobj['repo']['name'] )
     cmp.compare_directory( leftdir, rightdir)
     return cmp
 
+def summary_overlay( pkgobj, rpkg_info, rpkg_dir, quick=True ):
+    cmp = generate_compare_data( pkgobj, rpkg_info, rpkg_dir, quick )        
+    prefix = PACKAGE_ROOT() + os.sep
+    cmp.print_diff_files( "diff ", strip_prefix=prefix )
+    cmp.print_left_files( "local", strip_prefix=prefix )
+    cmp.print_right_files( "remote",  strip_prefix=None )
+    cmp.print_error_files( "error ", strip_prefix=prefix )
+    cmp.print_summary()
+
+def summary_not_overlay( pkgobj, rpkg_info, rpkg_dir, quick=True ):
+    cmp = generate_compare_data( pkgobj, rpkg_info, rpkg_dir, quick )        
+    prefix = PACKAGE_ROOT() + os.sep
+    cmp.print_diff_files( "diff ", strip_prefix=prefix )
+    cmp.print_left_files( "local", strip_prefix=prefix )
+    cmp.print_right_files( "remote",  strip_prefix=None )
+    cmp.print_error_files( "error ", strip_prefix=prefix )
+    cmp.print_summary()
     
 def show_snapshot_info( rpkg_info, rpkg_dir ):
     if ( rpkg_info == None ):
