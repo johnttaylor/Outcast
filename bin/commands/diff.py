@@ -156,7 +156,7 @@ def run( common_args, cmd_argv ):
         
     # File compare
     if ( args['file'] ):
-        print_unified_diff( pkgobj, rpkg_info, rpkg_dir, args['<fname>'], int(args['-n'], args['-f']))
+        print_unified_diff( pkgobj, rpkg_info, rpkg_dir, args['<fname>'], int(args['-n']), args['-f'])
         
         
 #------------------------------------------------------------------------------

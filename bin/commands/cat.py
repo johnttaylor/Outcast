@@ -19,7 +19,7 @@ Common Options:
     
     
 Notes:
-    o If  <adoptedpkg> is not speficied, then the repository's package 
+    o If  <adoptedpkg> is not specified, then the repository's package 
       information is displayed.
     
 """
