@@ -40,11 +40,11 @@ def run( common_args, cmd_argv ):
         cmd = f'git clone --branch {args["<id>"]} --depth=1 {args["<origin>"]}/{args["<repo>"]}.git {pkg}'
         utils.push_dir( dst )
         t = utils.run_shell( cmd, common_args['-v'] )
+        if ( utils.is_error(t) ):   # Clean-up attempted cloned dir if there was failure
+            utils.remove_tree( {args["<repo>"]} ) 
         utils.pop_dir()    
-        if ( utils.is_error(t) ):   # Clean-up dst dir if there was failure
-            utils.remove_tree( dst ) 
         utils.check_results( t, f"ERROR: Failed the retreive/clone the specified package/repository. Note: the <id> ({args['<id>']}) MUST be a git TAG." )
 
-        # Remove the .git directoy since this is a non-tracked copy
+        # Remove the .git directory since this is a non-tracked copy
         gitdir = os.path.join( dst, pkg, ".git" )
         utils.remove_tree( gitdir, warn_msg="Not able to remove the .git directory for local copy" )
