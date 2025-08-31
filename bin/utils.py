@@ -193,7 +193,12 @@ def set_tree_readonly( root, set_as_read_only = True ):
 
 # Copies only the files in the src-dir to the dst-dir
 def copy_files( srcdir, dstdir ):
-    src_files = os.listdir(srcdir)
+    try:
+        src_files = os.listdir(srcdir)
+    except:
+        print_warning( f"Unable to access the directory: {srcdir}" )
+        return
+    
     for file_name in src_files:
         full_file_name = os.path.join(srcdir, file_name)
         if os.path.isfile(full_file_name):
@@ -640,6 +645,7 @@ def walk_dir_filtered_by_ignored( tree_to_walk, ignore_file, pkgroot ):
             os.remove( TEMP_IGNORE_FILE_NAME )
         except:
             ignored = None
+            print_warning( f"Failed to parse the {ignore_file} file" )
 
     list = []
     for root, dirs, files in os.walk(tree_to_walk):
@@ -774,7 +780,7 @@ def parse_vernum( string ):
             pre  = t2[1]
             t[2] = t2[0]
         elif ( len(t2) > 2 ):
-            exit( "ERROR: Malformed version number (prerelease id): [{}]".format( string ) )
+            print_warning( "Malformed version number (prerelease id): [{}]".format( string ) )
     
     
     return (t[0], t[1], t[2], pre)
@@ -972,10 +978,10 @@ class CompareDirs(object):
                     
     def compare_directory( self, dir1, dir2 ):
         if ( not os.path.isdir(dir1) ):
-            print(f"WARNING: Left {dir1} is not a directory")
+            print_warning(f"Left {dir1} is not a directory")
             return
         if ( not os.path.isdir(dir2) ):
-            print(f"WARNING: Right {dir2} is not a directory")
+            print_warning(f"Right {dir2} is not a directory")
             return
 
         # Create a directory comparision object and then process the results

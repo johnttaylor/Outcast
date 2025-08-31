@@ -2,12 +2,14 @@
  
 Collection of operations performed directly on a package's repository
 ===============================================================================
-usage: orc [common-opts] repo [options] <repo> <origin> list-tag [<tfilter>]
+usage: orc [common-opts] repo [options] <repo> list-tag [<tfilter>]
+       orc [common-opts] repo [options] <repo> <origin> list-tag [<tfilter>]
        
 
 Arguments:
     <repo>           Name of the targeted repository
-    <origin>         Path/URL to the repository
+    <origin>         Path/URL to the repository (Used when the <repo> has not 
+                     yet been adopted)
     <tfilter>        Tag filter, e.g. OUTCAST2
     
 Options:
@@ -41,6 +43,11 @@ def run( common_args, cmd_argv ):
 
     # Display tag information
     if args['list-tag']:
+        if args['<origin>'] == None:
+            json_dict = utils.load_package_file()
+            pkgobj, deptype, pkgidx = utils.json_find_dependency( json_dict, args['<repo>'] )
+            args['<origin>']        = pkgobj['repo']['origin']
+
         cmd = f"evie.py {vopt} --scm {common_args['--scm']} meta {args['<repo>']} {args['<origin>']} tag"
         if args['<tfilter>']:
             cmd += f" {args['<tfilter>']}"

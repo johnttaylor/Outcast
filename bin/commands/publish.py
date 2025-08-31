@@ -170,7 +170,10 @@ def run( common_args, cmd_argv ):
     if ( args['-v'] == False ):
         p = utils.filter_changes_in_publish_dict(p)
     p = utils.flip_history_order(p)
-    print( json.dumps(p, indent=2) )
+    print( "HISTORY" ) 
+    print( json.dumps(p['history'], indent=2) )
+    print( "CURRENT" ) 
+    print( json.dumps(p['current'], indent=2) )
 
     # Display warnings
     if ( not args['-w'] ):
