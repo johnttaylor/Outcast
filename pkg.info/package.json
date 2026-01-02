@@ -21,12 +21,20 @@
   },
   "publish": {
     "current": {
-      "comment": "Initial publication of Outcast as an Outcast repo",
-      "version": "2.2.0",
-      "date": "Sun Aug 31 01:41:21 2025",
-      "timestamp": 1756604481,
+      "comment": "Deprecate the mount and umount commands",
+      "version": "2.3.0",
+      "date": "Fri Jan  2 20:37:59 2026",
+      "timestamp": 1767386279,
       "changes": null
     },
-    "history": []
+    "history": [
+      {
+        "comment": "Initial publication of Outcast as an Outcast repo",
+        "version": "2.2.0",
+        "date": "Sun Aug 31 01:41:21 2025",
+        "timestamp": 1756604481,
+        "changes": null
+      }
+    ]
   }
 }
